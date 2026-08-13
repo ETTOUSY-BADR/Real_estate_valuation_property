@@ -300,6 +300,19 @@ def artifact_record(
     return record
 
 
+def write_json_atomic(path: Path, payload: object) -> None:
+    """Serialize JSON and atomically replace ``path`` only after success."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = path.with_suffix(path.suffix + ".part")
+    temporary.unlink(missing_ok=True)
+    try:
+        serialized = json.dumps(payload, indent=2, ensure_ascii=False)
+        temporary.write_text(serialized, encoding="utf-8")
+        temporary.replace(path)
+    finally:
+        temporary.unlink(missing_ok=True)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--force", action="store_true")
@@ -450,7 +463,6 @@ def main() -> None:
             )
         )
 
-    args.manifest.parent.mkdir(parents=True, exist_ok=True)
     manifest = {
         "schema_version": 1,
         "retrieved_at_utc": retrieved_at,
@@ -458,14 +470,13 @@ def main() -> None:
         "artifacts": artifacts,
         "notes": [
             "DPE must be joined with date_etablissement_dpe <= valuation date.",
-            "BAN, BDNB, transport and amenity releases are current static snapshots.",
+            "BAN and BDNB are pinned static snapshots; transport and amenity "
+            "sources are current static snapshots.",
             "No public elevator field was found in the selected open BDNB/DPE schemas.",
             "BDNB BPE supplies shop/service POIs; Paris Open Data supplies schools and parks.",
         ],
     }
-    args.manifest.write_text(
-        json.dumps(manifest, indent=2, ensure_ascii=False), encoding="utf-8"
-    )
+    write_json_atomic(args.manifest, manifest)
     print(f"Saved manifest: {args.manifest}", flush=True)
 
 

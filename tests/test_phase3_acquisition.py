@@ -25,6 +25,7 @@ from paris_avm.data.acquire_phase3 import (
     BDNB_URL,
     acquire_dpe,
     download_file,
+    write_json_atomic,
 )
 
 
@@ -114,6 +115,31 @@ class Phase3AcquisitionTests(unittest.TestCase):
 
             self.assertEqual(path.read_bytes(), b"valid cached snapshot")
             self.assertFalse(path.with_suffix(".csv.part").exists())
+
+    def test_manifest_is_replaced_only_after_valid_json_is_written(self) -> None:
+        with TemporaryDirectory() as directory:
+            path = Path(directory) / "source_manifest.json"
+            path.write_text('{"status":"old"}', encoding="utf-8")
+
+            write_json_atomic(path, {"status": "complete", "artifacts": [1, 2]})
+
+            self.assertEqual(
+                json.loads(path.read_text(encoding="utf-8")),
+                {"status": "complete", "artifacts": [1, 2]},
+            )
+            self.assertFalse(path.with_suffix(".json.part").exists())
+
+    def test_manifest_serialization_failure_preserves_previous_file(self) -> None:
+        with TemporaryDirectory() as directory:
+            path = Path(directory) / "source_manifest.json"
+            path.write_text('{"status":"valid"}', encoding="utf-8")
+            path.with_suffix(".json.part").write_text("stale", encoding="utf-8")
+
+            with self.assertRaises(TypeError):
+                write_json_atomic(path, {"not_json_serializable": object()})
+
+            self.assertEqual(path.read_text(encoding="utf-8"), '{"status":"valid"}')
+            self.assertFalse(path.with_suffix(".json.part").exists())
 
     def test_cached_filtered_snapshot_does_not_claim_upstream_total(self) -> None:
         with TemporaryDirectory() as directory:
