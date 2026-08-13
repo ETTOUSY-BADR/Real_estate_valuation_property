@@ -135,13 +135,19 @@ def download_file(client: requests.Session, url: str, path: Path, force: bool) -
         return
     path.parent.mkdir(parents=True, exist_ok=True)
     temporary = path.with_suffix(path.suffix + ".part")
-    with client.get(url, stream=True, timeout=(30, 300)) as response:
-        response.raise_for_status()
-        with temporary.open("wb") as handle:
-            for block in response.iter_content(1024 * 1024):
-                if block:
-                    handle.write(block)
-    temporary.replace(path)
+    temporary.unlink(missing_ok=True)
+    try:
+        with client.get(url, stream=True, timeout=(30, 300)) as response:
+            response.raise_for_status()
+            with temporary.open("wb") as handle:
+                for block in response.iter_content(1024 * 1024):
+                    if block:
+                        handle.write(block)
+        if not temporary.stat().st_size:
+            raise RuntimeError(f"Downloaded source is empty: {url}")
+        temporary.replace(path)
+    finally:
+        temporary.unlink(missing_ok=True)
     print(f"Downloaded: {path} ({path.stat().st_size:,} bytes)", flush=True)
 
 
