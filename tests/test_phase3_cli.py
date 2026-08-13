@@ -63,6 +63,13 @@ class Phase3CliTests(unittest.TestCase):
         message = self.parse_error(arguments)
         self.assertIn("positive whole number", message)
 
+    def test_conflicting_arrondissement_codes_are_rejected(self) -> None:
+        arguments = [
+            "75020" if value == "75008" else value for value in VALID_ARGUMENTS
+        ]
+        message = self.parse_error(arguments)
+        self.assertIn("must identify the same arrondissement", message)
+
     def test_documented_coordinates_match_resolved_address(self) -> None:
         args = parse_args(VALID_ARGUMENTS)
         template = pd.Series(

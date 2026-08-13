@@ -51,6 +51,10 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
         parser.error("--postal-code must be between 75001 and 75020")
     if not re.fullmatch(r"751(?:0[1-9]|1[0-9]|20)", str(args.commune_code)):
         parser.error("--commune-code must be between 75101 and 75120")
+    if str(args.postal_code)[-2:] != str(args.commune_code)[-2:]:
+        parser.error(
+            "--postal-code and --commune-code must identify the same arrondissement"
+        )
     if not re.fullmatch(r"[0-9A-Z]{4}", str(args.street_code).upper()):
         parser.error("--street-code must contain four letters/digits")
     if (
