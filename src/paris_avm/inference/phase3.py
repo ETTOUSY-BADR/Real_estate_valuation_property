@@ -52,6 +52,13 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
         parser.error("--commune-code must be between 75101 and 75120")
     if not re.fullmatch(r"[0-9A-Z]{4}", str(args.street_code).upper()):
         parser.error("--street-code must contain four letters/digits")
+    if (
+        not np.isfinite(args.address_number)
+        or args.address_number <= 0
+        or not float(args.address_number).is_integer()
+    ):
+        parser.error("--address-number must be a positive whole number")
+    args.address_number = int(args.address_number)
     if not 0 <= args.rooms <= 15:
         parser.error("--rooms must be between 0 and 15")
     if not 48.80 <= args.latitude <= 48.92 or not 2.20 <= args.longitude <= 2.48:
@@ -66,9 +73,8 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
 
 
 def normalized_address_id(args: argparse.Namespace) -> str:
-    number = str(int(round(args.address_number)))
     suffix = str(args.address_suffix).strip().lower()
-    return f"{args.commune_code}_{args.street_code.upper()}_{number}_{suffix}"
+    return f"{args.commune_code}_{args.street_code.upper()}_{args.address_number}_{suffix}"
 
 
 def add_base_and_comparable_features(

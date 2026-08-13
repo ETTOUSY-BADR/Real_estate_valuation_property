@@ -6,7 +6,7 @@ import contextlib
 import io
 import unittest
 
-from paris_avm.inference.phase3 import parse_args
+from paris_avm.inference.phase3 import normalized_address_id, parse_args
 
 
 VALID_ARGUMENTS = [
@@ -44,6 +44,18 @@ class Phase3CliTests(unittest.TestCase):
         args = parse_args(VALID_ARGUMENTS)
         self.assertEqual(args.date.strftime("%Y-%m-%d"), "2025-01-02")
         self.assertEqual(args.street_code, "2576")
+        self.assertEqual(args.address_number, 29)
+        self.assertEqual(normalized_address_id(args), "75108_2576_29_")
+
+    def test_fractional_address_number_is_rejected(self) -> None:
+        arguments = ["29.5" if value == "29" else value for value in VALID_ARGUMENTS]
+        message = self.parse_error(arguments)
+        self.assertIn("positive whole number", message)
+
+    def test_nonpositive_address_number_is_rejected(self) -> None:
+        arguments = ["0" if value == "29" else value for value in VALID_ARGUMENTS]
+        message = self.parse_error(arguments)
+        self.assertIn("positive whole number", message)
 
     def test_date_outside_evaluated_period_is_rejected(self) -> None:
         arguments = [
