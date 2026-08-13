@@ -19,6 +19,9 @@ Thumbs.db
 data/raw/dvf/*.csv
 data/raw/dvf/*.csv.gz
 data/bronze/**
+!data/bronze/bdnb/
+!data/bronze/bdnb/release=2026-02-a/
+!data/bronze/bdnb/release=2026-02-a/metadata.yml
 data/silver/**
 data/gold/**
 !data/README.md
