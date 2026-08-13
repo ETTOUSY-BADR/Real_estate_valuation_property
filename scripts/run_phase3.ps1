@@ -1,5 +1,5 @@
 param(
-    [string]$PythonExe = "C:\Users\badre\anaconda3\python.exe",
+    [string]$PythonExe = "python",
     [switch]$SkipAcquisition,
     [switch]$SkipFeatureBuild,
     [switch]$SkipBenchmark

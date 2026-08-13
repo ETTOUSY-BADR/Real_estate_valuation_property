@@ -96,10 +96,10 @@ lawful notarial, property-manager, copropriété or licensed listing source.
 
 ```powershell
 $env:PYTHONPATH = '.\src'
-& 'C:\Users\badre\anaconda3\python.exe' -m paris_avm.data.acquire_phase3 --skip-dpe
-& 'C:\Users\badre\anaconda3\python.exe' -m paris_avm.features.phase3
-& 'C:\Users\badre\anaconda3\python.exe' -m paris_avm.modeling.benchmark_phase3
-& 'C:\Users\badre\anaconda3\python.exe' -m paris_avm.visualization.phase3
+python -m paris_avm.data.acquire_phase3 --skip-dpe
+python -m paris_avm.features.phase3
+python -m paris_avm.modeling.benchmark_phase3
+python -m paris_avm.visualization.phase3
 powershell -ExecutionPolicy Bypass -File .\docs\paper\compile_phase3.ps1
 ```
 
@@ -111,7 +111,7 @@ identity is deterministic:
 
 ```powershell
 $env:PYTHONPATH = '.\src'
-& 'C:\Users\badre\anaconda3\python.exe' -m paris_avm.inference.phase3 `
+python -m paris_avm.inference.phase3 `
   --surface 58 --rooms 3 --postal-code 75008 --commune-code 75108 `
   --street-code 2576 --address-number 29 `
   --latitude 48.878673 --longitude 2.302806 --date 2025-01-02

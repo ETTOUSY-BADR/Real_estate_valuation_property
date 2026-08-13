@@ -6,20 +6,20 @@
   "latex-workshop.latex.outDir": "%DIR%",
   "latex-workshop.latex.tools": [
     {
-      "name": "miktex-pdflatex",
-      "command": "C:\\Users\\badre\\AppData\\Local\\Programs\\MiKTeX\\miktex\\bin\\x64\\pdflatex.exe",
+      "name": "pdflatex",
+      "command": "pdflatex",
       "args": ["-interaction=nonstopmode", "-synctex=1", "%DOC%"]
     },
     {
-      "name": "miktex-bibtex",
-      "command": "C:\\Users\\badre\\AppData\\Local\\Programs\\MiKTeX\\miktex\\bin\\x64\\bibtex.exe",
+      "name": "bibtex",
+      "command": "bibtex",
       "args": ["%DOCFILE%"]
     }
   ],
   "latex-workshop.latex.recipes": [
     {
       "name": "pdflatex -> bibtex -> pdflatex x2",
-      "tools": ["miktex-pdflatex", "miktex-bibtex", "miktex-pdflatex", "miktex-pdflatex"]
+      "tools": ["pdflatex", "bibtex", "pdflatex", "pdflatex"]
     }
   ],
   "latex-workshop.latex.recipe.default": "first"

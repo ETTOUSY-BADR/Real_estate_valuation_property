@@ -21,7 +21,7 @@ Rebuild the table from the project root with:
 
 ```powershell
 $env:PYTHONPATH = '.\src'
-& 'C:\Users\badre\anaconda3\python.exe' -m paris_avm.features.phase2
+python -m paris_avm.features.phase2
 ```
 
 ## Phase 3 data contract

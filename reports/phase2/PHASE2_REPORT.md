@@ -97,9 +97,9 @@ local price information while retaining the stable Phase 1 estimate.
 
 ```powershell
 $env:PYTHONPATH = '.\src'
-& 'C:\Users\badre\anaconda3\python.exe' -m paris_avm.features.phase2
-& 'C:\Users\badre\anaconda3\python.exe' -m paris_avm.modeling.benchmark_phase2
-& 'C:\Users\badre\anaconda3\python.exe' -m paris_avm.visualization.phase2
+python -m paris_avm.features.phase2
+python -m paris_avm.modeling.benchmark_phase2
+python -m paris_avm.visualization.phase2
 powershell -ExecutionPolicy Bypass -File .\docs\paper\compile_phase2.ps1
 ```
 
@@ -107,7 +107,7 @@ Estimate one property:
 
 ```powershell
 $env:PYTHONPATH = '.\src'
-& 'C:\Users\badre\anaconda3\python.exe' -m paris_avm.inference.phase2 `
+python -m paris_avm.inference.phase2 `
   --surface 50 --rooms 2 --postal-code 75011 `
   --latitude 48.859 --longitude 2.379 `
   --address-number 25 --lots 2 --date 2025-12-31
