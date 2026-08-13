@@ -27,6 +27,11 @@ GENERATED_ARTIFACTS = [
 ]
 
 
+def sha256(path: Path) -> str:
+    with path.open("rb") as handle:
+        return hashlib.file_digest(handle, "sha256").hexdigest()
+
+
 class Phase3TrackedDeliverableTests(unittest.TestCase):
     def test_tracked_deliverables_exist(self) -> None:
         for relative in TRACKED_DELIVERABLES:
@@ -51,6 +56,9 @@ class Phase3ArtifactTests(unittest.TestCase):
         cls.results = json.loads(
             (ROOT / "reports/phase3/phase3_results.json").read_text(encoding="utf-8")
         )
+        cls.manifest = json.loads(
+            (ROOT / "reports/phase3/source_manifest.json").read_text(encoding="utf-8")
+        )
 
     def test_gold_contract(self) -> None:
         self.assertEqual(self.quality["rows"], 143_009)
@@ -61,9 +69,23 @@ class Phase3ArtifactTests(unittest.TestCase):
 
     def test_gold_matches_recorded_digest(self) -> None:
         gold_path = ROOT / "data/gold/phase3_sale_features.parquet"
-        with gold_path.open("rb") as handle:
-            actual = hashlib.file_digest(handle, "sha256").hexdigest()
-        self.assertEqual(actual, self.quality["output_sha256"])
+        self.assertEqual(sha256(gold_path), self.quality["output_sha256"])
+
+    def test_source_manifest_matches_local_snapshots(self) -> None:
+        self.assertEqual(self.manifest["schema_version"], 1)
+        artifacts = self.manifest["artifacts"]
+        self.assertGreater(len(artifacts), 0)
+        self.assertEqual(len({item["source_id"] for item in artifacts}), len(artifacts))
+        self.assertEqual(len({item["path"] for item in artifacts}), len(artifacts))
+
+        bronze_root = (ROOT / "data/bronze").resolve()
+        for artifact in artifacts:
+            with self.subTest(source_id=artifact["source_id"]):
+                path = (ROOT / artifact["path"]).resolve()
+                self.assertTrue(path.is_relative_to(bronze_root))
+                self.assertTrue(path.is_file())
+                self.assertEqual(path.stat().st_size, artifact["bytes"])
+                self.assertEqual(sha256(path), artifact["sha256"])
 
     def test_chronological_gold_rows(self) -> None:
         columns = ["id_mutation", "date_mutation", "date_etablissement_dpe"]
