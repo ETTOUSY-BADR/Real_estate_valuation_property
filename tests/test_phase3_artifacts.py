@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 from pathlib import Path
 import unittest
@@ -56,6 +57,12 @@ class Phase3ArtifactTests(unittest.TestCase):
         self.assertEqual(self.quality["future_dpe_leakage_rows"], 0)
         self.assertGreater(self.quality["match_quality"]["ban_exact_match_rate"], 0.99)
         self.assertGreater(self.quality["match_quality"]["bdnb_building_match_rate"], 0.999)
+
+    def test_gold_matches_recorded_digest(self) -> None:
+        gold_path = ROOT / "data/gold/phase3_sale_features.parquet"
+        with gold_path.open("rb") as handle:
+            actual = hashlib.file_digest(handle, "sha256").hexdigest()
+        self.assertEqual(actual, self.quality["output_sha256"])
 
     def test_chronological_gold_rows(self) -> None:
         columns = ["id_mutation", "date_mutation", "date_etablissement_dpe"]
