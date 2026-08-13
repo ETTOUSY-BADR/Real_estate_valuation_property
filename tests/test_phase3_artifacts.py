@@ -9,6 +9,7 @@ import unittest
 
 import joblib
 import pandas as pd
+import pyarrow.parquet as pq
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -123,7 +124,22 @@ class Phase3ArtifactTests(unittest.TestCase):
         self.assertEqual(artifact["model_family"], "catboost")
         self.assertEqual(artifact["training_period"], "2021-2024")
         self.assertEqual(artifact["test_period"], "2025")
-        self.assertEqual(len(artifact["features"]), 100)
+        features = artifact["features"]
+        categorical = artifact["categorical_features"]
+        self.assertEqual(len(features), 100)
+        self.assertEqual(len(features), len(set(features)))
+        self.assertEqual(len(categorical), len(set(categorical)))
+        self.assertTrue(set(categorical).issubset(features))
+
+        gold_columns = set(
+            pq.read_schema(ROOT / "data/gold/phase3_sale_features.parquet").names
+        )
+        self.assertTrue(set(features).issubset(gold_columns))
+        self.assertEqual(list(artifact["model"].feature_names_), features)
+        expected_categorical_indices = [features.index(name) for name in categorical]
+        self.assertEqual(
+            artifact["model"].get_cat_feature_indices(), expected_categorical_indices
+        )
 
     def test_reported_improvement(self) -> None:
         winner = self.results["winner"]
