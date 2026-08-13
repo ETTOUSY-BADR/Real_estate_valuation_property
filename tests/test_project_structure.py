@@ -17,6 +17,8 @@ ROOT = Path(__file__).resolve().parents[1]
 class ProjectStructureTests(unittest.TestCase):
     def test_expected_directories_and_metadata_exist(self) -> None:
         expected = [
+            ".gitattributes",
+            ".gitignore",
             "configs",
             "data",
             "docs",

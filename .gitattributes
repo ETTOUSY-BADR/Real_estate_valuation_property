@@ -1,0 +1,12 @@
+# Keep source and documentation stable across Windows and Linux checkouts.
+* text=auto eol=lf
+
+# Generated and published binary artifacts must never be line-normalized.
+*.gz binary
+*.jpeg binary
+*.joblib binary
+*.jpg binary
+*.parquet binary
+*.pdf binary
+*.png binary
+*.zip binary
