@@ -1,0 +1,375 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[margin=2.2cm]{geometry}
+\usepackage{amsmath}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{microtype}
+\usepackage{caption}
+\usepackage{subcaption}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=blue!55!black,
+  citecolor=blue!55!black,
+  urlcolor=blue!55!black,
+  pdftitle={Chronological Benchmarking of Tabular Regression Models for Paris Apartment Valuation},
+  pdfauthor={Badr Ettousy}
+}
+\graphicspath{{../../visuals/benchmark/}}
+\setlength{\parskip}{0.35em}
+\setlength{\parindent}{0pt}
+
+\title{Chronological Benchmarking of Tabular Regression Models\\
+for Paris Apartment Valuation Using DVF Transactions, 2021--2025}
+\author{Badr Ettousy}
+\date{August 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+This study benchmarks six methods for automated valuation of ordinary Paris
+apartments using geolocated French Demandes de valeurs fonci\`eres (DVF)
+transactions from 2021 through 2025. After mutation-level filtering and fixed
+quality controls, the dataset contains 143,009 sales. Model selection uses
+90,275 observations from 2021--2023 for development training and 24,404 sales
+from 2024 for chronological validation. Selected configurations are refitted on
+114,679 observations from 2021--2024 and evaluated on a common 2025 cohort of
+28,330 transactions. The comparison includes an arrondissement median-price-per-
+square-metre heuristic, ridge regression, random forest, histogram gradient
+boosting, XGBoost, and LightGBM. LightGBM obtains the lowest 2025 mean absolute
+error (MAE), EUR 96,981, with $R^2=0.8619$ and a median absolute percentage error
+of 12.33\%. XGBoost is statistically indistinguishable at the 5\% level under a
+paired bootstrap: the LightGBM-minus-XGBoost MAE difference is EUR $-387$ with a
+95\% interval of approximately EUR $[-755,1]$. All four nonlinear tree ensembles
+substantially outperform the market heuristic, whereas ridge regression performs
+poorly. The results support gradient-boosted trees as the practical reference
+class for this feature set, but do not establish that LightGBM universally
+dominates XGBoost or future market regimes.
+\end{abstract}
+
+\textbf{Keywords:} automated valuation model, real estate, DVF, temporal
+validation, gradient boosting, LightGBM, XGBoost, Paris.
+
+\section{Introduction}
+
+Automated valuation models (AVMs) estimate property transaction values from
+structured characteristics and market evidence. They are attractive because
+they are reproducible and scalable, yet they are vulnerable to spatial
+heterogeneity, missing property attributes, heavy-tailed prices, and temporal
+market shifts. A random train--test split can conceal the last problem because
+near-contemporaneous transactions appear on both sides of the split.
+
+This work asks a focused question: under a shared chronological protocol, which
+of six common tabular-regression approaches provides the strongest out-of-year
+valuation accuracy for Paris apartments? The contribution is empirical rather
+than algorithmic. It consists of (i) mutation-aware DVF cleaning, (ii) a fixed
+2021--2025 temporal evaluation design, (iii) model selection using a common
+criterion, (iv) paired uncertainty estimates on identical 2025 transactions,
+and (v) reproducible accuracy and computational-efficiency artifacts.
+
+\section{Data}
+
+\subsection{Source and scope}
+
+DVF is produced by the French Direction g\'en\'erale des Finances publiques and
+contains transaction information derived from notarial deeds and cadastral
+records \cite{dvf2026}. This study uses the geolocated Paris files for calendar
+years 2021--2025. The raw files contain 420,058 property rows representing
+207,365 mutations.
+
+DVF records a mutation-level value on one or more property rows. Treating every
+row as an independent sale can therefore duplicate targets or associate a single
+price with incompatible property types. The pipeline retains arm's-length sales
+(``Vente'') containing exactly one apartment (DVF local-type code 2), permits
+bundled dependencies such as a cellar or parking space (code 3), and rejects
+mutations containing a house or commercial property (codes 1 or 4).
+
+The remaining observations must contain a valid date, transaction value,
+surface, Paris postcode, latitude, and longitude. Fixed plausibility bounds are
+9--300 m$^2$ for surface, EUR 50,000--10,000,000 for value, and EUR
+2,000--30,000 per m$^2$. Coordinates are restricted to the Paris bounding box
+used by the application. Table~\ref{tab:data} reports the resulting cohorts.
+
+\begin{table}[htbp]
+\centering
+\caption{Annual DVF row counts and eligible apartment transactions.}
+\label{tab:data}
+\begin{tabular}{lrrr}
+\toprule
+Year & Raw rows & Single-apartment sale rows & Clean model rows \\
+\midrule
+2021 & 81,517 & 31,835 & 30,397 \\
+2022 & 98,308 & 34,566 & 33,080 \\
+2023 & 80,993 & 28,174 & 26,798 \\
+2024 & 74,800 & 25,595 & 24,404 \\
+2025 & 84,440 & 29,503 & 28,330 \\
+\midrule
+Total & 420,058 & 149,673 & 143,009 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Features and target}
+
+The target is total mutation value in euros. Learned models optimize
+$\log(1+y)$ and transform predictions back with $\exp(\hat{z})-1$, reducing the
+influence of the long upper tail while preserving a positive-scale prediction.
+The feature vector contains built surface, number of principal rooms, latitude,
+longitude, address number, number of lots, month, day of year, calendar year,
+months since January 2021, and postcode. Numeric missing values are median
+imputed; postcode is one-hot encoded. Numeric inputs are standardized only for
+ridge regression, where scale directly affects the penalty.
+
+Important determinants are unavailable in DVF: interior condition, floor,
+elevator, energy rating, exposure, view, occupancy, and detailed building
+quality. The estimated error therefore reflects both model limitations and
+irreducible missing-information error.
+
+\section{Methods}
+
+\subsection{Temporal evaluation protocol}
+
+The split is chronological and identical for every method:
+\begin{itemize}
+  \item development training: 2021--2023 (90,275 rows);
+  \item configuration selection: 2024 (24,404 rows), minimizing MAE;
+  \item final refit: 2021--2024 (114,679 rows);
+  \item common test: 2025 (28,330 rows).
+\end{itemize}
+
+No 2025 transaction is used by a fitting or configuration-selection call in the
+benchmark program. However, 2025 results from an earlier baseline experiment had
+already been inspected by the analyst. Consequently, 2025 is computationally
+held out for the six-model comparison but should not be described as a fully
+blind external test.
+
+\subsection{Models}
+
+The median-price baseline multiplies apartment surface by the median price per
+m$^2$ observed in its arrondissement during the available training years. Ridge
+regression adds an $\ell_2$ penalty to a linear model \cite{hoerl1970}. Random
+forest averages decorrelated trees trained on bootstrap samples and randomized
+feature subsets \cite{breiman2001}. Histogram Gradient Boosting is the existing
+project model and represents conventional histogram-binned boosting
+\cite{friedman2001}. XGBoost adds a regularized, systems-optimized tree-boosting
+implementation \cite{chen2016}; LightGBM uses histogram learning and leaf-wise
+growth with efficiency techniques including gradient-based one-side sampling and
+exclusive feature bundling \cite{ke2017}.
+
+Table~\ref{tab:config} gives the selected configuration. Each learned model is
+chosen from a compact, predefined search space of three candidates, except ridge
+regression, which uses four penalty values. This is a controlled engineering
+benchmark, not an exhaustive hyperparameter optimization.
+
+\begin{table}[htbp]
+\centering
+\caption{Configurations selected by 2024 validation MAE. Shared random seed is 42.}
+\label{tab:config}
+\small
+\begin{tabular}{p{3.4cm}p{10.2cm}}
+\toprule
+Method & Selected configuration \\
+\midrule
+Median price/m$^2$ & Arrondissement median from the training period \\
+Ridge & $\alpha=100$ \\
+Random Forest & 240 trees; max-features 0.7; minimum leaf size 5 \\
+Histogram Gradient Boosting & 63 leaves; minimum leaf size 40; $\ell_2=2$; learning rate 0.06 \\
+XGBoost & depth 6; minimum child weight 5; 650 trees; learning rate 0.04 \\
+LightGBM & 31 leaves; minimum child size 25; 650 trees; learning rate 0.04 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Evaluation criteria}
+
+For actual values $y_i$ and predictions $\hat{y}_i$, the primary criterion is
+\begin{equation}
+\mathrm{MAE}=\frac{1}{n}\sum_{i=1}^{n}|y_i-\hat{y}_i|.
+\end{equation}
+Secondary criteria are root mean squared error (RMSE), coefficient of
+determination ($R^2$), mean absolute percentage error (MAPE), median absolute
+percentage error (MdAPE), and the proportions within 10\% and 20\% of the actual
+value. Training time, batch prediction latency, and serialized artifact size are
+also recorded.
+
+Individual MAE intervals use 500 nonparametric bootstrap resamples. Model-to-
+model conclusions use 1,000 paired bootstrap resamples of per-transaction
+absolute-error differences, preserving the fact that all models predict the same
+sales. A paired interval wholly below zero indicates that the row model has lower
+MAE at the 5\% level under this resampling procedure.
+
+\section{Results}
+
+\subsection{Overall accuracy}
+
+Table~\ref{tab:results} presents the common 2025 test results. LightGBM has the
+lowest observed MAE at EUR 96,981, followed by XGBoost at EUR 97,367 and
+Histogram Gradient Boosting at EUR 97,753. The same three models are almost tied
+on typical relative error, with MdAPE between 12.33\% and 12.48\%. LightGBM puts
+71.41\% of test predictions within 20\% of the transaction value, compared with
+62.60\% for the market baseline.
+
+\begin{table}[htbp]
+\centering
+\caption{Performance on 28,330 transactions from the common 2025 test cohort.}
+\label{tab:results}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{lrrrrrrrr}
+\toprule
+Model & MAE (EUR) & 95\% MAE interval & RMSE (EUR) & $R^2$ & MdAPE & Within 10\% & Within 20\% \\
+\midrule
+LightGBM & 96,981 & [94,935; 99,014] & 197,107 & 0.8619 & 12.33\% & 41.49\% & 71.41\% \\
+XGBoost & 97,367 & [95,312; 99,485] & 199,023 & 0.8592 & 12.34\% & 41.22\% & 71.32\% \\
+Hist. Gradient Boosting & 97,753 & [95,730; 99,884] & 198,027 & 0.8606 & 12.48\% & 40.87\% & 70.87\% \\
+Random Forest & 99,797 & [97,726; 101,900] & 200,909 & 0.8566 & 12.89\% & 40.20\% & 70.06\% \\
+Median price/m$^2$ & 110,868 & [108,575; 113,272] & 221,015 & 0.8264 & 14.62\% & 36.54\% & 62.60\% \\
+Ridge regression & 169,126 & [163,427; 174,924] & 549,280 & $-0.0722$ & 19.99\% & 25.51\% & 50.03\% \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{benchmark_accuracy.png}
+\caption{Accuracy comparison, operational hit rate, and validation-to-test transfer. Error bars in the MAE panel are 95\% bootstrap intervals.}
+\label{fig:accuracy}
+\end{figure}
+
+Relative to the median-price baseline, LightGBM reduces test MAE by EUR 13,887
+(paired 95\% interval EUR 12,896--14,905), a 12.53\% reduction. The corresponding
+reductions are EUR 13,501 for XGBoost, EUR 13,115 for Histogram Gradient
+Boosting, and EUR 11,071 for Random Forest; their paired intervals against the
+baseline are all strictly positive.
+
+\subsection{Are the leading models distinguishable?}
+
+The LightGBM-minus-XGBoost paired MAE difference is EUR $-387$ with a 95\%
+interval of EUR $[-755,1]$. Thus, the observed ordering does not support a
+5\%-level claim that LightGBM is more accurate than XGBoost. LightGBM is more
+accurate than Histogram Gradient Boosting by EUR 772 per sale, with interval EUR
+$[400,1{,}140]$ in LightGBM's favor, and more accurate than Random Forest by EUR
+2,816, with interval EUR $[2{,}257,3{,}331]$. Figure~\ref{fig:pairwise} reports
+the full paired difference matrix.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.82\textwidth]{benchmark_pairwise_differences.png}
+\caption{Mean paired absolute-error differences in thousands of euros. Negative values favor the row model.}
+\label{fig:pairwise}
+\end{figure}
+
+\subsection{Efficiency and temporal stability}
+
+On the benchmark machine, the selected LightGBM refit took 2.05 seconds and its
+serialized artifact occupied 1.84 MB. XGBoost took 3.27 seconds and occupied
+2.60 MB; Histogram Gradient Boosting took 2.87 seconds and occupied 1.36 MB.
+Random Forest required 16.63 seconds and 383.27 MB. These single-run wall-clock
+measurements describe this implementation and hardware, not universal library
+speed rankings.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{benchmark_efficiency.png}
+\caption{Observed accuracy--efficiency trade-offs. Training-time axes are logarithmic; bubble area represents serialized artifact size.}
+\label{fig:efficiency}
+\end{figure}
+
+All nonlinear ensembles retain a clear advantage over the baseline throughout
+2025. The boosted models have monthly MdAPE near 12\% in the first half and
+generally rise toward 13--14\% by December, suggesting modest late-year drift.
+Ridge is consistently weakest and deteriorates more strongly in the second half.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{benchmark_monthly_stability.png}
+\caption{Month-by-month median absolute percentage error on the 2025 test cohort.}
+\label{fig:monthly}
+\end{figure}
+
+\section{Discussion}
+
+The most important result is class-level rather than library-level: nonlinear
+tree ensembles are clearly preferable to the market heuristic and the global
+linear model for the available DVF features. Location coordinates, postcode,
+surface, and their interactions create irregular valuation functions that ridge
+regression cannot represent without explicit basis expansion. Its negative test
+$R^2$ and high RMSE also indicate sensitivity to expensive-tail transactions
+after retransformation from log space.
+
+Among tree ensembles, gradient boosting is the strongest family. LightGBM is the
+best point estimate and offers an attractive accuracy--size--training-time
+combination. Nevertheless, its difference from XGBoost is too small to declare a
+robust accuracy victory on this test cohort. A production choice between the two
+should therefore consider operational simplicity, explainability tooling,
+latency under the actual service workload, and monitoring behavior in newer
+market periods.
+
+The strong arrondissement median-price baseline is also informative. It reaches
+$R^2=0.8264$ using only surface and arrondissement-level market evidence. The
+boosted models improve MAE by approximately 12\%--13\%, demonstrating genuine
+incremental value, but the remaining EUR 97k MAE shows that the current feature
+set is not sufficient for appraisal-grade precision.
+
+\section{Limitations and validity threats}
+
+First, the 2025 cohort is temporally held out by the benchmark code but was
+previously inspected during development of the original project model. It is not
+an untouched external replication. A future publication claim should be tested
+on a newly released period or another geography that has not informed model or
+feature decisions.
+
+Second, DVF does not contain many causal value drivers, and mutation-level prices
+may include dependencies. The eligibility rules reduce ambiguity but do not
+recover unobserved condition or amenity information. Third, the search is compact
+and slightly different in size across model families. It is designed to avoid a
+large, unfair tuning advantage, but it does not locate each method's global
+optimum. Fourth, bootstrap intervals condition on the observed 2025 transaction
+population and do not quantify regime-change uncertainty. Finally, timing values
+come from one Windows workstation and one run per selected final model.
+
+\section{Reproducibility}
+
+The experiment uses Python 3.12, NumPy 1.26.4, pandas 2.2.2, scikit-learn 1.5.1,
+XGBoost 3.4.0, LightGBM 4.7.0, and joblib 1.4.2. Random seeds are fixed at 42 for
+model fitting and 20250811 for bootstrap resampling. The complete benchmark took
+294.1 seconds in the recorded run. The project stores the cleaning and benchmark
+code, annual input manifest, selected model artifacts, per-row validation and
+test predictions, hyperparameter-search results, pairwise comparisons, and all
+figures required by this paper.
+
+The principal commands are:
+\begin{verbatim}
+python benchmark_models.py
+python visualize_benchmark.py
+powershell -ExecutionPolicy Bypass -File docs/paper/compile_paper.ps1
+\end{verbatim}
+
+\section{Conclusion}
+
+Under a shared chronological evaluation, LightGBM produces the lowest observed
+2025 MAE, while XGBoost is statistically tied under paired resampling. Histogram
+Gradient Boosting and Random Forest remain competitive, and all four nonlinear
+ensembles outperform the arrondissement median-price baseline. Ridge regression
+is unsuitable as the principal AVM with the current representation. The next
+scientific step is not to assume that a more complex architecture will win, but
+to add richer building and neighborhood information and benchmark any attention-
+based model against the LightGBM/XGBoost reference under a newly locked temporal
+or geographic test.
+
+\section*{Acknowledgements}
+The computational workflow and manuscript preparation were assisted by an AI
+coding system. Responsibility for data use, analysis choices, verification, and
+all scientific claims remains with the project author.
+
+\bibliographystyle{plain}
+\bibliography{references}
+
+\end{document}

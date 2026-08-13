@@ -1,0 +1,553 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[margin=2.0cm]{geometry}
+\usepackage{amsmath}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{microtype}
+\usepackage{caption}
+\usepackage{float}
+
+\definecolor{navy}{HTML}{102A43}
+\definecolor{blue}{HTML}{1677B8}
+\hypersetup{
+  colorlinks=true,
+  linkcolor=blue,
+  citecolor=blue,
+  urlcolor=blue,
+  pdftitle={From Transactions to Buildings: Leakage-Aware External Data Enrichment for Paris Apartment Valuation},
+  pdfauthor={Badr Ettousy}
+}
+\graphicspath{{../../visuals/phase3/}}
+\captionsetup{font=small,labelfont=bf}
+\setlength{\parskip}{0.35em}
+\setlength{\parindent}{0pt}
+\renewcommand{\arraystretch}{1.14}
+
+\title{\textcolor{navy}{\textbf{From Transactions to Buildings}}\\[0.25em]
+\large Leakage-Aware External Data Enrichment for\\
+Paris Apartment Valuation}
+\author{Badr Ettousy}
+\date{August 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+This study evaluates whether authoritative building and neighborhood data can
+improve an automated valuation model (AVM) previously limited to French
+Demandes de valeurs fonci\`eres (DVF) transactions and lagged comparable sales.
+The fixed cohort contains 143,009 ordinary Paris apartment sales from
+2021--2025. Phase 3 links each transaction to Base Adresse Nationale (BAN)
+address identity; Base de Donn\'ees Nationale des B\^atiments (BDNB) building
+attributes and dated energy-performance diagnostics (DPE); rail stations;
+schools, parks and nearby services; and strategic transport-noise maps. Exact
+BAN matches cover 99.49\% of sales, 99.997\% receive a BDNB building identity,
+and 76.85\% receive a DPE that existed by the transaction date. No future-DPE
+join is observed. Configuration selection uses 2024 only; selected models are
+refitted on 2021--2024 and evaluated on 28,330 sales from 2025. The selected
+CatBoost model obtains EUR 93,136 mean absolute error (MAE), EUR 192,806 root
+mean squared error, $R^2=0.8679$, and 11.70\% median absolute percentage error.
+Relative to the frozen Phase 2 comparable-sale correction (EUR 96,428 MAE), the
+MAE reduction is EUR 3,293, or 3.42\%, with a paired 95\% bootstrap interval of
+EUR 2,735--3,846. Dated DPE, building and neighborhood ablations each improve
+MAE, although their gains are not additive or causal. Current BAN/BDNB and
+amenity snapshots are explicitly classified as retrospective reconstruction;
+only dated DPE and lagged comparable-sale variables satisfy full point-in-time
+rules. The result shows a meaningful but bounded improvement and does not turn
+the AVM into a certified appraisal.
+\end{abstract}
+
+\textbf{Keywords:} automated valuation model; DVF; BAN; BDNB; DPE; entity
+resolution; point-in-time features; CatBoost; Paris real estate.
+
+\section{Executive result}
+
+Phase 3 was designed to answer one practical question: does adding reliable
+property identity, building condition proxies, energy information, access and
+neighborhood context improve out-of-year valuation accuracy beyond Phase 2?
+The answer is yes on the fixed 2025 cohort. The selected model reduces MAE by
+EUR 3,293 (3.42\%), improves MdAPE from 12.22\% to 11.70\%, increases the share
+of estimates within 20\% from 71.69\% to 73.39\%, and raises $R^2$ from 0.8601
+to 0.8679. The paired interval for the MAE reduction excludes zero.
+
+The contribution is broader than one score. It includes a versioned Bronze
+source layer, deterministic address and building resolution, a row-level match
+audit, a leakage-aware DPE join, an enriched 141-column Gold table, controlled
+feature-family ablations, a reusable CatBoost artifact and an auditable
+single-property inference path.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{phase3_results_dashboard.png}
+\caption{Executive Phase 3 result. Error bars are nonparametric 95\% bootstrap
+intervals. Paired improvement intervals resample transaction-level differences
+against the same frozen Phase 2 predictions.}
+\label{fig:executive}
+\end{figure}
+
+\section{Problem setting and prior phases}
+
+The target is total transaction value in euros for an ordinary apartment sale
+in Paris. Phase 1 established a chronological tabular-model benchmark using
+DVF characteristics. Phase 2 added Lambert-93 spatial variables, H3 cells and
+historical comparable-sale statistics under a minimum 90-day information lag.
+Its best method combined 75\% of a LightGBM estimate with 25\% of the trailing
+365-day, 500-metre local median price per square metre. That correction reached
+EUR 96,428 MAE in 2025, improving the Phase 1 reference only modestly.
+
+Phase 2 also exposed the main information gap. DVF describes the transaction
+and apartment size but not the building, dated energy state, exact persistent
+address identity, transit access or environmental context. Phase 3 therefore
+focuses on external data linkage rather than a more exotic neural architecture.
+
+\section{Data and external sources}
+
+\subsection{Fixed transaction cohort}
+
+The transaction cohort is unchanged from the earlier phases. DVF rows are
+collapsed and filtered at mutation level so that the target is not duplicated
+across property lines \cite{dvf}. The cohort retains arm's-length sales containing exactly
+one apartment, while allowing dependencies such as cellars or parking spaces.
+Required fields include date, value, surface and Paris coordinates. Fixed
+plausibility bounds are 9--300 m$^2$ for surface, EUR 50,000--10,000,000 for
+value and EUR 2,000--30,000 per m$^2$.
+
+\begin{table}[H]
+\centering
+\caption{Chronological cohorts used throughout Phase 3.}
+\label{tab:splits}
+\begin{tabular}{lrrl}
+\toprule
+Period & Sales & Cumulative training sales & Role \\
+\midrule
+2021 & 30,397 & 30,397 & Development \\
+2022 & 33,080 & 63,477 & Development \\
+2023 & 26,798 & 90,275 & Development \\
+2024 & 24,404 & 114,679 & Configuration selection \\
+2025 & 28,330 & --- & Frozen chronological test \\
+\midrule
+Total & 143,009 & --- & Fixed Gold identity \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Authoritative enrichment sources}
+
+Table~\ref{tab:sources} summarizes the new inputs. Every downloaded artifact is
+stored under \path{data/bronze/} with producer, licence, source URL, retrieval
+timestamp, byte size and SHA-256 recorded in
+\path{reports/phase3/source_manifest.json}. The BDNB departmental archive is
+version 2026-02.a for Paris and contains both DPE records and the official
+DPE-to-building relation; a second bulk ADEME download is therefore not needed.
+
+\begin{table}[H]
+\centering
+\caption{Phase 3 external sources and snapshot interpretation.}
+\label{tab:sources}
+\footnotesize
+\begin{tabularx}{\textwidth}{p{3.05cm}X p{3.25cm}}
+\toprule
+Source / producer / licence & Variables introduced & Temporal status \\
+\midrule
+BAN \cite{ban}\\IGN, Licence Ouverte 2.0 & Normalized address ID, FANTOIR road identity, coordinates and cadastral references & Current static reference \\
+BDNB 2026-02.a \cite{bdnb}\\CSTB, Licence Ouverte 2.0 & Building ID, footprint, levels, height, year/period, dwelling and lot counts, materials and coarse state & Retrospective static reconstruction \\
+DPE in BDNB \cite{dpe}\\ADEME/CSTB, Licence Ouverte 2.0 & Energy and GHG classes, consumption, emissions, heating, surface and diagnostic date & Point-in-time date filter \\
+Rail stations \cite{idfm}\\\^Ile-de-France Mobilit\'es, Licence Ouverte 2.0 & Metro, RER, train and tram distance/density by mode and line & Current static context \\
+Schools and parks \cite{paris}\\Ville de Paris, ODbL & Nearest distance, counts and green-space area & Current static context \\
+Services\\BDNB BPE, Licence Ouverte 2.0 & Nearby shop/service distance and counts & Retrospective static context \\
+Noise \cite{noise}\\DRIEAT/CEREMA, Licence Ouverte 2.0 & 2022 road, RATP-rail and SNCF-rail Lden bands & Fixed 2022 strategic map \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{Data architecture and entity resolution}
+
+The pipeline follows Bronze--Silver--Gold layering (Figure~\ref{fig:pipeline}).
+Bronze preserves source snapshots. Silver resolves identities and records how
+every match was obtained. Gold retains one row per original DVF sale and adds
+the external fields plus explicit missingness and provenance indicators.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{phase3_data_pipeline.png}
+\caption{Source-to-model architecture. The feature contract distinguishes
+dated information from retrospective static reconstruction.}
+\label{fig:pipeline}
+\end{figure}
+
+\subsection{Exact address identity}
+
+The primary address key combines commune, the four-character FANTOIR/DVF road
+code, street number and normalized suffix. It is deterministic and avoids
+fuzzy street-name matching. The key resolves to the BAN interoperability ID.
+The resulting exact BAN match rate is 99.49\%. Coordinates and labels from BAN
+are retained for audit, not used to overwrite the original transaction identity
+silently.
+
+\subsection{BAN-to-BDNB building resolution}
+
+The official BAN--BDNB relationship table can return several buildings for one
+address. Candidates are ranked using the relationship reliability field; the
+highest-ranked building is selected deterministically. When the address route
+is unavailable, the cadastral parcel relation is used as a fallback. The Gold
+table records the selected BDNB building, match method, confidence, number of
+candidates and both address and parcel evidence. This produces a 99.997\%
+building match rate and 99.46\% high-confidence rate. The row-level Silver audit
+is stored in \path{data/silver/phase3_match_audit.parquet}.
+
+\subsection{Identity-preserving joins}
+
+The build asserts that the enriched table has exactly 143,009 rows, that the
+original mutation order and IDs are preserved and that no duplicate mutation
+is created. This matters because one-to-many building, DPE or amenity joins can
+otherwise inflate the training sample and create false accuracy. The delivered
+Gold table has 141 typed columns and a recorded SHA-256 contract.
+
+\section{Feature engineering and temporal contract}
+
+\subsection{Building structure, age and condition}
+
+BDNB contributes construction year or period, age at sale, level count, height,
+footprint, dwelling count, total/parking lot counts, wall and roof materials,
+usage class and coarse building state. Construction age is computed relative
+to each sale year and invalid negative or implausible values are rejected. The
+median building age in the 2025 test is 125 years, reflecting the old Paris
+housing stock. These fields are valuable retrospective descriptors, but the
+2026 snapshot does not prove that every value was observable in earlier years.
+
+\subsection{Point-in-time DPE}
+
+For a sale at date $t$, a diagnostic is eligible only when
+\begin{equation}
+  \mathrm{date\_etablissement\_dpe} \leq t.
+\end{equation}
+Within each resolved building, an as-of join selects the latest eligible DPE.
+The pipeline records DPE age in days, apartment-surface discrepancy and match
+confidence. A hard validation rejects any future diagnostic. The observed
+future-DPE leakage count is zero.
+
+Overall historical coverage is 76.85\%, but it is strongly time-dependent:
+13.12\% in 2021, 83.38\% in 2022, 97.10\% in 2023, 99.05\% in 2024 and 99.33\%
+in 2025. This pattern is expected because the current DPE regime begins in the
+study period; it also explains why a single aggregate coverage percentage is
+insufficient.
+
+\subsection{Accessibility, amenities and noise}
+
+Coordinates are transformed to Lambert-93 before metric distance calculations.
+The new context variables include nearest Metro, RER, train, tram, school,
+green-space centroid and shop/service distances; counts of stations, modes,
+lines, schools, green spaces and services inside fixed radii; green-space area;
+and maximum intersecting road/RATP/SNCF Lden bands. In the 2025 cohort, median
+straight-line distances are 222 m to Metro, 946 m to RER, 154 m to a school,
+103 m to a green-space centroid and 6 m to a BDNB BPE service location.
+
+Noise values represent strategic contour bands rather than parcel-level acoustic
+measurements. Locations outside a mapped high-noise contour are represented by
+the low/no-band category and a missing-contour indicator. They must not be read
+as an exact measured decibel value.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{phase3_enrichment_profile.png}
+\caption{External-feature profile on the 2025 test cohort. DPE shares are
+conditional on a diagnostic available by the sale date. Distances are
+straight-line Lambert-93 measures. Noise is a strategic contour category.}
+\label{fig:profile}
+\end{figure}
+
+\subsection{Unavailable requested fields}
+
+The reviewed public BAN, BDNB and DPE fields do not provide a reliable
+apartment-floor or elevator variable for this cohort. Building level count is
+not a substitute for apartment floor. Gold therefore includes explicit
+\texttt{apartment\_floor\_available=0} and
+\texttt{elevator\_source\_available=0} flags while leaving the values missing.
+This avoids converting an unsupported assumption into model input. A lawful
+notarial, copropri\'et\'e, property-manager or licensed-listing source would be
+needed to complete those fields.
+
+\subsection{Information-time classification}
+
+The final contract separates two evidence classes:
+\begin{itemize}
+  \item \textbf{Point-in-time:} DPE dated on or before the sale and all Phase 2
+  comparable-sale features subject to a minimum 90-day publication lag.
+  \item \textbf{Retrospective static:} current BAN identity, most BDNB physical
+  attributes, current transport/school/park/service snapshots and the fixed
+  2022 strategic noise map.
+\end{itemize}
+The full model is consequently a strong retrospective reconstruction, not a
+claim that every external value was operationally available on each historical
+valuation date.
+
+\section{Modeling and evaluation}
+
+\subsection{Feature-family ablations}
+
+All candidates retain the core DVF and Phase 2 variables so that Phase 3 tests
+incremental information. Five LightGBM feature sets are compared: Phase 2 only,
+dated DPE, building/linkage, neighborhood context and the full enrichment
+without raw high-cardinality identity. Each is evaluated with MAE and Huber
+objectives using a small predefined configuration grid. CatBoost additionally
+receives raw BAN address and BDNB building categories because its ordered
+categorical handling is suitable for high-cardinality identity. The final
+CatBoost configuration has 650 iterations, learning rate 0.05, depth 7,
+$\ell_2$ leaf regularization 5 and MAE loss.
+
+The CatBoost comparison changes both model family and access to raw identity.
+Its advantage over full LightGBM therefore cannot be attributed to identity
+alone. Likewise, feature-family ablation gains overlap and must not be added.
+
+\subsection{Chronological protocol}
+
+Development uses 2021--2023. The 2024 cohort selects the feature set, objective
+and hyperparameters. Selected candidates are refitted once on 2021--2024 and
+scored on the common 2025 rows. No 2025 record is used by a fitting or selection
+call. However, the 2025 cohort had already been examined in Phases 1 and 2; it is
+frozen for Phase 3 computation but not a pristine analyst-blind external test.
+A later prospective cohort is required for final deployment evidence.
+
+\subsection{Metrics and uncertainty}
+
+The primary metric is
+\begin{equation}
+  \mathrm{MAE}=\frac{1}{n}\sum_{i=1}^{n}|y_i-\hat y_i|.
+\end{equation}
+Secondary metrics are RMSE, $R^2$, mean and median absolute percentage error
+(MAPE and MdAPE), and the shares within 10\% and 20\% of the transaction value.
+MAE intervals use nonparametric bootstrap resampling. Improvement intervals use
+paired resampling of per-sale absolute-error differences, preserving the fact
+that every candidate predicts the same transactions.
+
+\section{Results}
+
+\subsection{Ablation and final test performance}
+
+Table~\ref{tab:results} reports the principal 2025 results. Every MAE-objective
+enrichment ablation improves on the frozen Phase 2 reference. Dated DPE alone
+reduces MAE by EUR 1,206; building/linkage by EUR 1,858; neighborhood context by
+EUR 796; and the full no-identity LightGBM model by EUR 2,460. Their paired 95\%
+intervals exclude zero. The selected CatBoost model improves MAE by EUR 3,293.
+
+\begin{table}[H]
+\centering
+\caption{Frozen 2025 chronological test. Intervals are paired MAE reductions
+against Phase 2; positive values favor the row method.}
+\label{tab:results}
+\small
+\begin{tabular}{lrrrr}
+\toprule
+Method & MAE (EUR) & MdAPE & Within 20\% & Reduction (95\% CI), EUR \\
+\midrule
+CatBoost, full identity/enrichment & \textbf{93,136} & \textbf{11.70\%} & \textbf{73.39\%} & \textbf{3,293 (2,735--3,846)} \\
+LightGBM, full without raw identity & 93,968 & 11.80\% & 73.03\% & 2,460 (1,860--3,137) \\
+LightGBM, building/linkage & 94,571 & 11.90\% & 72.28\% & 1,858 (1,271--2,493) \\
+LightGBM, dated DPE & 95,222 & 11.97\% & 72.28\% & 1,206 (657--1,867) \\
+LightGBM, neighborhood context & 95,632 & 11.99\% & 71.74\% & 796 (293--1,355) \\
+Phase 2 comparable correction & 96,428 & 12.22\% & 71.69\% & Reference \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+For the winner, RMSE is EUR 192,806, $R^2=0.8679$, MAPE is 18.12\%, 43.68\%
+of estimates are within 10\% and 73.39\% are within 20\%. Phase 3 reduces
+absolute error on 54.21\% of individual test sales; the median transaction-level
+gain is EUR 1,496. The improvement therefore reflects many modest gains plus a
+smaller number of large corrections, not universal superiority on every sale.
+
+\subsection{Calibration, value segments and time stability}
+
+Figure~\ref{fig:diagnostics} shows that the predicted and observed values remain
+tightly aligned over most of the range, with dispersion increasing among
+high-value sales. Phase 3 lowers MAE in every transaction-value decile shown,
+including the upper decile where absolute errors are much larger. Monthly 2025
+MAE also remains below Phase 2 in every month. This supports temporal stability
+within the test year, although it does not measure a new market regime.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{phase3_prediction_diagnostics.png}
+\caption{Frozen-test diagnostics. The transaction-level gain distribution is
+clipped for legibility; reported averages use the unclipped differences.}
+\label{fig:diagnostics}
+\end{figure}
+
+\subsection{Geographic heterogeneity}
+
+The mean improvement is positive in 19 of 20 arrondissements. It is largest in
+the 6th, 4th, 7th, 8th and 1st arrondissements and approximately neutral in the
+16th (EUR $-167$ mean change). The map also shows intermixed gains and losses
+within the same neighborhoods. This is consistent with heterogeneous errors at
+the individual property level and argues against interpreting arrondissement
+averages as causal amenity premiums.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{phase3_spatial_performance.png}
+\caption{Spatial distribution of transaction-level changes and mean MAE
+reduction by arrondissement. Green marks lower absolute error under Phase 3.}
+\label{fig:spatial}
+\end{figure}
+
+\subsection{Model use of enriched information}
+
+CatBoost prediction-value-change importance assigns 79.68\% of total importance
+to core DVF/spatial variables, dominated by surface and log surface. Historical
+comparables account for 12.95\%; building/linkage 2.30\%; neighborhood context
+2.01\%; DPE/energy 1.86\%; and identity/micro-location 1.20\%. The strong
+ablation gains alongside small individual importances are not contradictory:
+external variables can refine difficult cases while surface still explains
+most price-level variation. Importance values describe the fitted model's use
+of features and do not estimate willingness to pay or causal effects.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{phase3_feature_importance.png}
+\caption{CatBoost prediction-value-change importance for the selected model.
+Feature-family totals sum to 100. Correlated variables may divide importance.}
+\label{fig:importance}
+\end{figure}
+
+\section{Interpretation and practical value}
+
+Three conclusions follow. First, external information addresses a real omitted-
+variable problem. Each enrichment family provides an independently positive
+test signal under the controlled LightGBM ablations. Second, reliable identity
+is operationally important even when its direct feature importance is small: it
+allows building, DPE and context records to attach to the correct transaction
+and enables CatBoost to learn repeated micro-location patterns. Third, the
+improvement is meaningful but bounded. A 3.42\% MAE reduction does not remove
+unobserved apartment condition, renovation quality, floor, elevator, view,
+exposure, occupancy or private outdoor space.
+
+The selected artifact supports single-property inference through
+\path{paris_avm.inference.phase3}. The caller supplies the apartment attributes,
+coordinates, valuation date, commune code and FANTOIR street code. The command
+resolves an exact existing BAN/BDNB identity, rolls DPE back to the valuation
+date, recomputes lagged comparable features and returns an automated indication.
+It also warns that building and neighborhood fields use the 2026 static snapshot.
+
+\section{Limitations and threats to validity}
+
+\begin{enumerate}
+  \item \textbf{Static-snapshot bias.} Current physical/context snapshots can
+  improve reconstruction of past sales without proving historical availability.
+  This is the most important limitation.
+  \item \textbf{Previously inspected test year.} The 2025 rows are excluded
+  from Phase 3 fitting and selection, but earlier phases had exposed aggregate
+  2025 performance. Prospective confirmation is still necessary.
+  \item \textbf{Residual property heterogeneity.} Floor, elevator, interior
+  condition, view and renovation quality remain unavailable.
+  \item \textbf{DPE linkage.} A building can contain several apartments and
+  diagnostics. The latest eligible building-linked DPE may not be the exact
+  apartment; surface discrepancy and confidence fields make this uncertainty
+  visible but do not eliminate it.
+  \item \textbf{Noise and amenity semantics.} Straight-line distances ignore
+  walking networks and barriers. Strategic noise contours are categorical
+  planning layers, not indoor measurements.
+  \item \textbf{Bootstrap scope.} The paired interval measures sampling
+  variation within the 2025 cohort, not uncertainty under future interest-rate,
+  policy or market-regime shifts.
+  \item \textbf{Non-causal analysis.} Ablations and feature importance quantify
+  predictive association only.
+\end{enumerate}
+
+\section{Reproducibility and transfer package}
+
+The complete Phase 3 transfer package is contained in the project:
+\begin{itemize}
+  \item acquisition: \path{paris_avm.data.acquire_phase3};
+  \item entity resolution and features: \path{paris_avm.features.phase3};
+  \item ablation/model benchmark: \path{paris_avm.modeling.benchmark_phase3};
+  \item figures: \path{paris_avm.visualization.phase3};
+  \item inference: \path{paris_avm.inference.phase3};
+  \item Gold table: \path{data/gold/phase3_sale_features.parquet};
+  \item audit and contracts: \path{data/silver/phase3_match_audit.parquet} and
+  \path{reports/phase3/};
+  \item selected model: \path{models/phase3/phase3_selected_model.joblib}.
+\end{itemize}
+
+The deterministic execution order is:
+\begin{verbatim}
+python -m paris_avm.data.acquire_phase3 --skip-dpe
+python -m paris_avm.features.phase3
+python -m paris_avm.modeling.benchmark_phase3
+python -m paris_avm.visualization.phase3
+powershell -ExecutionPolicy Bypass -File docs/paper/compile_phase3.ps1
+\end{verbatim}
+The \texttt{--skip-dpe} option is intentional because the dated ADEME DPE rows
+and official DPE-to-building relation are already present in the versioned BDNB
+archive.
+
+\section{Conclusion}
+
+Phase 3 converts a transaction-only benchmark into an auditable building-aware
+valuation pipeline. Near-complete address/building resolution, strict dated-DPE
+selection and controlled feature-family experiments produce a statistically
+consistent EUR 3,293 MAE reduction on 28,330 sales from 2025. The strongest
+model remains driven by surface and historical market evidence, while external
+building, energy and context features provide useful refinements. The proper
+next step is not more retrospective tuning: it is prospective evaluation on a
+new cohort with vintage-correct snapshots, followed by lawful acquisition of
+apartment floor, elevator and condition data. Until then, the output should be
+used as a transparent automated indication rather than a certified appraisal.
+
+\begin{thebibliography}{9}
+
+\bibitem{dvf}
+Direction g\'en\'erale des Finances publiques.
+\emph{Demandes de valeurs fonci\`eres (DVF)}.
+\url{https://www.data.gouv.fr/fr/datasets/demandes-de-valeurs-foncieres/}.
+
+\bibitem{ban}
+Institut national de l'information g\'eographique et foresti\`ere.
+\emph{Base Adresse Nationale: t\'el\'echargements}.
+\url{https://adresse.data.gouv.fr/outils/telechargements}.
+
+\bibitem{bdnb}
+Centre scientifique et technique du b\^atiment.
+\emph{Base de Donn\'ees Nationale des B\^atiments}.
+\url{https://www.data.gouv.fr/fr/datasets/base-de-donnees-nationale-des-batiments/}.
+
+\bibitem{dpe}
+ADEME.
+\emph{Diagnostics de performance \'energ\'etique pour les logements}.
+\url{https://data.ademe.fr/datasets/dpe-v2-logements-existants}.
+
+\bibitem{idfm}
+\^Ile-de-France Mobilit\'es.
+\emph{Gares et stations du r\'eseau ferr\'e d'\^Ile-de-France par ligne}.
+\url{https://data.iledefrance.fr/explore/dataset/gares-et-stations-du-reseau-ferre-dile-de-france-par-ligne/}.
+
+\bibitem{paris}
+Ville de Paris.
+\emph{Paris Data: \'etablissements scolaires et espaces verts}.
+\url{https://opendata.paris.fr/}.
+
+\bibitem{noise}
+DRIEAT \^Ile-de-France.
+\emph{Cartes de bruit strat\'egiques pour Paris}.
+\url{https://www.data.gouv.fr/fr/datasets/lot-de-donnees-relatives-aux-cartes-de-bruit-strategiques-pour-paris/}.
+
+\bibitem{catboost}
+L. Prokhorenkova, G. Gusev, A. Vorobev, A. Dorogush, and A. Gulin.
+CatBoost: unbiased boosting with categorical features.
+\emph{Advances in Neural Information Processing Systems}, 31, 2018.
+
+\bibitem{lightgbm}
+G. Ke, Q. Meng, T. Finley, T. Wang, W. Chen, W. Ma, Q. Ye, and T.-Y. Liu.
+LightGBM: a highly efficient gradient boosting decision tree.
+\emph{Advances in Neural Information Processing Systems}, 30, 2017.
+
+\end{thebibliography}
+
+\end{document}

@@ -1,0 +1,31 @@
+{
+  "dataset": "Geolocated DVF - Paris department 75",
+  "retrieved_on": "2026-08-11",
+  "source_index": "https://files.data.gouv.fr/geo-dvf/latest/csv/",
+  "downloaded_files": [
+    {
+      "year": 2021,
+      "source_url": "https://files.data.gouv.fr/geo-dvf/latest/csv/2021/departements/75.csv.gz",
+      "archive": "75_2021.csv.gz",
+      "archive_sha256": "522417155FF3FDC55F424E6CF39D099FBD782AE39D9F7E62ED9D8766CD062E9B",
+      "archive_bytes": 2089677,
+      "extracted_file": "75_2021.csv",
+      "extracted_bytes": 15521009,
+      "raw_rows": 81517,
+      "raw_mutations": 43743,
+      "clean_model_rows": 30397
+    },
+    {
+      "year": 2022,
+      "source_url": "https://files.data.gouv.fr/geo-dvf/latest/csv/2022/departements/75.csv.gz",
+      "archive": "75_2022.csv.gz",
+      "archive_sha256": "8C01EC183C755510772905BBB2EBC972B3D8E694B1FB0192F28C5B015178C904",
+      "archive_bytes": 2406855,
+      "extracted_file": "75_2022.csv",
+      "extracted_bytes": 18711444,
+      "raw_rows": 98308,
+      "raw_mutations": 47240,
+      "clean_model_rows": 33080
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Verify project",
+      "type": "shell",
+      "command": "powershell",
+      "args": ["-ExecutionPolicy", "Bypass", "-File", ".\\scripts\\verify_project.ps1"],
+      "group": {"kind": "test", "isDefault": true},
+      "problemMatcher": []
+    },
+    {
+      "label": "Build Phase 3 figures and paper",
+      "type": "shell",
+      "command": "powershell",
+      "args": [
+        "-ExecutionPolicy", "Bypass", "-File", ".\\scripts\\run_phase3.ps1",
+        "-SkipAcquisition", "-SkipFeatureBuild", "-SkipBenchmark"
+      ],
+      "group": "build",
+      "problemMatcher": []
+    }
+  ]
+}

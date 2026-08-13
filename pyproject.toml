@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=75", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "paris-avm"
+version = "0.3.0"
+description = "Leakage-aware Paris apartment valuation with DVF, BAN, BDNB, DPE and neighborhood data."
+readme = "README.md"
+requires-python = ">=3.11"
+authors = [{ name = "Badre" }]
+dynamic = ["dependencies"]
+
+[project.scripts]
+paris-avm-train = "paris_avm.modeling.train_phase1:main"
+paris-avm-build-phase2 = "paris_avm.features.phase2:main"
+paris-avm-benchmark-phase2 = "paris_avm.modeling.benchmark_phase2:main"
+paris-avm-acquire-phase3 = "paris_avm.data.acquire_phase3:main"
+paris-avm-build-phase3 = "paris_avm.features.phase3:main"
+paris-avm-benchmark-phase3 = "paris_avm.modeling.benchmark_phase3:main"
+paris-avm-predict-phase3 = "paris_avm.inference.phase3:main"
+paris-avm-visualize-phase3 = "paris_avm.visualization.phase3:main"
+
+[tool.setuptools.dynamic]
+dependencies = { file = ["requirements.txt"] }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]

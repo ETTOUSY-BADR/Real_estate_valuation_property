@@ -1,0 +1,103 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[margin=2.1cm]{geometry}
+\usepackage{booktabs}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{microtype}
+\hypersetup{colorlinks=true,linkcolor=blue!55!black,urlcolor=blue!55!black,
+  pdftitle={Phase 3: External Building and Neighborhood Enrichment},
+  pdfauthor={Badr Ettousy}}
+\setlength{\parskip}{0.35em}
+\setlength{\parindent}{0pt}
+
+\title{Phase 3: External Building, Energy, Accessibility and\\
+Neighborhood Enrichment for Paris Apartment Valuation}
+\author{Badr Ettousy}
+\date{August 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+This addendum evaluates authoritative external-data linkage for a Paris
+apartment automated valuation model. The 143,009-sale DVF Gold cohort is linked
+to BAN address identity, BDNB building characteristics, dated ADEME DPE records,
+Ile-de-France Mobilites stations, City of Paris schools and green spaces, BDNB
+shop/service equipment and 2022 strategic noise maps. Exact BAN matches cover
+99.49\% of sales; 99.997\% receive a BDNB building and 76.85\% receive a DPE
+that existed by the transaction date. No future-DPE joins are detected. A
+CatBoost model selected on 2024 and tested on 28,330 sales from 2025 achieves
+EUR 93,136 MAE, compared with EUR 96,428 for the Phase 2 correction. The paired
+MAE reduction is EUR 3,293 (95\% bootstrap interval: EUR 2,735--3,846).
+Static source snapshots are explicitly treated as retrospective reconstruction,
+not fully vintage-correct historical features.
+\end{abstract}
+
+\section{Data integration}
+The Bronze layer stores immutable source snapshots and a manifest containing
+URLs, producer, licence, retrieval time, byte size and SHA-256. The Silver
+layer records row-level entity resolution. BAN is matched deterministically by
+commune, FANTOIR road code, number and suffix. Official BAN--BDNB relations are
+ranked by reliability; the cadastral parcel is a fallback. The Gold table has
+one row per original sale and 141 columns.
+
+Building features include construction year/period, level count, height,
+footprint, dwelling/lot counts, wall/roof fields and coarse state. Location
+features include distance/density for Metro, RER, train, tram, schools, public
+green spaces and BDNB equipment, plus road/RATP/SNCF Lden bands.
+
+\section{Temporal rules}
+For a sale at date $t$, an ADEME diagnostic is eligible only when
+\[
+  \texttt{date\_etablissement\_dpe} \leq t.
+\]
+The historical comparable layer retains Phase 2's 90-day availability lag.
+BAN, most BDNB physical attributes, strategic noise and amenity/transport
+snapshots are labelled retrospective static context because consistent annual
+vintages are unavailable. Ablations separate dated DPE from static building and
+context information.
+
+\section{Results}
+\begin{table}[htbp]
+\centering
+\caption{Frozen 2025 chronological test.}
+\begin{tabular}{lrrrr}
+\toprule
+Method & MAE (EUR) & MdAPE & Within 20\% & $R^2$ \\
+\midrule
+CatBoost, full identity/enrichment & \textbf{93,136} & \textbf{11.70\%} & \textbf{73.39\%} & \textbf{0.8679} \\
+LightGBM, full without identity & 93,968 & 11.80\% & 73.03\% & 0.8661 \\
+LightGBM, building only & 94,571 & 11.90\% & 72.28\% & 0.8658 \\
+LightGBM, dated DPE only & 95,222 & 11.97\% & 72.28\% & 0.8637 \\
+LightGBM, context only & 95,632 & 11.99\% & 71.74\% & 0.8627 \\
+Phase 2 correction & 96,428 & 12.22\% & 71.69\% & 0.8601 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The selected CatBoost model improves MAE by EUR 3,293 (3.42\%). Its paired
+95\% bootstrap interval, EUR 2,735--3,846, excludes zero. Dated DPE alone
+improves MAE by EUR 1,206; building-only and context-only ablations improve by
+EUR 1,858 and EUR 796 respectively. The high-cardinality identity layer adds a
+further gain relative to full LightGBM without raw identity.
+
+\section{Limitations and deployment}
+Public sources did not expose a reliable apartment-floor or elevator field.
+Both are stored as explicitly unavailable rather than inferred from building
+height or level count. Static 2026 building/context reconstruction may improve
+a retrospective 2025 backtest but is not proof of information availability in
+2021--2025. A prospective 2026 or later cohort and vintage-correct source
+snapshots are required before a strong external deployment claim. The model is
+an automated indication, not a certified appraisal.
+
+\section{Reproducibility}
+The source manifest, match audit, feature-quality contract, validation trials,
+row-level test predictions, paired intervals and selected model artifact are
+saved with the project. The pipeline is run in order with
+\texttt{acquire\_phase3\_data.py}, \texttt{build\_phase3\_features.py} and
+\texttt{benchmark\_phase3.py}.
+
+\end{document}

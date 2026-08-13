@@ -1,0 +1,178 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[margin=2.1cm]{geometry}
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{microtype}
+\usepackage{caption}
+\usepackage{float}
+\hypersetup{colorlinks=true,linkcolor=blue!55!black,urlcolor=blue!55!black,
+  pdftitle={Phase 2: Leakage-Safe Spatial and Comparable-Sale Features for Paris Apartment Valuation},
+  pdfauthor={Badr Ettousy}}
+\graphicspath{{../../visuals/phase2/}}
+\setlength{\parskip}{0.35em}
+\setlength{\parindent}{0pt}
+
+\title{Phase 2: Leakage-Safe Spatial and Comparable-Sale Features\\
+for Paris Apartment Valuation}
+\author{Badr Ettousy}
+\date{August 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+This addendum evaluates a second-stage data-engineering pipeline for the Paris
+DVF apartment valuation benchmark. A typed Gold table of 143,009 transactions
+adds Lambert-93 distances, H3 cells, local transaction density, and historical
+comparable-sale statistics. Every comparable is at least 90 days older than the
+transaction being valued. Model and blend selection use 2024 only; 28,330 sales
+from 2025 form the final chronological test. A transparent correction combining
+75\% of the Phase 1 LightGBM estimate with 25\% of a trailing local median
+reduces test MAE from EUR 96,981 to EUR 96,428. The paired bootstrap interval
+for the reduction is EUR 333--743. Full enriched LightGBM and XGBoost models do
+not materially improve the Phase 1 reference. The result supports conservative
+use of recent local evidence and argues against complexity without new
+building-level information.
+\end{abstract}
+
+\section{Objective and contribution}
+Phase 1 established a chronological six-model benchmark. Phase 2 asks whether
+better spatial data engineering and strictly historical comparable sales add
+out-of-year value. The contribution is an auditable feature contract, not a new
+learning algorithm. Source-file hashes, cleaning counts, feature ranges, and
+coverage are recorded in a machine-readable quality report.
+
+\section{Data-engineering design}
+Five annual Paris DVF files covering 2021--2025 are cleaned at mutation level
+using the fixed Phase 1 cohort definition. WGS84 coordinates are retained for
+storage and transformed to Lambert-93 for metric distance calculations. H3
+cells at resolutions 8, 9, and 10 preserve multiple spatial scales. Address,
+street, commune, and parcel identifiers are retained in the Gold table, while
+the highest-cardinality categories are not supplied directly to the models.
+
+For each sale at date $t$, eligible historical observations satisfy
+\[
+  90 \leq t-t_i \leq 730 \text{ days}, \qquad d(i,t) \leq 1000 \text{ m}.
+\]
+Counts and median prices per square metre are computed for several nested
+distance/time windows. Additional features include dispersion, distance/time
+weighted comparable values, size/room-similar comparable values, nearest prior
+sale distance, median comparable age, and short-versus-long local momentum.
+The 90-day lag approximates information availability and prevents same-period
+or future transactions from leaking into a valuation.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.98\textwidth]{comparable_coverage.png}
+\caption{Coverage and density of eligible historical evidence. Lower 2021
+coverage is expected because no pre-2021 source file is available.}
+\end{figure}
+
+\section{Evaluation protocol}
+Development training uses 90,275 sales from 2021--2023. The 24,404 sales from
+2024 select model configurations, target formulations, comparable definitions,
+and blend weights. Selected learners are refitted on 114,679 sales from
+2021--2024 and tested once on 28,330 sales from 2025. The primary metric is MAE;
+secondary metrics are median absolute percentage error (MdAPE), $R^2$, and the
+share of estimates within 20\% of the transaction value.
+
+LightGBM and XGBoost use full spatial/comparable features with log total-price,
+log-price-per-square-metre, and local-residual targets. Spatial-only and
+comparable-only ablations test the contribution of feature groups. A six-model
+blend and four transparent Phase 1/comparable corrections are selected using
+validation MAE only.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.98\textwidth]{comparable_weight_selection.png}
+\caption{Validation-only selection of the comparable feature and blend weight.
+The selected correction assigns 75\% weight to Phase 1 and 25\% to the
+500-metre, trailing-365-day median.}
+\end{figure}
+
+\section{Results}
+\begin{table}[H]
+\centering
+\caption{Selected 2025 test results. Lower MAE and MdAPE are better.}
+\begin{tabular}{lrrr}
+\toprule
+Method & MAE (EUR) & MdAPE & Within 20\% \\
+\midrule
+Phase 1 + comparable correction & \textbf{96,428} & \textbf{12.22\%} & \textbf{71.69\%} \\
+XGBoost, total-price target & 96,914 & 12.43\% & 71.18\% \\
+Phase 1 LightGBM & 96,981 & 12.33\% & 71.41\% \\
+XGBoost, EUR/m$^2$ target & 96,996 & 12.61\% & 70.73\% \\
+Six-model validation blend & 97,183 & 12.52\% & 70.89\% \\
+XGBoost, residual target & 97,507 & 12.60\% & 70.69\% \\
+LightGBM, spatial-only & 98,232 & 12.72\% & 70.31\% \\
+LightGBM, comparable-only & 98,963 & 12.73\% & 70.81\% \\
+LightGBM, full total-price & 99,144 & 12.73\% & 69.89\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{phase2_accuracy.png}
+\caption{Chronological test accuracy. Error bars are 95\% bootstrap intervals
+for each MAE.}
+\end{figure}
+
+The selected correction improves MAE by EUR 552 relative to Phase 1. A paired
+bootstrap over identical test transactions gives a 95\% interval of EUR
+333--743 for this reduction. MdAPE improves from 12.33\% to 12.22\%, and the
+within-20\% rate increases from 71.41\% to 71.69\%. $R^2$ decreases slightly
+from 0.8619 to 0.8601, so the evidence is metric-dependent. The effect is
+statistically consistent on this cohort but modest in practical magnitude.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{correction_diagnostics.png}
+\caption{Prediction, error-distribution, temporal-stability, and paired-error
+diagnostics for the selected correction.}
+\end{figure}
+
+\section{Interpretation}
+Adding all engineered variables to a flexible learner did not outperform the
+simpler Phase 1 model. The feature-gain diagnostic confirms that surface remains
+dominant, although XGBoost uses the local median and weighted comparable
+features. Importance values describe model usage, not causal effects.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{phase2_feature_importance.png}
+\caption{Gain-based feature importance for the full total-price models.}
+\end{figure}
+
+The transparent correction succeeds by shrinking the base estimate only partly
+toward recent local evidence. It is easier to inspect and reproduce than the
+six-model blend. The outcome also shows why engineering effort should be judged
+by chronological holdout performance rather than feature count.
+
+\section{Limitations and next step}
+DVF lacks condition, floor, lift, view, noise, renovation quality, detailed
+building state, and energy performance. Because 2025 had already been inspected
+during Phase 1, future claims require genuinely prospective confirmation on a
+later cohort. The bootstrap quantifies sampling variation within 2025, not
+market-regime uncertainty. The estimates are statistical indications, not
+certified appraisals or investment guarantees.
+
+The recommended Phase 3 is reliable external linkage: BAN-normalized addresses,
+BDNB building characteristics, DPE ratings, cadastral age, and distances to
+transit and amenities. These additions address missing information directly and
+should be assessed with both chronological and spatial holdouts before exploring
+attention-based architectures.
+
+\section{Reproducibility}
+The complete build, benchmark, visualization, and single-property inference
+commands are documented in \texttt{reports/phase2/PHASE2\_REPORT.md}. Numerical
+results are stored as CSV and JSON, and the Gold table is Parquet with its source
+hashes and feature contract recorded separately.
+
+\end{document}

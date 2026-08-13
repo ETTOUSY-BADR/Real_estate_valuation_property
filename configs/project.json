@@ -1,0 +1,26 @@
+{
+  "project": "paris-avm",
+  "version": "0.3.0",
+  "random_seed": 42,
+  "target": "valeur_fonciere",
+  "geography": "Paris, France",
+  "crs": {
+    "storage": "EPSG:4326",
+    "metric_features": "EPSG:2154"
+  },
+  "temporal_split": {
+    "development": [2021, 2022, 2023],
+    "validation": [2024],
+    "test": [2025]
+  },
+  "comparable_sales": {
+    "minimum_information_lag_days": 90,
+    "maximum_history_days": 730,
+    "maximum_radius_metres": 1000
+  },
+  "phase3": {
+    "bdnb_release": "2026-02-a",
+    "dated_dpe_required": true,
+    "static_context_interpretation": "retrospective reconstruction"
+  }
+}

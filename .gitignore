@@ -1,0 +1,40 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.coverage
+htmlcov/
+.venv/
+venv/
+
+# Editors and operating systems
+.idea/
+.DS_Store
+Thumbs.db
+
+# Raw and derived data
+data/raw/dvf/*.csv
+data/raw/dvf/*.csv.gz
+data/bronze/**
+data/silver/**
+data/gold/**
+!data/README.md
+!data/raw/dvf/manifest.json
+
+# Trained artifacts and generated analyses
+models/**/*.joblib
+reports/**/*.csv
+reports/**/*.json
+visuals/**/*.png
+
+# LaTeX build products; final PDFs remain shareable
+*.aux
+*.bbl
+*.blg
+*.log
+*.out
+*.synctex.gz
+docs/paper/previews/
