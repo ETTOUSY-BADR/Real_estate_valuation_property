@@ -120,6 +120,18 @@ FEATURE_SETS = {
 }
 
 
+def dump_joblib_atomic(artifact: Any, path: Path) -> None:
+    """Serialize a model without replacing a valid artifact on failure."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = path.with_suffix(path.suffix + ".part")
+    temporary.unlink(missing_ok=True)
+    try:
+        joblib.dump(artifact, temporary)
+        temporary.replace(path)
+    finally:
+        temporary.unlink(missing_ok=True)
+
+
 def prepare_categories(data: pd.DataFrame) -> pd.DataFrame:
     output, _ = prepare_categorical_data(data)
     all_categories = set(
@@ -395,7 +407,9 @@ def main() -> None:
             "retrospective_static_context": feature_set
             in {"building", "context", "full_no_identity", "full_identity"},
         }
-        joblib.dump(artifact, args.model_dir / "phase3_selected_model.joblib")
+        dump_joblib_atomic(
+            artifact, args.model_dir / "phase3_selected_model.joblib"
+        )
 
     summary = {
         "schema_version": 1,
