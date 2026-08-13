@@ -22,14 +22,10 @@ import pandas as pd
 from matplotlib.path import Path as MplPath
 from scipy.spatial import cKDTree
 
-from paris_avm.data.acquire_phase3 import BAN_PATH
+from paris_avm.data.acquire_phase3 import BAN_PATH, BDNB_ARCHIVE
 from paris_avm.paths import PROJECT_ROOT
 
 
-BDNB_ARCHIVE = PROJECT_ROOT / Path(
-    "data/bronze/bdnb/release=2026-02-a/"
-    "open_data_millesime_2026-02-a_dep75_csv.zip"
-)
 CONTEXT_DIR = PROJECT_ROOT / "data/bronze/phase3"
 
 

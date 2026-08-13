@@ -33,13 +33,28 @@ BAN_PATH = (
     PROJECT_ROOT
     / f"data/bronze/ban/snapshot={BAN_SNAPSHOT_DATE}/adresses-75.csv.gz"
 )
+BDNB_RELEASE = "2026-02-a"
+BDNB_SHA256 = "9476d90130607bc33b72cf578bf931210de525c6748dd21a338aac9e8ce972df"
+BDNB_METADATA_SHA256 = (
+    "6db5f37b06ca0ae71a987f070cf23ba64f9c23f59a9f3d3364fc8dd632280865"
+)
+BDNB_BASE_URL = (
+    f"https://open-data.s3.fr-par.scw.cloud/bdnb_millesime_{BDNB_RELEASE}/"
+    f"millesime_{BDNB_RELEASE}_dep75"
+)
 BDNB_URL = (
-    "https://open-data.s3.fr-par.scw.cloud/bdnb_millesime_2026-02-a/"
-    "millesime_2026-02-a_dep75/open_data_millesime_2026-02-a_dep75_csv.zip"
+    f"{BDNB_BASE_URL}/open_data_millesime_{BDNB_RELEASE}_dep75_csv.zip"
 )
 BDNB_METADATA_URL = (
-    "https://open-data.s3.fr-par.scw.cloud/bdnb_millesime_2026-02-a/"
-    "millesime_2026-02-a_dep75/open_data_millesime_2026-02-a_dep75_csv_metadata.yml"
+    f"{BDNB_BASE_URL}/open_data_millesime_{BDNB_RELEASE}_dep75_csv_metadata.yml"
+)
+BDNB_ARCHIVE = (
+    PROJECT_ROOT
+    / f"data/bronze/bdnb/release={BDNB_RELEASE}/"
+    f"open_data_millesime_{BDNB_RELEASE}_dep75_csv.zip"
+)
+BDNB_METADATA_PATH = (
+    PROJECT_ROOT / f"data/bronze/bdnb/release={BDNB_RELEASE}/metadata.yml"
 )
 DPE_DATASET_ID = "meg-83tjwtg8dyz4vv7h1dqe"
 DPE_API = f"https://data.ademe.fr/data-fair/api/v1/datasets/{DPE_DATASET_ID}"
@@ -322,13 +337,22 @@ def main() -> None:
         )
     )
 
-    bdnb_path = PROJECT_ROOT / Path(
-        "data/bronze/bdnb/release=2026-02-a/"
-        "open_data_millesime_2026-02-a_dep75_csv.zip"
+    bdnb_path = BDNB_ARCHIVE
+    bdnb_meta_path = BDNB_METADATA_PATH
+    download_file(
+        client,
+        BDNB_URL,
+        bdnb_path,
+        args.force,
+        expected_sha256=BDNB_SHA256,
     )
-    bdnb_meta_path = PROJECT_ROOT / "data/bronze/bdnb/release=2026-02-a/metadata.yml"
-    download_file(client, BDNB_URL, bdnb_path, args.force)
-    download_file(client, BDNB_METADATA_URL, bdnb_meta_path, args.force)
+    download_file(
+        client,
+        BDNB_METADATA_URL,
+        bdnb_meta_path,
+        args.force,
+        expected_sha256=BDNB_METADATA_SHA256,
+    )
     artifacts.append(
         artifact_record(
             "bdnb_paris_2026_02_a",
@@ -337,7 +361,10 @@ def main() -> None:
             BDNB_URL,
             bdnb_path,
             retrieved_at,
-            {"snapshot_semantics": "retrospective static reconstruction"},
+            {
+                "release": BDNB_RELEASE,
+                "snapshot_semantics": "retrospective static reconstruction",
+            },
         )
     )
     artifacts.append(

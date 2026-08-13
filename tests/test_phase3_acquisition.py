@@ -17,6 +17,12 @@ from paris_avm.data.acquire_phase3 import (
     BAN_SHA256,
     BAN_SNAPSHOT_DATE,
     BAN_URL,
+    BDNB_ARCHIVE,
+    BDNB_METADATA_PATH,
+    BDNB_METADATA_SHA256,
+    BDNB_RELEASE,
+    BDNB_SHA256,
+    BDNB_URL,
     acquire_dpe,
     download_file,
 )
@@ -180,6 +186,14 @@ class Phase3AcquisitionTests(unittest.TestCase):
         self.assertIn(f"/{BAN_SNAPSHOT_DATE}/", BAN_URL)
         self.assertEqual(BAN_PATH.parent.name, f"snapshot={BAN_SNAPSHOT_DATE}")
         self.assertRegex(BAN_SHA256, r"^[0-9a-f]{64}$")
+
+    def test_bdnb_source_is_pinned_to_verified_release(self) -> None:
+        self.assertIn(f"bdnb_millesime_{BDNB_RELEASE}/", BDNB_URL)
+        self.assertEqual(BDNB_ARCHIVE.parent.name, f"release={BDNB_RELEASE}")
+        self.assertRegex(BDNB_SHA256, r"^[0-9a-f]{64}$")
+        self.assertRegex(BDNB_METADATA_SHA256, r"^[0-9a-f]{64}$")
+        metadata = BDNB_METADATA_PATH.read_text(encoding="utf-8")
+        self.assertIn(f"sha256: {BDNB_SHA256}", metadata)
 
 
 if __name__ == "__main__":
