@@ -7,6 +7,8 @@ The script does not fit or select a model.
 
 from __future__ import annotations
 
+import argparse
+from collections.abc import Sequence
 import json
 from pathlib import Path
 
@@ -500,7 +502,17 @@ def draw_feature_importance() -> None:
     finish(fig, "phase3_feature_importance.png")
 
 
-def main() -> None:
+def build_parser() -> argparse.ArgumentParser:
+    return argparse.ArgumentParser(
+        description=(
+            "Generate the publication figures for the Phase 3 external-data "
+            "paper from existing benchmark artifacts."
+        )
+    )
+
+
+def main(argv: Sequence[str] | None = None) -> None:
+    build_parser().parse_args(argv)
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     setup_style()
     comparison, predictions, gold, quality, results = load_inputs()
