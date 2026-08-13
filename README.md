@@ -121,6 +121,9 @@ powershell -ExecutionPolicy Bypass -File .\scripts\verify_project.ps1
 
 The checks validate Python imports, row identity, duplicate mutations, DPE
 temporal leakage, model metadata, reported improvement and transfer artifacts.
+In a fresh clone, checks that require generated data and model files are skipped
+with an explicit message. Run the Phase 3 pipeline to enable the complete
+artifact-integrity suite.
 
 ## Research deliverables
 
