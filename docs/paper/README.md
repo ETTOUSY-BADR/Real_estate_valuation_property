@@ -33,6 +33,6 @@ To reproduce the empirical inputs before compiling:
 
 ```powershell
 $env:PYTHONPATH = '.\src'
-& 'C:\Users\badre\anaconda3\python.exe' -m paris_avm.modeling.benchmark_phase1
-& 'C:\Users\badre\anaconda3\python.exe' -m paris_avm.visualization.benchmark
+python -m paris_avm.modeling.benchmark_phase1
+python -m paris_avm.visualization.benchmark
 ```

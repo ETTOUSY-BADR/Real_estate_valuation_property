@@ -8,7 +8,7 @@ version = "0.3.0"
 description = "Leakage-aware Paris apartment valuation with DVF, BAN, BDNB, DPE and neighborhood data."
 readme = "README.md"
 requires-python = ">=3.11"
-authors = [{ name = "Badre" }]
+authors = [{ name = "Badr Ettousy" }]
 dynamic = ["dependencies"]
 
 [project.scripts]

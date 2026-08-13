@@ -52,8 +52,10 @@ zero.
 From the repository root:
 
 ```powershell
-& 'C:\Users\badre\anaconda3\python.exe' -m pip install -r requirements.txt
-& 'C:\Users\badre\anaconda3\python.exe' -m pip install -e .
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install --upgrade pip
+python -m pip install -e .
 ```
 
 An editable installation exposes commands such as
@@ -84,10 +86,10 @@ Individual module commands are also available:
 
 ```powershell
 $env:PYTHONPATH = '.\src'
-& 'C:\Users\badre\anaconda3\python.exe' -m paris_avm.data.acquire_phase3 --skip-dpe
-& 'C:\Users\badre\anaconda3\python.exe' -m paris_avm.features.phase3
-& 'C:\Users\badre\anaconda3\python.exe' -m paris_avm.modeling.benchmark_phase3
-& 'C:\Users\badre\anaconda3\python.exe' -m paris_avm.visualization.phase3
+python -m paris_avm.data.acquire_phase3 --skip-dpe
+python -m paris_avm.features.phase3
+python -m paris_avm.modeling.benchmark_phase3
+python -m paris_avm.visualization.phase3
 ```
 
 The `--skip-dpe` option is intentional: dated ADEME DPE rows and official
@@ -99,7 +101,7 @@ Phase 3 inference requires a deterministic DVF/FANTOIR address identity:
 
 ```powershell
 $env:PYTHONPATH = '.\src'
-& 'C:\Users\badre\anaconda3\python.exe' -m paris_avm.inference.phase3 `
+python -m paris_avm.inference.phase3 `
   --surface 58 --rooms 3 --postal-code 75008 --commune-code 75108 `
   --street-code 2576 --address-number 29 `
   --latitude 48.878673 --longitude 2.302806 --lots 2 --date 2025-01-02
@@ -124,10 +126,10 @@ temporal leakage, model metadata, reported improvement and transfer artifacts.
 
 - [Phase 3 paper](docs/paper/phase3_paper.pdf)
 - [Phase 3 technical report](reports/phase3/PHASE3_REPORT.md)
-- [Source manifest](reports/phase3/source_manifest.json)
-- [Feature-quality contract](reports/phase3/feature_quality.json)
-- [Model comparison](reports/phase3/phase3_model_comparison.csv)
-- [Publication figures](visuals/phase3/)
+
+The source manifest, feature-quality contract, model comparison and publication
+figures are generated locally under `reports/phase3/` and `visuals/phase3/`.
+They are intentionally excluded from Git because they are reproducible outputs.
 
 Earlier Phase 1 and Phase 2 experiments remain available in the same package,
 with their reports, models and papers preserved for traceability.
