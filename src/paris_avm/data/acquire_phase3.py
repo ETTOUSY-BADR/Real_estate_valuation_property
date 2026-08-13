@@ -386,7 +386,8 @@ def main() -> None:
         import pandas as pd
 
         sales = pd.read_parquet(
-            "data/gold/phase2_sale_features.parquet", columns=["address_id"]
+            PROJECT_ROOT / "data/gold/phase2_sale_features.parquet",
+            columns=["address_id"],
         )
         sale_address_ids = set(sales["address_id"].dropna().astype(str))
         dpe_stats = acquire_dpe(client, dpe_path, args.force, sale_address_ids)

@@ -13,6 +13,7 @@ from paris_avm.paths import PROJECT_ROOT
 
 
 ROOT = Path(__file__).resolve().parents[1]
+ARTIFACT_PREFIXES = ("data/", "docs/", "models/", "reports/", "visuals/")
 
 
 class ProjectStructureTests(unittest.TestCase):
@@ -45,7 +46,30 @@ class ProjectStructureTests(unittest.TestCase):
         self.assertGreater(len(source_files), 0)
         for source_file in source_files:
             with self.subTest(source=source_file.relative_to(ROOT)):
-                ast.parse(source_file.read_text(encoding="utf-8"), filename=str(source_file))
+                ast.parse(
+                    source_file.read_text(encoding="utf-8"),
+                    filename=str(source_file),
+                )
+
+    def test_file_calls_do_not_use_bare_artifact_paths(self) -> None:
+        for source_file in sorted((ROOT / "src").rglob("*.py")):
+            tree = ast.parse(
+                source_file.read_text(encoding="utf-8"), filename=str(source_file)
+            )
+            for node in ast.walk(tree):
+                if not isinstance(node, ast.Call) or not node.args:
+                    continue
+                first_argument = node.args[0]
+                if not (
+                    isinstance(first_argument, ast.Constant)
+                    and isinstance(first_argument.value, str)
+                    and first_argument.value.startswith(ARTIFACT_PREFIXES)
+                ):
+                    continue
+                self.fail(
+                    f"{source_file.relative_to(ROOT)}:{node.lineno} uses bare "
+                    f"artifact path {first_argument.value!r}; anchor it at PROJECT_ROOT"
+                )
 
     def test_all_package_modules_import(self) -> None:
         modules = sorted(

@@ -334,7 +334,9 @@ def main() -> None:
     )
 
     # Phase 2's selected transparent correction is the honest reference.
-    phase2_test = pd.read_csv("reports/phase2/phase2_test_predictions.csv")
+    phase2_test = pd.read_csv(
+        PROJECT_ROOT / "reports/phase2/phase2_test_predictions.csv"
+    )
     reference = test[["id_mutation"]].merge(
         phase2_test[["id_mutation", "prediction_phase2_comparable_correction"]],
         on="id_mutation",
