@@ -155,7 +155,9 @@ def acquire_dpe(
         print(f"Cached: {path}", flush=True)
         with gzip.open(path, "rt", encoding="utf-8") as handle:
             rows = sum(1 for _ in handle)
-        return {"rows": rows, "api_total": rows}
+        # The cached file may contain only records matching ``ban_ids``. Its
+        # row count therefore cannot reconstruct the upstream Paris total.
+        return {"rows": rows, "api_total": None, "cache_hit": True}
 
     path.parent.mkdir(parents=True, exist_ok=True)
     temporary = path.with_suffix(path.suffix + ".part")
@@ -198,7 +200,7 @@ def acquire_dpe(
                 flush=True,
             )
     temporary.replace(path)
-    return {"rows": count, "api_total": api_total}
+    return {"rows": count, "api_total": api_total, "cache_hit": False}
 
 
 def artifact_record(
