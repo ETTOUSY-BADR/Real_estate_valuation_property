@@ -9,6 +9,7 @@ import unittest
 import pandas as pd
 
 from paris_avm.inference.phase3 import (
+    add_base_and_comparable_features,
     normalize_address_suffix,
     normalized_address_id,
     parse_args,
@@ -104,6 +105,45 @@ class Phase3CliTests(unittest.TestCase):
         template = pd.Series({"ban_x": 648_873.72, "ban_y": 6_864_512.73})
         with self.assertRaisesRegex(SystemExit, "from the resolved address"):
             validate_coordinate_consistency(args, template)
+
+    def test_dynamic_template_features_are_recomputed(self) -> None:
+        row = pd.DataFrame(
+            [
+                {
+                    "longitude": 2.302806,
+                    "latitude": 48.878673,
+                    "surface_reelle_bati": 58.0,
+                    "nombre_pieces_principales": 3.0,
+                    "ban_x": 648_873.72,
+                    "ban_y": 6_864_512.73,
+                    "ban_address_id": "75108_2576_00029",
+                    "ban_match_distance_m": 999.0,
+                    "ban_match_confidence": 0.0,
+                    "building_year": 1900.0,
+                    "building_year_missing": 1,
+                    "building_age_at_sale": 1.0,
+                }
+            ]
+        )
+        history = pd.DataFrame(
+            {
+                "date_mutation": pd.Series(dtype="datetime64[ns]"),
+                "x_l93": pd.Series(dtype="float64"),
+                "y_l93": pd.Series(dtype="float64"),
+                "price_per_m2": pd.Series(dtype="float64"),
+                "surface_reelle_bati": pd.Series(dtype="float64"),
+                "nombre_pieces_principales": pd.Series(dtype="float64"),
+            }
+        )
+
+        result = add_base_and_comparable_features(
+            row, history, pd.Timestamp("2025-01-02")
+        )
+
+        self.assertAlmostEqual(result.at[0, "ban_match_distance_m"], 10.51, places=1)
+        self.assertEqual(result.at[0, "ban_match_confidence"], 1.0)
+        self.assertEqual(result.at[0, "building_year_missing"], 0)
+        self.assertEqual(result.at[0, "building_age_at_sale"], 125.0)
 
     def test_date_outside_evaluated_period_is_rejected(self) -> None:
         arguments = [

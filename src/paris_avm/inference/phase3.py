@@ -133,6 +133,32 @@ def add_base_and_comparable_features(
     x, y = transformer.transform(float(row.at[0, "longitude"]), float(row.at[0, "latitude"]))
     row["x_l93"] = x
     row["y_l93"] = y
+    ban_x = pd.to_numeric(pd.Series([row.at[0, "ban_x"]]), errors="coerce").iloc[0]
+    ban_y = pd.to_numeric(pd.Series([row.at[0, "ban_y"]]), errors="coerce").iloc[0]
+    has_ban = (
+        pd.notna(row.at[0, "ban_address_id"])
+        and pd.notna(ban_x)
+        and pd.notna(ban_y)
+    )
+    if has_ban:
+        ban_distance = float(np.hypot(x - ban_x, y - ban_y))
+        row.loc[0, "ban_match_distance_m"] = ban_distance
+        row.loc[0, "ban_match_confidence"] = 1.0 if ban_distance <= 100 else 0.85
+    else:
+        row.loc[0, "ban_match_distance_m"] = np.nan
+        row.loc[0, "ban_match_confidence"] = 0.0
+
+    building_year = pd.to_numeric(
+        pd.Series([row.at[0, "building_year"]]), errors="coerce"
+    ).iloc[0]
+    row.loc[0, "building_year_missing"] = np.int8(pd.isna(building_year))
+    building_age = (
+        valuation_date.year - building_year if pd.notna(building_year) else np.nan
+    )
+    row.loc[0, "building_age_at_sale"] = (
+        building_age if pd.notna(building_age) and 0 <= building_age <= 1_000 else np.nan
+    )
+
     center_x, center_y = transformer.transform(2.3499, 48.8530)
     dx, dy = x - center_x, y - center_y
     row["distance_paris_center_m"] = np.hypot(dx, dy)
