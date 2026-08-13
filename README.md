@@ -108,6 +108,9 @@ python -m paris_avm.inference.phase3 `
   --latitude 48.878673 --longitude 2.302806 --lots 2 --date 2025-01-02
 ```
 
+For repeated street numbers, `--address-suffix` accepts either compact codes or
+common forms such as `bis`, `ter` and `quater`.
+
 The estimator resolves BAN and BDNB identity, uses only DPE available by the
 valuation date, verifies that supplied coordinates are consistent with the
 resolved address, recomputes lagged comparable-sale evidence and warns that

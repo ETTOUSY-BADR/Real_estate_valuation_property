@@ -27,6 +27,12 @@ from paris_avm.paths import PROJECT_ROOT
 DEFAULT_MODEL = PROJECT_ROOT / "models/phase3/phase3_selected_model.joblib"
 DEFAULT_GOLD = PROJECT_ROOT / "data/gold/phase3_sale_features.parquet"
 MAX_ADDRESS_COORDINATE_OFFSET_M = 250.0
+ADDRESS_SUFFIX_ALIASES = {"bis": "b", "ter": "t", "quater": "q"}
+
+
+def normalize_address_suffix(value: object) -> str:
+    suffix = str(value).strip().lower()
+    return ADDRESS_SUFFIX_ALIASES.get(suffix, suffix)
 
 
 def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
@@ -39,7 +45,11 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--latitude", type=float, required=True)
     parser.add_argument("--longitude", type=float, required=True)
     parser.add_argument("--address-number", type=float, required=True)
-    parser.add_argument("--address-suffix", default="")
+    parser.add_argument(
+        "--address-suffix",
+        default="",
+        help="Repetition index, e.g. B/bis, T/ter or Q/quater",
+    )
     parser.add_argument("--lots", type=float, default=1)
     parser.add_argument("--date", required=True, help="YYYY-MM-DD")
     parser.add_argument("--model", type=Path, default=DEFAULT_MODEL)
@@ -74,11 +84,12 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
         parser.error("--date must be a valid date in YYYY-MM-DD format")
     if args.date.year != 2025:
         parser.error("--date must be in 2025; this model is only evaluated for 2025")
+    args.address_suffix = normalize_address_suffix(args.address_suffix)
     return args
 
 
 def normalized_address_id(args: argparse.Namespace) -> str:
-    suffix = str(args.address_suffix).strip().lower()
+    suffix = normalize_address_suffix(args.address_suffix)
     return f"{args.commune_code}_{args.street_code.upper()}_{args.address_number}_{suffix}"
 
 

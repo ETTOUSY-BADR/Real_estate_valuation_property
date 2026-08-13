@@ -9,6 +9,7 @@ import unittest
 import pandas as pd
 
 from paris_avm.inference.phase3 import (
+    normalize_address_suffix,
     normalized_address_id,
     parse_args,
     validate_coordinate_consistency,
@@ -69,6 +70,18 @@ class Phase3CliTests(unittest.TestCase):
         ]
         message = self.parse_error(arguments)
         self.assertIn("must identify the same arrondissement", message)
+
+    def test_common_address_suffixes_use_canonical_codes(self) -> None:
+        aliases = {"BIS": "b", "ter": "t", " Quater ": "q", "A": "a"}
+        for supplied, expected in aliases.items():
+            with self.subTest(suffix=supplied):
+                self.assertEqual(normalize_address_suffix(supplied), expected)
+
+    def test_suffix_alias_is_used_in_address_identity(self) -> None:
+        arguments = VALID_ARGUMENTS + ["--address-suffix", "BIS"]
+        args = parse_args(arguments)
+        self.assertEqual(args.address_suffix, "b")
+        self.assertEqual(normalized_address_id(args), "75108_2576_29_b")
 
     def test_documented_coordinates_match_resolved_address(self) -> None:
         args = parse_args(VALID_ARGUMENTS)
