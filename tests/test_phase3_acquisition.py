@@ -110,6 +110,28 @@ class Phase3AcquisitionTests(unittest.TestCase):
         self.assertEqual({record["numero_dpe"] for record in records}, {"selected"})
         self.assertEqual(client.get.call_count, 20)
 
+    def test_incomplete_dpe_response_preserves_cached_snapshot(self) -> None:
+        response = MagicMock()
+        response.json.return_value = {
+            "total": 2,
+            "results": [{"numero_dpe": "partial", "identifiant_ban": "keep"}],
+        }
+        client = MagicMock()
+        client.get.return_value = response
+
+        with TemporaryDirectory() as directory:
+            path = Path(directory) / "dpe.jsonl.gz"
+            with gzip.open(path, "wt", encoding="utf-8") as output:
+                output.write('{"numero_dpe":"cached"}\n')
+
+            with self.assertRaisesRegex(RuntimeError, "Incomplete DPE response"):
+                acquire_dpe(client, path, force=True, ban_ids={"keep"})
+
+            with gzip.open(path, "rt", encoding="utf-8") as source:
+                records = [json.loads(line) for line in source]
+            self.assertEqual(records, [{"numero_dpe": "cached"}])
+            self.assertFalse(path.with_suffix(".gz.part").exists())
+
 
 if __name__ == "__main__":
     unittest.main()

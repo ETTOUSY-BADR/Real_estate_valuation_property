@@ -168,44 +168,62 @@ def acquire_dpe(
     path.parent.mkdir(parents=True, exist_ok=True)
     temporary = path.with_suffix(path.suffix + ".part")
     # Query exact Paris postcodes independently. This avoids the expensive
-    # wildcard score/sort used by Data Fair and makes progress resumable by
-    # arrondissement while retaining every Paris record.
+    # wildcard score/sort used by Data Fair and bounds each paginated query
+    # while retaining every Paris record.
     count = 0
     api_total = 0
-    with gzip.open(temporary, "wt", encoding="utf-8", newline="\n") as output:
-        for arrondissement in range(1, 21):
-            postcode = f"750{arrondissement:02d}"
-            url: str | None = f"{DPE_API}/lines"
-            params: dict[str, Any] | None = {
-                "size": 10_000,
-                "qs": f"code_postal_ban:{postcode}",
-                "select": ",".join(DPE_FIELDS),
-            }
-            arrondissement_count = 0
-            arrondissement_total = 0
-            while url:
-                response = client.get(url, params=params, timeout=(30, 180))
-                response.raise_for_status()
-                payload = response.json()
-                arrondissement_total = int(payload.get("total", arrondissement_total))
-                for record in payload.get("results", []):
-                    record.pop("_score", None)
-                    identifier = str(record.get("identifiant_ban") or "")
-                    if ban_ids is None or identifier in ban_ids:
-                        output.write(
-                            json.dumps(record, ensure_ascii=False, separators=(",", ":"))
-                        )
-                        output.write("\n")
-                        count += 1
-                    arrondissement_count += 1
-                url = payload.get("next")
-                params = None
-            api_total += arrondissement_total
-            print(
-                f"DPE {postcode}: scanned {arrondissement_count:,}, retained {count:,}",
-                flush=True,
-            )
-    temporary.replace(path)
+    temporary.unlink(missing_ok=True)
+    try:
+        with gzip.open(temporary, "wt", encoding="utf-8", newline="\n") as output:
+            for arrondissement in range(1, 21):
+                postcode = f"750{arrondissement:02d}"
+                url: str | None = f"{DPE_API}/lines"
+                params: dict[str, Any] | None = {
+                    "size": 10_000,
+                    "qs": f"code_postal_ban:{postcode}",
+                    "select": ",".join(DPE_FIELDS),
+                }
+                arrondissement_count = 0
+                arrondissement_total = 0
+                while url:
+                    response = client.get(url, params=params, timeout=(30, 180))
+                    response.raise_for_status()
+                    payload = response.json()
+                    arrondissement_total = int(
+                        payload.get("total", arrondissement_total)
+                    )
+                    for record in payload.get("results", []):
+                        record.pop("_score", None)
+                        identifier = str(record.get("identifiant_ban") or "")
+                        if ban_ids is None or identifier in ban_ids:
+                            output.write(
+                                json.dumps(
+                                    record,
+                                    ensure_ascii=False,
+                                    separators=(",", ":"),
+                                )
+                            )
+                            output.write("\n")
+                            count += 1
+                        arrondissement_count += 1
+                    url = payload.get("next")
+                    params = None
+                if arrondissement_count != arrondissement_total:
+                    raise RuntimeError(
+                        f"Incomplete DPE response for {postcode}: received "
+                        f"{arrondissement_count:,} of {arrondissement_total:,} records"
+                    )
+                api_total += arrondissement_total
+                print(
+                    f"DPE {postcode}: scanned {arrondissement_count:,}, "
+                    f"retained {count:,}",
+                    flush=True,
+                )
+        if not api_total:
+            raise RuntimeError("ADEME returned no DPE records for Paris")
+        temporary.replace(path)
+    finally:
+        temporary.unlink(missing_ok=True)
     return {"rows": count, "api_total": api_total, "cache_hit": False}
 
 
