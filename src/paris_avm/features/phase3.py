@@ -37,6 +37,18 @@ def sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
+def write_parquet_atomic(data: pd.DataFrame, path: Path) -> None:
+    """Write a Parquet artifact without replacing a valid file on failure."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = path.with_suffix(path.suffix + ".part")
+    temporary.unlink(missing_ok=True)
+    try:
+        data.to_parquet(temporary, index=False, compression="zstd")
+        temporary.replace(path)
+    finally:
+        temporary.unlink(missing_ok=True)
+
+
 def read_bdnb(
     archive: zipfile.ZipFile, table: str, usecols: list[str] | None = None
 ) -> pd.DataFrame:
@@ -657,8 +669,8 @@ def main() -> None:
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.audit.parent.mkdir(parents=True, exist_ok=True)
     args.quality.parent.mkdir(parents=True, exist_ok=True)
-    data.to_parquet(args.output, index=False, compression="zstd")
-    audit.to_parquet(args.audit, index=False, compression="zstd")
+    write_parquet_atomic(data, args.output)
+    write_parquet_atomic(audit, args.audit)
 
     phase3_columns = [column for column in data.columns if column not in pd.read_parquet(args.input).columns]
     missingness = {
