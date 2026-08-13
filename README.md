@@ -142,6 +142,12 @@ They are intentionally excluded from Git because they are reproducible outputs.
 Earlier Phase 1 and Phase 2 experiments remain available in the same package,
 with their reports, models and papers preserved for traceability.
 
+## Citation
+
+If you use Paris AVM in research or another project, cite it using the
+machine-readable metadata in [`CITATION.cff`](CITATION.cff). GitHub also exposes
+this metadata through its **Cite this repository** menu.
+
 ## Important interpretation
 
 Dated DPE and historical comparable-sale features are point-in-time. Current

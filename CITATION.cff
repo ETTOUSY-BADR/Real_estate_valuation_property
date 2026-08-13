@@ -1,0 +1,14 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it using the metadata below."
+title: "Paris AVM: Leakage-Aware Apartment Valuation"
+type: software
+authors:
+  - family-names: Ettousy
+    given-names: Badr
+version: 0.3.0
+repository-code: "https://github.com/ETTOUSY-BADR/Real_estate_valuation_property"
+url: "https://github.com/ETTOUSY-BADR/Real_estate_valuation_property"
+abstract: >-
+  A leakage-aware automated valuation workflow for Paris apartments using
+  DVF transactions and external BAN, BDNB, DPE, transport, amenity, and
+  environmental data.

@@ -19,6 +19,7 @@ class ProjectStructureTests(unittest.TestCase):
         expected = [
             ".gitattributes",
             ".gitignore",
+            "CITATION.cff",
             "configs",
             "data",
             "docs",
