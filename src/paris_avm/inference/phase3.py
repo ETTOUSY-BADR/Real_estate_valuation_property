@@ -9,6 +9,7 @@ available on or before the requested valuation date.
 from __future__ import annotations
 
 import argparse
+from collections.abc import Sequence
 from pathlib import Path
 import re
 
@@ -27,7 +28,7 @@ DEFAULT_MODEL = PROJECT_ROOT / "models/phase3/phase3_selected_model.joblib"
 DEFAULT_GOLD = PROJECT_ROOT / "data/gold/phase3_sale_features.parquet"
 
 
-def parse_args() -> argparse.Namespace:
+def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--surface", type=float, required=True)
     parser.add_argument("--rooms", type=float, required=True)
@@ -42,7 +43,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--date", required=True, help="YYYY-MM-DD")
     parser.add_argument("--model", type=Path, default=DEFAULT_MODEL)
     parser.add_argument("--gold-table", type=Path, default=DEFAULT_GOLD)
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
     if not 9 <= args.surface <= 300:
         parser.error("--surface must be between 9 and 300 square metres")
     if not re.fullmatch(r"750(?:0[1-9]|1[0-9]|20)", str(args.postal_code)):
@@ -55,7 +56,12 @@ def parse_args() -> argparse.Namespace:
         parser.error("--rooms must be between 0 and 15")
     if not 48.80 <= args.latitude <= 48.92 or not 2.20 <= args.longitude <= 2.48:
         parser.error("coordinates must be located within Paris")
-    args.date = pd.to_datetime(args.date, errors="raise")
+    try:
+        args.date = pd.to_datetime(args.date, format="%Y-%m-%d", errors="raise")
+    except (TypeError, ValueError):
+        parser.error("--date must be a valid date in YYYY-MM-DD format")
+    if args.date.year != 2025:
+        parser.error("--date must be in 2025; this model is only evaluated for 2025")
     return args
 
 

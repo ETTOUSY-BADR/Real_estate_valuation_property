@@ -97,7 +97,8 @@ DPE-to-building relations are contained in the versioned BDNB Paris archive.
 
 ## Estimate one apartment
 
-Phase 3 inference requires a deterministic DVF/FANTOIR address identity:
+Phase 3 inference requires a deterministic DVF/FANTOIR address identity and a
+valuation date within the model's evaluated 2025 period:
 
 ```powershell
 $env:PYTHONPATH = '.\src'

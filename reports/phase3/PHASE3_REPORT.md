@@ -107,7 +107,8 @@ The `--skip-dpe` flag is intentional: ADEME DPE rows and official DPE↔building
 relations are already contained in the versioned Paris BDNB archive.
 
 Single-property inference requires the DVF/FANTOIR street code so address
-identity is deterministic:
+identity is deterministic. Valuation dates are restricted to the evaluated
+2025 period; prospective use requires a newly validated model:
 
 ```powershell
 $env:PYTHONPATH = '.\src'
