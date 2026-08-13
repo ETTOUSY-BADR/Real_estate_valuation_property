@@ -16,7 +16,7 @@ The project follows a chronological research protocol:
 
 The selected Phase 3 CatBoost model reaches **EUR 93,136 MAE** on 28,330 sales
 from 2025, versus **EUR 96,428** for the Phase 2 reference. The paired reduction
-is **EUR 3,293 (3.42%)**, with a 95% bootstrap interval of
+is **EUR 3,293 (3.41%)**, with a 95% bootstrap interval of
 **EUR 2,735–3,846**.
 
 Entity resolution is near-complete: exact BAN address coverage is 99.49%, BDNB

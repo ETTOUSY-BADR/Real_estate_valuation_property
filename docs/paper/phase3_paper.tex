@@ -56,7 +56,7 @@ refitted on 2021--2024 and evaluated on 28,330 sales from 2025. The selected
 CatBoost model obtains EUR 93,136 mean absolute error (MAE), EUR 192,806 root
 mean squared error, $R^2=0.8679$, and 11.70\% median absolute percentage error.
 Relative to the frozen Phase 2 comparable-sale correction (EUR 96,428 MAE), the
-MAE reduction is EUR 3,293, or 3.42\%, with a paired 95\% bootstrap interval of
+MAE reduction is EUR 3,293, or 3.41\%, with a paired 95\% bootstrap interval of
 EUR 2,735--3,846. Dated DPE, building and neighborhood ablations each improve
 MAE, although their gains are not additive or causal. Current BAN/BDNB and
 amenity snapshots are explicitly classified as retrospective reconstruction;
@@ -74,7 +74,7 @@ Phase 3 was designed to answer one practical question: does adding reliable
 property identity, building condition proxies, energy information, access and
 neighborhood context improve out-of-year valuation accuracy beyond Phase 2?
 The answer is yes on the fixed 2025 cohort. The selected model reduces MAE by
-EUR 3,293 (3.42\%), improves MdAPE from 12.22\% to 11.70\%, increases the share
+EUR 3,293 (3.41\%), improves MdAPE from 12.22\% to 11.70\%, increases the share
 of estimates within 20\% from 71.69\% to 73.39\%, and raises $R^2$ from 0.8601
 to 0.8679. The paired interval for the MAE reduction excludes zero.
 
@@ -425,7 +425,7 @@ test signal under the controlled LightGBM ablations. Second, reliable identity
 is operationally important even when its direct feature importance is small: it
 allows building, DPE and context records to attach to the correct transaction
 and enables CatBoost to learn repeated micro-location patterns. Third, the
-improvement is meaningful but bounded. A 3.42\% MAE reduction does not remove
+improvement is meaningful but bounded. A 3.41\% MAE reduction does not remove
 unobserved apartment condition, renovation quality, floor, elevator, view,
 exposure, occupancy or private outdoor space.
 

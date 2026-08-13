@@ -143,8 +143,36 @@ class Phase3ArtifactTests(unittest.TestCase):
 
     def test_reported_improvement(self) -> None:
         winner = self.results["winner"]
-        self.assertLess(winner["mae_eur"], self.results["reference_2025_mae_eur"])
+        reference = self.results["reference_2025_mae_eur"]
+        self.assertLess(winner["mae_eur"], reference)
         self.assertGreater(winner["reduction_ci95_lower_eur"], 0)
+
+        reduction = winner["mae_reduction_vs_baseline_eur"]
+        reduction_percent = reduction / reference * 100
+        published_percent = f"{reduction_percent:.2f}"
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        self.assertIn(
+            f"EUR {reduction:,.0f} ({published_percent}%)",
+            readme,
+        )
+        report = (ROOT / "reports/phase3/PHASE3_REPORT.md").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn(
+            f"EUR {reduction:,.2f} ({published_percent}%)",
+            report,
+        )
+        manuscript = (ROOT / "docs/paper/phase3_paper.tex").read_text(
+            encoding="utf-8"
+        )
+        manuscript_claims = [
+            f"or {published_percent}\\%",
+            f"({published_percent}\\%)",
+            f"A {published_percent}\\% MAE reduction",
+        ]
+        for claim in manuscript_claims:
+            with self.subTest(claim=claim):
+                self.assertIn(claim, manuscript)
 
     def test_generated_artifacts_exist(self) -> None:
         for relative in GENERATED_ARTIFACTS:

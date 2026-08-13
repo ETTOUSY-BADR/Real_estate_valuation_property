@@ -6,7 +6,7 @@ Phase 3 links the 143,009-row Paris DVF Gold cohort to authoritative address,
 building, energy, transport, school, green-space, shop/service and strategic
 noise sources. The selected CatBoost model reduces 2025 MAE from **EUR
 96,428.47** for the frozen Phase 2 comparable correction to **EUR 93,135.57**.
-The reduction is **EUR 3,292.89 (3.42%)**, with a paired 95% bootstrap interval
+The reduction is **EUR 3,292.89 (3.41%)**, with a paired 95% bootstrap interval
 of **EUR 2,735.12–3,845.97**.
 
 | Method | 2025 MAE | MdAPE | Within ±20% | R² |
