@@ -11,7 +11,6 @@ from __future__ import annotations
 
 import argparse
 import hashlib
-import json
 import re
 import zipfile
 from pathlib import Path
@@ -22,7 +21,7 @@ import pandas as pd
 from matplotlib.path import Path as MplPath
 from scipy.spatial import cKDTree
 
-from paris_avm.data.acquire_phase3 import BAN_PATH, BDNB_ARCHIVE
+from paris_avm.data.acquire_phase3 import BAN_PATH, BDNB_ARCHIVE, write_json_atomic
 from paris_avm.paths import PROJECT_ROOT
 
 
@@ -668,7 +667,6 @@ def main() -> None:
 
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.audit.parent.mkdir(parents=True, exist_ok=True)
-    args.quality.parent.mkdir(parents=True, exist_ok=True)
     write_parquet_atomic(data, args.output)
     write_parquet_atomic(audit, args.audit)
 
@@ -702,9 +700,7 @@ def main() -> None:
         "phase3_columns": phase3_columns,
         "missing_rate": missingness,
     }
-    args.quality.write_text(
-        json.dumps(quality, indent=2, ensure_ascii=False), encoding="utf-8"
-    )
+    write_json_atomic(args.quality, quality)
     print(f"Saved {args.output}: {len(data):,} rows, {len(data.columns)} columns")
     print(f"Saved {args.audit} and {args.quality}")
 
