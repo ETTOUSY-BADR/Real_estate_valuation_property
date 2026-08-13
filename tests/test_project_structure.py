@@ -4,8 +4,11 @@ from __future__ import annotations
 
 import ast
 import importlib
-from pathlib import Path
+import pkgutil
 import unittest
+from pathlib import Path
+
+import paris_avm
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -37,15 +40,14 @@ class ProjectStructureTests(unittest.TestCase):
             with self.subTest(source=source_file.relative_to(ROOT)):
                 ast.parse(source_file.read_text(encoding="utf-8"), filename=str(source_file))
 
-    def test_public_pipeline_modules_import(self) -> None:
-        modules = [
-            "paris_avm.data.acquire_phase3",
-            "paris_avm.features.phase2",
-            "paris_avm.features.phase3",
-            "paris_avm.modeling.benchmark_phase3",
-            "paris_avm.inference.phase3",
-            "paris_avm.visualization.phase3",
-        ]
+    def test_all_package_modules_import(self) -> None:
+        modules = sorted(
+            module.name
+            for module in pkgutil.walk_packages(
+                paris_avm.__path__, prefix=f"{paris_avm.__name__}."
+            )
+        )
+        self.assertGreater(len(modules), 0)
         for module in modules:
             with self.subTest(module=module):
                 importlib.import_module(module)
