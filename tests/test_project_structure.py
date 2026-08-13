@@ -9,12 +9,16 @@ import unittest
 from pathlib import Path
 
 import paris_avm
+from paris_avm.paths import PROJECT_ROOT
 
 
 ROOT = Path(__file__).resolve().parents[1]
 
 
 class ProjectStructureTests(unittest.TestCase):
+    def test_installed_package_resolves_repository_root(self) -> None:
+        self.assertEqual(PROJECT_ROOT, ROOT)
+
     def test_expected_directories_and_metadata_exist(self) -> None:
         expected = [
             ".gitattributes",

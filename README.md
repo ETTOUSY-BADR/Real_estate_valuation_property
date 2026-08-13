@@ -66,6 +66,9 @@ An editable installation exposes commands such as
 $env:PYTHONPATH = '.\src'
 ```
 
+Run project commands from anywhere inside the repository. When invoking an
+installed command from elsewhere, set `PARIS_AVM_ROOT` to the repository path.
+
 ## Reproduce Phase 3
 
 Run the complete acquisition, feature, benchmark, figure and paper workflow:
