@@ -12,7 +12,14 @@ from tempfile import TemporaryDirectory
 import unittest
 from unittest.mock import MagicMock
 
-from paris_avm.data.acquire_phase3 import acquire_dpe, download_file
+from paris_avm.data.acquire_phase3 import (
+    BAN_PATH,
+    BAN_SHA256,
+    BAN_SNAPSHOT_DATE,
+    BAN_URL,
+    acquire_dpe,
+    download_file,
+)
 
 
 class Phase3AcquisitionTests(unittest.TestCase):
@@ -49,6 +56,42 @@ class Phase3AcquisitionTests(unittest.TestCase):
 
             self.assertEqual(path.read_bytes(), b"valid cached snapshot")
             self.assertFalse(path.with_suffix(".csv.part").exists())
+
+    def test_checksum_mismatch_preserves_cached_source(self) -> None:
+        client, _ = self.download_client([b"unexpected snapshot"])
+        with TemporaryDirectory() as directory:
+            path = Path(directory) / "source.csv"
+            path.write_bytes(b"valid cached snapshot")
+
+            with self.assertRaisesRegex(RuntimeError, "Checksum mismatch"):
+                download_file(
+                    client,
+                    "https://example.test/source",
+                    path,
+                    force=True,
+                    expected_sha256="0" * 64,
+                )
+
+            self.assertEqual(path.read_bytes(), b"valid cached snapshot")
+            self.assertFalse(path.with_suffix(".csv.part").exists())
+
+    def test_checksum_mismatch_rejects_cached_source_without_network(self) -> None:
+        client = MagicMock()
+        with TemporaryDirectory() as directory:
+            path = Path(directory) / "source.csv"
+            path.write_bytes(b"corrupt cached snapshot")
+
+            with self.assertRaisesRegex(RuntimeError, "Checksum mismatch for cached"):
+                download_file(
+                    client,
+                    "https://example.test/source",
+                    path,
+                    force=False,
+                    expected_sha256="0" * 64,
+                )
+
+            self.assertEqual(path.read_bytes(), b"corrupt cached snapshot")
+        client.get.assert_not_called()
 
     def test_interrupted_download_preserves_cache_and_removes_partial(self) -> None:
         def interrupted_blocks() -> Iterator[bytes]:
@@ -131,6 +174,12 @@ class Phase3AcquisitionTests(unittest.TestCase):
                 records = [json.loads(line) for line in source]
             self.assertEqual(records, [{"numero_dpe": "cached"}])
             self.assertFalse(path.with_suffix(".gz.part").exists())
+
+    def test_ban_source_is_pinned_to_its_archived_snapshot(self) -> None:
+        self.assertNotIn("/latest/", BAN_URL)
+        self.assertIn(f"/{BAN_SNAPSHOT_DATE}/", BAN_URL)
+        self.assertEqual(BAN_PATH.parent.name, f"snapshot={BAN_SNAPSHOT_DATE}")
+        self.assertRegex(BAN_SHA256, r"^[0-9a-f]{64}$")
 
 
 if __name__ == "__main__":

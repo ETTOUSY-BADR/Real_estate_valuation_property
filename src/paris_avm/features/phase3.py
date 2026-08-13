@@ -22,6 +22,7 @@ import pandas as pd
 from matplotlib.path import Path as MplPath
 from scipy.spatial import cKDTree
 
+from paris_avm.data.acquire_phase3 import BAN_PATH
 from paris_avm.paths import PROJECT_ROOT
 
 
@@ -260,12 +261,7 @@ def add_noise_features(data: pd.DataFrame) -> pd.DataFrame:
 def link_addresses_and_buildings(
     sales: pd.DataFrame, archive: zipfile.ZipFile
 ) -> tuple[pd.DataFrame, dict[str, object], pd.DataFrame]:
-    ban = pd.read_csv(
-        "data/bronze/ban/snapshot=2026-08-12/adresses-75.csv.gz",
-        sep=";",
-        dtype="string",
-        low_memory=False,
-    )
+    ban = pd.read_csv(BAN_PATH, sep=";", dtype="string", low_memory=False)
     ban["canonical_address_key"] = address_key(
         ban["code_insee"], ban["id_fantoir"].str[-4:], ban["numero"], ban["rep"]
     )

@@ -23,7 +23,16 @@ from urllib3.util.retry import Retry
 from paris_avm.paths import PROJECT_ROOT
 
 
-BAN_URL = "https://adresse.data.gouv.fr/data/ban/adresses/latest/csv/adresses-75.csv.gz"
+BAN_SNAPSHOT_DATE = "2026-08-12"
+BAN_SHA256 = "38dd8f34090c4a9d8bc04ddf56868f911625de7455592f0e70516288a76a86a7"
+BAN_URL = (
+    f"https://adresse.data.gouv.fr/data/ban/adresses/{BAN_SNAPSHOT_DATE}/"
+    "csv/adresses-75.csv.gz"
+)
+BAN_PATH = (
+    PROJECT_ROOT
+    / f"data/bronze/ban/snapshot={BAN_SNAPSHOT_DATE}/adresses-75.csv.gz"
+)
 BDNB_URL = (
     "https://open-data.s3.fr-par.scw.cloud/bdnb_millesime_2026-02-a/"
     "millesime_2026-02-a_dep75/open_data_millesime_2026-02-a_dep75_csv.zip"
@@ -129,8 +138,22 @@ def sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
-def download_file(client: requests.Session, url: str, path: Path, force: bool) -> None:
+def download_file(
+    client: requests.Session,
+    url: str,
+    path: Path,
+    force: bool,
+    expected_sha256: str | None = None,
+) -> None:
     if path.exists() and path.stat().st_size and not force:
+        if expected_sha256 is not None:
+            actual_sha256 = sha256(path)
+            if actual_sha256.lower() != expected_sha256.lower():
+                raise RuntimeError(
+                    f"Checksum mismatch for cached {path}: expected "
+                    f"{expected_sha256}, received {actual_sha256}; use --force "
+                    "to reacquire it"
+                )
         print(f"Cached: {path}", flush=True)
         return
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -145,6 +168,13 @@ def download_file(client: requests.Session, url: str, path: Path, force: bool) -
                         handle.write(block)
         if not temporary.stat().st_size:
             raise RuntimeError(f"Downloaded source is empty: {url}")
+        if expected_sha256 is not None:
+            actual_sha256 = sha256(temporary)
+            if actual_sha256.lower() != expected_sha256.lower():
+                raise RuntimeError(
+                    f"Checksum mismatch for {url}: expected {expected_sha256}, "
+                    f"received {actual_sha256}"
+                )
         temporary.replace(path)
     finally:
         temporary.unlink(missing_ok=True)
@@ -269,8 +299,14 @@ def main() -> None:
     retrieved_at = datetime.now(timezone.utc).isoformat()
     artifacts: list[dict[str, Any]] = []
 
-    ban_path = PROJECT_ROOT / "data/bronze/ban/snapshot=2026-08-12/adresses-75.csv.gz"
-    download_file(client, BAN_URL, ban_path, args.force)
+    ban_path = BAN_PATH
+    download_file(
+        client,
+        BAN_URL,
+        ban_path,
+        args.force,
+        expected_sha256=BAN_SHA256,
+    )
     artifacts.append(
         artifact_record(
             "ban_paris",
@@ -279,7 +315,10 @@ def main() -> None:
             BAN_URL,
             ban_path,
             retrieved_at,
-            {"snapshot_semantics": "current static address reference"},
+            {
+                "snapshot_date": BAN_SNAPSHOT_DATE,
+                "snapshot_semantics": "archived static address reference",
+            },
         )
     )
 
