@@ -18,6 +18,7 @@ TRACKED_DELIVERABLES = [
 ]
 GENERATED_ARTIFACTS = [
     "data/gold/phase3_sale_features.parquet",
+    "data/silver/phase3_match_audit.parquet",
     "models/phase3/phase3_selected_model.joblib",
     "reports/phase3/feature_quality.json",
     "reports/phase3/phase3_results.json",
@@ -72,6 +73,28 @@ class Phase3ArtifactTests(unittest.TestCase):
         sale_date = pd.to_datetime(gold["date_mutation"])
         dpe_date = pd.to_datetime(gold["date_etablissement_dpe"], errors="coerce")
         self.assertFalse((dpe_date.notna() & dpe_date.gt(sale_date)).any())
+
+    def test_match_audit_covers_every_gold_transaction(self) -> None:
+        audit_path = ROOT / "data/silver/phase3_match_audit.parquet"
+        audit = pd.read_parquet(audit_path)
+        gold_ids = pd.read_parquet(
+            ROOT / "data/gold/phase3_sale_features.parquet", columns=["id_mutation"]
+        )["id_mutation"]
+        required_columns = {
+            "id_mutation",
+            "ban_match_method",
+            "ban_match_distance_m",
+            "ban_match_confidence",
+            "bdnb_match_method",
+            "bdnb_match_confidence",
+            "bdnb_address_candidate_count",
+            "bdnb_parcel_candidate_count",
+        }
+
+        self.assertTrue(required_columns.issubset(audit.columns))
+        self.assertFalse(audit["id_mutation"].isna().any())
+        self.assertFalse(audit["id_mutation"].duplicated().any())
+        self.assertTrue(audit["id_mutation"].equals(gold_ids))
 
     def test_selected_model_contract(self) -> None:
         artifact = joblib.load(ROOT / "models/phase3/phase3_selected_model.joblib")
