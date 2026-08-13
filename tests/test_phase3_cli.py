@@ -6,7 +6,13 @@ import contextlib
 import io
 import unittest
 
-from paris_avm.inference.phase3 import normalized_address_id, parse_args
+import pandas as pd
+
+from paris_avm.inference.phase3 import (
+    normalized_address_id,
+    parse_args,
+    validate_coordinate_consistency,
+)
 
 
 VALID_ARGUMENTS = [
@@ -56,6 +62,28 @@ class Phase3CliTests(unittest.TestCase):
         arguments = ["0" if value == "29" else value for value in VALID_ARGUMENTS]
         message = self.parse_error(arguments)
         self.assertIn("positive whole number", message)
+
+    def test_documented_coordinates_match_resolved_address(self) -> None:
+        args = parse_args(VALID_ARGUMENTS)
+        template = pd.Series(
+            {
+                "ban_x": 648_873.72,
+                "ban_y": 6_864_512.73,
+                "x_l93": 648_866.60,
+                "y_l93": 6_864_520.34,
+            }
+        )
+        self.assertLess(validate_coordinate_consistency(args, template), 25)
+
+    def test_coordinates_far_from_resolved_address_are_rejected(self) -> None:
+        arguments = [
+            "48.850000" if value == "48.878673" else value
+            for value in VALID_ARGUMENTS
+        ]
+        args = parse_args(arguments)
+        template = pd.Series({"ban_x": 648_873.72, "ban_y": 6_864_512.73})
+        with self.assertRaisesRegex(SystemExit, "from the resolved address"):
+            validate_coordinate_consistency(args, template)
 
     def test_date_outside_evaluated_period_is_rejected(self) -> None:
         arguments = [

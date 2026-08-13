@@ -109,8 +109,9 @@ python -m paris_avm.inference.phase3 `
 ```
 
 The estimator resolves BAN and BDNB identity, uses only DPE available by the
-valuation date, recomputes lagged comparable-sale evidence and warns that most
-building/context attributes use a retrospective 2026 static snapshot.
+valuation date, verifies that supplied coordinates are consistent with the
+resolved address, recomputes lagged comparable-sale evidence and warns that
+most building/context attributes use a retrospective 2026 static snapshot.
 
 ## Verification
 

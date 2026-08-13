@@ -26,6 +26,7 @@ from paris_avm.paths import PROJECT_ROOT
 
 DEFAULT_MODEL = PROJECT_ROOT / "models/phase3/phase3_selected_model.joblib"
 DEFAULT_GOLD = PROJECT_ROOT / "data/gold/phase3_sale_features.parquet"
+MAX_ADDRESS_COORDINATE_OFFSET_M = 250.0
 
 
 def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
@@ -75,6 +76,39 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
 def normalized_address_id(args: argparse.Namespace) -> str:
     suffix = str(args.address_suffix).strip().lower()
     return f"{args.commune_code}_{args.street_code.upper()}_{args.address_number}_{suffix}"
+
+
+def validate_coordinate_consistency(
+    args: argparse.Namespace, template: pd.Series
+) -> float:
+    canonical_x = pd.to_numeric(
+        pd.Series([template.get("ban_x")]), errors="coerce"
+    ).iloc[0]
+    canonical_y = pd.to_numeric(
+        pd.Series([template.get("ban_y")]), errors="coerce"
+    ).iloc[0]
+    if pd.isna(canonical_x) or pd.isna(canonical_y):
+        canonical_x = pd.to_numeric(
+            pd.Series([template.get("x_l93")]), errors="coerce"
+        ).iloc[0]
+        canonical_y = pd.to_numeric(
+            pd.Series([template.get("y_l93")]), errors="coerce"
+        ).iloc[0]
+    if pd.isna(canonical_x) or pd.isna(canonical_y):
+        raise SystemExit(
+            "Canonical address coordinates are unavailable in the Gold table."
+        )
+
+    supplied_x, supplied_y = Transformer.from_crs(
+        4326, 2154, always_xy=True
+    ).transform(args.longitude, args.latitude)
+    offset = float(np.hypot(supplied_x - canonical_x, supplied_y - canonical_y))
+    if offset > MAX_ADDRESS_COORDINATE_OFFSET_M:
+        raise SystemExit(
+            f"Provided coordinates are {offset:,.0f} m from the resolved address; "
+            "check --latitude/--longitude or the address identity fields."
+        )
+    return offset
 
 
 def add_base_and_comparable_features(
@@ -177,6 +211,7 @@ def main() -> None:
     # Static building/context comes from the most recent observed row at this
     # canonical address. Dated DPE fields are then rolled back below.
     template = same_address.sort_values("date_mutation").iloc[-1].copy()
+    validate_coordinate_consistency(args, template)
     row = template.to_frame().T.reset_index(drop=True)
     row.loc[0, "surface_reelle_bati"] = args.surface
     row.loc[0, "nombre_pieces_principales"] = args.rooms

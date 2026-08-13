@@ -118,4 +118,8 @@ python -m paris_avm.inference.phase3 `
   --latitude 48.878673 --longitude 2.302806 --date 2025-01-02
 ```
 
+The command rejects supplied coordinates more than 250 m from the resolved
+canonical address to prevent mixing one building with another neighborhood's
+context and comparable sales.
+
 This is an automated statistical indication, not a certified appraisal.
