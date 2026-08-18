@@ -21,6 +21,7 @@ from pyproj import Transformer
 from sklearn.neighbors import BallTree
 
 from paris_avm.artifacts import write_json_atomic, write_parquet_atomic
+from paris_avm.features.schema import contract_summary, validate_phase2_table
 from paris_avm.modeling.train_phase1 import DEFAULT_DATA_FILES, load_and_clean_many
 from paris_avm.paths import PROJECT_ROOT
 
@@ -50,7 +51,7 @@ def add_identity_and_spatial_features(data: pd.DataFrame) -> pd.DataFrame:
     output = data.copy()
     transformer = Transformer.from_crs("EPSG:4326", "EPSG:2154", always_xy=True)
     x_l93, y_l93 = transformer.transform(
-        output["longitude"].to_numpy(), output["latitude"].to_numpy()
+        output["longitude"].to_list(), output["latitude"].to_list()
     )
     output["x_l93"] = x_l93
     output["y_l93"] = y_l93
@@ -73,7 +74,9 @@ def add_identity_and_spatial_features(data: pd.DataFrame) -> pd.DataFrame:
         + "_"
         + output["adresse_code_voie"].fillna("unknown")
     )
-    normalized_number = output["adresse_numero"].fillna(-1).round().astype("Int64").astype("string")
+    normalized_number = (
+        output["adresse_numero"].fillna(-1).round().astype("Int64").astype("string")
+    )
     normalized_suffix = output["adresse_suffixe"].fillna("").str.lower().str.strip()
     output["address_id"] = (
         output["street_id"] + "_" + normalized_number + "_" + normalized_suffix
@@ -108,11 +111,11 @@ def add_comparable_features(
         prefix = f"local_{window}d_{radius}m"
         feature_arrays[f"{prefix}_count"] = np.zeros(len(output), dtype=np.int32)
         feature_arrays[f"{prefix}_median_ppm2"] = np.full(len(output), np.nan)
+    feature_arrays["similar_comparable_count"] = np.zeros(len(output), dtype=np.int32)
     for name in [
         "local_365d_500m_mad_ppm2",
         "weighted_comp_ppm2",
         "similar_weighted_comp_ppm2",
-        "similar_comparable_count",
         "effective_comparable_count",
         "nearest_prior_sale_m",
         "median_comparable_age_days",
@@ -224,7 +227,11 @@ def add_comparable_features(
         - 1
     )
 
-    count_columns = [column for column in feature_arrays if column.endswith("_count")]
+    count_columns = [
+        column
+        for column in feature_arrays
+        if column.startswith("local_") and column.endswith("_count")
+    ] + ["similar_comparable_count"]
     quality = {
         "availability_lag_days": availability_lag_days,
         "maximum_radius_meters": MAX_RADIUS_METERS,
@@ -258,6 +265,66 @@ def add_comparable_features(
     return output, quality
 
 
+def build_phase2_features(
+    data_files: list[Path],
+    output: Path,
+    quality_report: Path,
+    *,
+    availability_lag_days: int = 90,
+    chunk_size: int = 512,
+) -> tuple[pd.DataFrame, dict[str, object]]:
+    """Build, validate and atomically publish the Phase 2 feature table."""
+    if availability_lag_days < 1:
+        raise ValueError("availability_lag_days must be positive")
+    if chunk_size < 1:
+        raise ValueError("chunk_size must be positive")
+    started = perf_counter()
+    data, counts = load_and_clean_many(data_files)
+    data = add_identity_and_spatial_features(data)
+    data, comparable_quality = add_comparable_features(
+        data,
+        availability_lag_days=availability_lag_days,
+        chunk_size=chunk_size,
+    )
+    if data["id_mutation"].duplicated().any():
+        raise RuntimeError("Gold feature table contains duplicate mutation identifiers.")
+    if not data["date_mutation"].is_monotonic_increasing:
+        raise RuntimeError("Gold feature table is not chronologically ordered.")
+    validate_phase2_table(data)
+
+    write_parquet_atomic(data, output)
+    report = {
+        "schema_version": 2,
+        "generated_at_utc": datetime.now(timezone.utc).isoformat(),
+        "gold_table": str(output.resolve()),
+        "output_sha256": file_sha256(output),
+        "row_count": int(len(data)),
+        "date_min": data["date_mutation"].min().date().isoformat(),
+        "date_max": data["date_mutation"].max().date().isoformat(),
+        "crs_storage": "EPSG:4326",
+        "crs_metric_features": "EPSG:2154",
+        "h3_resolutions": [8, 9, 10],
+        "source_files": [
+            {
+                "path": str(path.resolve()),
+                "bytes": path.stat().st_size,
+                "sha256": file_sha256(path),
+            }
+            for path in data_files
+        ],
+        "source_cleaning_counts": counts,
+        "comparable_feature_contract": comparable_quality,
+        "model_feature_contract": contract_summary(),
+        "feature_columns": data.columns.tolist(),
+        "runtime_seconds": round(perf_counter() - started, 3),
+    }
+    write_json_atomic(quality_report, report)
+    print(json.dumps(comparable_quality, indent=2, ensure_ascii=False))
+    print(f"Saved Gold feature table: {output}")
+    print(f"Saved quality report: {quality_report}")
+    return data, report
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--data", nargs="+", type=Path, default=DEFAULT_DATA_FILES)
@@ -276,49 +343,15 @@ def main() -> None:
     args = parser.parse_args()
     if args.availability_lag_days < 1:
         parser.error("--availability-lag-days must be positive")
-
-    started = perf_counter()
-    data, counts = load_and_clean_many(args.data)
-    data = add_identity_and_spatial_features(data)
-    data, comparable_quality = add_comparable_features(
-        data,
+    if args.chunk_size < 1:
+        parser.error("--chunk-size must be positive")
+    build_phase2_features(
+        args.data,
+        args.output,
+        args.quality_report,
         availability_lag_days=args.availability_lag_days,
         chunk_size=args.chunk_size,
     )
-    if data["id_mutation"].duplicated().any():
-        raise RuntimeError("Gold feature table contains duplicate mutation identifiers.")
-    if not data["date_mutation"].is_monotonic_increasing:
-        raise RuntimeError("Gold feature table is not chronologically ordered.")
-
-    write_parquet_atomic(data, args.output)
-    report = {
-        "schema_version": 1,
-        "generated_at_utc": datetime.now(timezone.utc).isoformat(),
-        "gold_table": str(args.output.resolve()),
-        "output_sha256": file_sha256(args.output),
-        "row_count": int(len(data)),
-        "date_min": data["date_mutation"].min().date().isoformat(),
-        "date_max": data["date_mutation"].max().date().isoformat(),
-        "crs_storage": "EPSG:4326",
-        "crs_metric_features": "EPSG:2154",
-        "h3_resolutions": [8, 9, 10],
-        "source_files": [
-            {
-                "path": str(path.resolve()),
-                "bytes": path.stat().st_size,
-                "sha256": file_sha256(path),
-            }
-            for path in args.data
-        ],
-        "source_cleaning_counts": counts,
-        "comparable_feature_contract": comparable_quality,
-        "feature_columns": data.columns.tolist(),
-        "runtime_seconds": round(perf_counter() - started, 3),
-    }
-    write_json_atomic(args.quality_report, report)
-    print(json.dumps(comparable_quality, indent=2, ensure_ascii=False))
-    print(f"Saved Gold feature table: {args.output}")
-    print(f"Saved quality report: {args.quality_report}")
 
 
 if __name__ == "__main__":

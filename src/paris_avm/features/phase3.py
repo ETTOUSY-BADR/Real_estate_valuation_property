@@ -23,6 +23,7 @@ from scipy.spatial import cKDTree
 
 from paris_avm.artifacts import write_json_atomic, write_parquet_atomic
 from paris_avm.data.acquire_phase3 import BAN_PATH, BDNB_ARCHIVE
+from paris_avm.features.schema import contract_summary, validate_phase3_table
 from paris_avm.paths import PROJECT_ROOT
 
 
@@ -607,23 +608,15 @@ def add_bpe_features(data: pd.DataFrame, archive: zipfile.ZipFile) -> pd.DataFra
     return output
 
 
-def main() -> None:
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument(
-        "--input", type=Path, default=PROJECT_ROOT / "data/gold/phase2_sale_features.parquet"
-    )
-    parser.add_argument(
-        "--output", type=Path, default=PROJECT_ROOT / "data/gold/phase3_sale_features.parquet"
-    )
-    parser.add_argument(
-        "--audit", type=Path, default=PROJECT_ROOT / "data/silver/phase3_match_audit.parquet"
-    )
-    parser.add_argument(
-        "--quality", type=Path, default=PROJECT_ROOT / "reports/phase3/feature_quality.json"
-    )
-    args = parser.parse_args()
-
-    data = pd.read_parquet(args.input)
+def build_phase3_features(
+    input_path: Path,
+    output: Path,
+    audit_path: Path,
+    quality_path: Path,
+) -> tuple[pd.DataFrame, dict[str, object]]:
+    """Enrich, validate and atomically publish the complete feature table."""
+    data = pd.read_parquet(input_path)
+    input_columns = data.columns.tolist()
     initial_ids = data["id_mutation"].copy()
     with zipfile.ZipFile(BDNB_ARCHIVE) as archive:
         data, match_quality, audit = link_addresses_and_buildings(data, archive)
@@ -646,30 +639,25 @@ def main() -> None:
 
     if len(data) != len(initial_ids) or not data["id_mutation"].equals(initial_ids):
         raise RuntimeError("Phase 3 joins changed the Gold row identity/order")
-    if data["id_mutation"].duplicated().any():
-        raise RuntimeError("Phase 3 produced duplicate mutation IDs")
     leakage = data["date_etablissement_dpe"].notna() & (
         data["date_etablissement_dpe"] > data["date_mutation"]
     )
-    if leakage.any():
-        raise RuntimeError("Future DPE information leaked into historical sales")
+    validate_phase3_table(data)
 
-    args.output.parent.mkdir(parents=True, exist_ok=True)
-    args.audit.parent.mkdir(parents=True, exist_ok=True)
-    write_parquet_atomic(data, args.output)
-    write_parquet_atomic(audit, args.audit)
+    write_parquet_atomic(data, output)
+    write_parquet_atomic(audit, audit_path)
 
-    phase3_columns = [column for column in data.columns if column not in pd.read_parquet(args.input).columns]
+    phase3_columns = [column for column in data.columns if column not in input_columns]
     missingness = {
         column: round(float(data[column].isna().mean()), 6) for column in phase3_columns
     }
     quality = {
-        "schema_version": 1,
+        "schema_version": 2,
         "rows": len(data),
         "columns": len(data.columns),
-        "input_sha256": sha256(args.input),
+        "input_sha256": sha256(input_path),
         "bdnb_archive_sha256": sha256(BDNB_ARCHIVE),
-        "output_sha256": sha256(args.output),
+        "output_sha256": sha256(output),
         "match_quality": match_quality,
         "dpe_available_at_sale_rate": float(data["dpe_available_at_sale"].mean()),
         "future_dpe_leakage_rows": int(leakage.sum()),
@@ -686,12 +674,32 @@ def main() -> None:
             "DPE fields with date_etablissement_dpe <= date_mutation",
             "all Phase 2 historical comparable features",
         ],
+        "model_feature_contract": contract_summary(),
         "phase3_columns": phase3_columns,
         "missing_rate": missingness,
     }
-    write_json_atomic(args.quality, quality)
-    print(f"Saved {args.output}: {len(data):,} rows, {len(data.columns)} columns")
-    print(f"Saved {args.audit} and {args.quality}")
+    write_json_atomic(quality_path, quality)
+    print(f"Saved {output}: {len(data):,} rows, {len(data.columns)} columns")
+    print(f"Saved {audit_path} and {quality_path}")
+    return data, quality
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--input", type=Path, default=PROJECT_ROOT / "data/gold/phase2_sale_features.parquet"
+    )
+    parser.add_argument(
+        "--output", type=Path, default=PROJECT_ROOT / "data/gold/phase3_sale_features.parquet"
+    )
+    parser.add_argument(
+        "--audit", type=Path, default=PROJECT_ROOT / "data/silver/phase3_match_audit.parquet"
+    )
+    parser.add_argument(
+        "--quality", type=Path, default=PROJECT_ROOT / "reports/phase3/feature_quality.json"
+    )
+    args = parser.parse_args()
+    build_phase3_features(args.input, args.output, args.audit, args.quality)
 
 
 if __name__ == "__main__":

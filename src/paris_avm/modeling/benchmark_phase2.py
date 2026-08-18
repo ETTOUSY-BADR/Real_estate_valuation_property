@@ -15,53 +15,26 @@ import numpy as np
 import pandas as pd
 from xgboost import XGBRegressor
 
+from paris_avm.features.schema import (
+    BASE_CATEGORICAL_FEATURES,
+    COMPARABLE_NUMERIC_FEATURES,
+    PROPERTY_ENGINEERED_NUMERIC_FEATURES,
+    SPATIAL_CATEGORICAL_FEATURES,
+    SPATIAL_NUMERIC_FEATURES,
+)
 from paris_avm.modeling.benchmark_phase1 import bootstrap_intervals
 from paris_avm.modeling.train_phase1 import NUMERIC_FEATURES, regression_metrics
 from paris_avm.paths import PROJECT_ROOT
 
 
-SPATIAL_NUMERIC = [
-    "x_l93",
-    "y_l93",
-    "distance_paris_center_m",
-    "bearing_sin",
-    "bearing_cos",
-]
-PROPERTY_ENGINEERED_NUMERIC = [
-    "log_surface",
-    "rooms_per_10m2",
-    "surface_terrain",
-]
-COMPARABLE_NUMERIC = [
-    "local_365d_250m_count",
-    "local_365d_250m_median_ppm2",
-    "local_180d_500m_count",
-    "local_180d_500m_median_ppm2",
-    "local_365d_500m_count",
-    "local_365d_500m_median_ppm2",
-    "local_730d_500m_count",
-    "local_730d_500m_median_ppm2",
-    "local_180d_1000m_count",
-    "local_180d_1000m_median_ppm2",
-    "local_365d_1000m_count",
-    "local_365d_1000m_median_ppm2",
-    "local_730d_1000m_count",
-    "local_730d_1000m_median_ppm2",
-    "local_365d_500m_mad_ppm2",
-    "weighted_comp_ppm2",
-    "similar_weighted_comp_ppm2",
-    "similar_comparable_count",
-    "effective_comparable_count",
-    "nearest_prior_sale_m",
-    "median_comparable_age_days",
-    "local_momentum_180v365_500m",
-    "local_momentum_180v365_1000m",
-]
-BASE_CATEGORICAL = ["code_postal"]
+SPATIAL_NUMERIC = list(SPATIAL_NUMERIC_FEATURES)
+PROPERTY_ENGINEERED_NUMERIC = list(PROPERTY_ENGINEERED_NUMERIC_FEATURES)
+COMPARABLE_NUMERIC = list(COMPARABLE_NUMERIC_FEATURES)
+BASE_CATEGORICAL = list(BASE_CATEGORICAL_FEATURES)
 # Street and H3 resolution 10 remain in the Gold table for auditable entity
 # history, but are deliberately not fitted as raw categories: their thousands
 # of levels are expensive and invite micro-location memorization.
-SPATIAL_CATEGORICAL = ["h3_r8", "h3_r9"]
+SPATIAL_CATEGORICAL = list(SPATIAL_CATEGORICAL_FEATURES)
 
 FEATURE_SETS = {
     "base": (NUMERIC_FEATURES, BASE_CATEGORICAL),

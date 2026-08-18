@@ -14,6 +14,7 @@ dynamic = ["dependencies"]
 [project.scripts]
 paris-avm-train = "paris_avm.modeling.train_phase1:main"
 paris-avm-build-phase2 = "paris_avm.features.phase2:main"
+paris-avm-preprocess = "paris_avm.features.preprocessing:main"
 paris-avm-benchmark-phase2 = "paris_avm.modeling.benchmark_phase2:main"
 paris-avm-acquire-phase3 = "paris_avm.data.acquire_phase3:main"
 paris-avm-build-phase3 = "paris_avm.features.phase3:main"

@@ -21,6 +21,14 @@ from catboost import CatBoostRegressor
 from lightgbm import LGBMRegressor
 
 from paris_avm.artifacts import write_csv_atomic, write_json_atomic
+from paris_avm.features.schema import (
+    BUILDING_CATEGORICAL_FEATURES,
+    BUILDING_NUMERIC_FEATURES,
+    CONTEXT_NUMERIC_FEATURES,
+    DPE_CATEGORICAL_FEATURES,
+    DPE_NUMERIC_FEATURES,
+    EXTERNAL_IDENTITY_CATEGORICAL_FEATURES,
+)
 from paris_avm.modeling.benchmark_phase1 import bootstrap_intervals
 from paris_avm.modeling.benchmark_phase2 import (
     BASE_CATEGORICAL,
@@ -34,74 +42,12 @@ from paris_avm.modeling.train_phase1 import NUMERIC_FEATURES, regression_metrics
 from paris_avm.paths import PROJECT_ROOT
 
 
-IDENTITY_CATEGORICAL = [
-    "ban_address_id",
-    "bdnb_building_id",
-    "bdnb_match_method",
-]
-BUILDING_NUMERIC = [
-    "ban_match_distance_m",
-    "ban_match_confidence",
-    "bdnb_match_confidence",
-    "bdnb_address_candidate_count",
-    "bdnb_parcel_candidate_count",
-    "building_level_count",
-    "building_year",
-    "building_dwelling_count",
-    "building_height_m",
-    "building_footprint_m2",
-    "building_parking_lot_count",
-    "building_total_lot_count",
-    "building_dwelling_count_rnc",
-    "building_age_at_sale",
-    "building_year_missing",
-]
-BUILDING_CATEGORICAL = [
-    "usage_niveau_1_txt",
-    "mat_mur_txt",
-    "mat_toit_txt",
-    "building_state",
-    "building_period_rnc",
-]
-DPE_NUMERIC = [
-    "dpe_available_at_sale",
-    "dpe_age_days",
-    "dpe_surface_difference_ratio",
-    "dpe_match_confidence",
-    "annee_construction_dpe",
-    "nombre_niveau_logement",
-    "nombre_niveau_immeuble",
-    "surface_habitable_immeuble",
-    "surface_habitable_logement",
-    "conso_5_usages_ep_m2",
-    "emission_ges_5_usages_m2",
-]
-DPE_CATEGORICAL = [
-    "classe_bilan_dpe",
-    "classe_emission_ges",
-    "type_installation_chauffage",
-    "type_energie_chauffage",
-]
-CONTEXT_NUMERIC = [
-    "distance_metro_m",
-    "distance_rer_m",
-    "distance_train_m",
-    "distance_tram_m",
-    "rail_station_mode_count_1000m",
-    "rail_line_count_1000m",
-    "distance_school_m",
-    "school_count_1000m",
-    "distance_green_space_centroid_m",
-    "green_space_count_500m",
-    "green_area_500m2",
-    "distance_shop_service_m",
-    "shop_service_count_500m",
-    "shop_service_count_1000m",
-    "noise_road_lden_db",
-    "noise_rail_ratp_lden_db",
-    "noise_rail_sncf_lden_db",
-    "noise_transport_lden_max_db",
-]
+IDENTITY_CATEGORICAL = list(EXTERNAL_IDENTITY_CATEGORICAL_FEATURES)
+BUILDING_NUMERIC = list(BUILDING_NUMERIC_FEATURES)
+BUILDING_CATEGORICAL = list(BUILDING_CATEGORICAL_FEATURES)
+DPE_NUMERIC = list(DPE_NUMERIC_FEATURES)
+DPE_CATEGORICAL = list(DPE_CATEGORICAL_FEATURES)
+CONTEXT_NUMERIC = list(CONTEXT_NUMERIC_FEATURES)
 
 BASE_NUMERIC = NUMERIC_FEATURES + PROPERTY_ENGINEERED_NUMERIC + SPATIAL_NUMERIC + COMPARABLE_NUMERIC
 BASE_CAT = BASE_CATEGORICAL + SPATIAL_CATEGORICAL

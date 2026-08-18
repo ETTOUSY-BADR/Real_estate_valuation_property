@@ -59,7 +59,7 @@ python -m pip install -e .
 ```
 
 An editable installation exposes commands such as
-`paris-avm-build-phase3`, `paris-avm-benchmark-phase3` and
+`paris-avm-preprocess`, `paris-avm-build-phase3`, `paris-avm-benchmark-phase3` and
 `paris-avm-predict-phase3`. Without installation, modules can be run by setting:
 
 ```powershell
@@ -70,6 +70,21 @@ Run project commands from anywhere inside the repository. When invoking an
 installed command from elsewhere, set `PARIS_AVM_ROOT` to the repository path.
 
 ## Reproduce Phase 3
+
+Build the complete model-ready dataset from the local DVF and versioned
+external snapshots:
+
+```powershell
+$env:PYTHONPATH = '.\src'
+python -m paris_avm.features.preprocessing
+```
+
+This one command produces property, time, spatial, 90-day-lagged historical
+comparable, building, point-in-time DPE and neighborhood-context features. It
+also writes `reports/preprocessing/run_summary.json`, which records the feature
+contract and checksums of both Gold tables. Use `--phase2-only` when the
+external Phase 3 snapshots are intentionally unavailable, or `--reuse-phase2`
+to resume enrichment from a checksum-verified Phase 2 table.
 
 Run the complete acquisition, feature, benchmark, figure and paper workflow:
 
