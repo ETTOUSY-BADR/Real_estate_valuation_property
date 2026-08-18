@@ -20,6 +20,7 @@ import pandas as pd
 from catboost import CatBoostRegressor
 from lightgbm import LGBMRegressor
 
+from paris_avm.artifacts import write_csv_atomic, write_json_atomic
 from paris_avm.modeling.benchmark_phase1 import bootstrap_intervals
 from paris_avm.modeling.benchmark_phase2 import (
     BASE_CATEGORICAL,
@@ -379,9 +380,12 @@ def main() -> None:
         row.update(intervals[row["model_key"]])
     comparison = pd.DataFrame(results).sort_values("mae_eur").reset_index(drop=True)
     comparison.insert(0, "mae_rank", np.arange(1, len(comparison) + 1))
-    comparison.to_csv(args.output_dir / "phase3_model_comparison.csv", index=False)
-    pd.DataFrame(validation_trials).to_csv(
-        args.output_dir / "phase3_validation_search.csv", index=False
+    write_csv_atomic(
+        comparison, args.output_dir / "phase3_model_comparison.csv"
+    )
+    write_csv_atomic(
+        pd.DataFrame(validation_trials),
+        args.output_dir / "phase3_validation_search.csv",
     )
 
     predictions = test[
@@ -389,7 +393,7 @@ def main() -> None:
     ].copy()
     for key, values in test_predictions.items():
         predictions[f"prediction_{key}"] = np.round(values, 2)
-    predictions.to_csv(args.output_dir / "phase3_test_predictions.csv", index=False)
+    write_csv_atomic(predictions, args.output_dir / "phase3_test_predictions.csv")
 
     winner_key = comparison.iloc[0]["model_key"]
     if winner_key in fitted:
@@ -425,8 +429,8 @@ def main() -> None:
             "use current static snapshots and are reported as retrospective reconstruction."
         ),
     }
-    (args.output_dir / "phase3_results.json").write_text(
-        json.dumps(summary, indent=2, ensure_ascii=False, default=str), encoding="utf-8"
+    write_json_atomic(
+        args.output_dir / "phase3_results.json", summary, default=str
     )
     print(comparison[["mae_rank", "model_key", "mae_eur", "r2"]].to_string(index=False))
 

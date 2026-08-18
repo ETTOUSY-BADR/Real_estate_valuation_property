@@ -13,6 +13,7 @@ import pandas as pd
 from paris_avm.artifacts import (
     temporary_path,
     write_atomic,
+    write_csv_atomic,
     write_json_atomic,
     write_parquet_atomic,
 )
@@ -111,6 +112,16 @@ class AtomicArtifactTests(unittest.TestCase):
             self.assertEqual(path.read_text(encoding="utf-8"), '{"status":"valid"}')
             self.assertFalse(temporary_path(path).exists())
 
+    def test_json_writer_supports_explicit_fallback_serialization(self) -> None:
+        with TemporaryDirectory() as directory:
+            path = Path(directory) / "report.json"
+
+            write_json_atomic(path, {"value": object()}, default=str)
+
+            payload = json.loads(path.read_text(encoding="utf-8"))
+            self.assertIsInstance(payload["value"], str)
+            self.assertIn("object", payload["value"])
+
     def test_parquet_writer_uses_stable_serialization_options(self) -> None:
         with TemporaryDirectory() as directory:
             path = Path(directory) / "features.parquet"
@@ -137,6 +148,47 @@ class AtomicArtifactTests(unittest.TestCase):
             write_parquet_atomic(expected, path)
 
             pd.testing.assert_frame_equal(pd.read_parquet(path), expected)
+            self.assertFalse(temporary_path(path).exists())
+
+    def test_csv_writer_uses_index_free_serialization(self) -> None:
+        with TemporaryDirectory() as directory:
+            path = Path(directory) / "results.csv"
+            data = MagicMock()
+
+            def writer(output: Path, **_: object) -> None:
+                output.write_text("metric,value\nmae,10\n", encoding="utf-8")
+
+            data.to_csv.side_effect = writer
+            write_csv_atomic(data, path)
+
+            data.to_csv.assert_called_once_with(temporary_path(path), index=False)
+            self.assertEqual(path.read_text(encoding="utf-8"), "metric,value\nmae,10\n")
+
+    def test_csv_write_failure_preserves_previous_file(self) -> None:
+        with TemporaryDirectory() as directory:
+            path = Path(directory) / "results.csv"
+            path.write_text("valid\n", encoding="utf-8")
+            data = MagicMock()
+
+            def failing_writer(output: Path, **_: object) -> None:
+                output.write_text("partial", encoding="utf-8")
+                raise OSError("disk write failed")
+
+            data.to_csv.side_effect = failing_writer
+            with self.assertRaisesRegex(OSError, "disk write failed"):
+                write_csv_atomic(data, path)
+
+            self.assertEqual(path.read_text(encoding="utf-8"), "valid\n")
+            self.assertFalse(temporary_path(path).exists())
+
+    def test_csv_writer_round_trip(self) -> None:
+        with TemporaryDirectory() as directory:
+            path = Path(directory) / "nested" / "results.csv"
+            expected = pd.DataFrame({"metric": ["mae", "rmse"], "value": [10.5, 20.5]})
+
+            write_csv_atomic(expected, path)
+
+            pd.testing.assert_frame_equal(pd.read_csv(path), expected)
             self.assertFalse(temporary_path(path).exists())
 
     def test_phase2_uses_shared_atomic_writers(self) -> None:

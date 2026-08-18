@@ -5,13 +5,19 @@ from __future__ import annotations
 from collections.abc import Callable
 import json
 from pathlib import Path
-from typing import Protocol
+from typing import Any, Protocol
 
 
 class ParquetWritable(Protocol):
     """Minimal interface required by :func:`write_parquet_atomic`."""
 
     def to_parquet(self, path: Path, **kwargs: object) -> object: ...
+
+
+class CsvWritable(Protocol):
+    """Minimal interface required by :func:`write_csv_atomic`."""
+
+    def to_csv(self, path: Path, **kwargs: object) -> object: ...
 
 
 def temporary_path(path: Path) -> Path:
@@ -31,11 +37,19 @@ def write_atomic(path: Path, writer: Callable[[Path], None]) -> None:
         temporary.unlink(missing_ok=True)
 
 
-def write_json_atomic(path: Path, payload: object) -> None:
+def write_json_atomic(
+    path: Path,
+    payload: object,
+    *,
+    default: Callable[[Any], Any] | None = None,
+) -> None:
     """Serialize JSON without replacing a valid artifact on failure."""
 
     def write(temporary: Path) -> None:
-        serialized = json.dumps(payload, indent=2, ensure_ascii=False)
+        options: dict[str, object] = {"indent": 2, "ensure_ascii": False}
+        if default is not None:
+            options["default"] = default
+        serialized = json.dumps(payload, **options)
         temporary.write_text(serialized, encoding="utf-8")
 
     write_atomic(path, write)
@@ -46,5 +60,14 @@ def write_parquet_atomic(data: ParquetWritable, path: Path) -> None:
 
     def write(temporary: Path) -> None:
         data.to_parquet(temporary, index=False, compression="zstd")
+
+    write_atomic(path, write)
+
+
+def write_csv_atomic(data: CsvWritable, path: Path) -> None:
+    """Serialize CSV without replacing a valid artifact on failure."""
+
+    def write(temporary: Path) -> None:
+        data.to_csv(temporary, index=False)
 
     write_atomic(path, write)

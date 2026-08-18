@@ -295,6 +295,7 @@ def main() -> None:
         "schema_version": 1,
         "generated_at_utc": datetime.now(timezone.utc).isoformat(),
         "gold_table": str(args.output.resolve()),
+        "output_sha256": file_sha256(args.output),
         "row_count": int(len(data)),
         "date_min": data["date_mutation"].min().date().isoformat(),
         "date_max": data["date_mutation"].max().date().isoformat(),

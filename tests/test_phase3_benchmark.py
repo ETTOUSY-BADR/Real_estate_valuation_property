@@ -7,10 +7,16 @@ from tempfile import TemporaryDirectory
 import unittest
 from unittest.mock import patch
 
+from paris_avm.artifacts import write_csv_atomic, write_json_atomic
+from paris_avm.modeling import benchmark_phase3
 from paris_avm.modeling.benchmark_phase3 import dump_joblib_atomic
 
 
 class Phase3BenchmarkTests(unittest.TestCase):
+    def test_benchmark_uses_shared_atomic_report_writers(self) -> None:
+        self.assertIs(benchmark_phase3.write_csv_atomic, write_csv_atomic)
+        self.assertIs(benchmark_phase3.write_json_atomic, write_json_atomic)
+
     def test_model_is_promoted_only_after_successful_serialization(self) -> None:
         with TemporaryDirectory() as directory:
             path = Path(directory) / "selected_model.joblib"
