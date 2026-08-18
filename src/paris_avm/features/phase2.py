@@ -20,6 +20,7 @@ import pandas as pd
 from pyproj import Transformer
 from sklearn.neighbors import BallTree
 
+from paris_avm.artifacts import write_json_atomic, write_parquet_atomic
 from paris_avm.modeling.train_phase1 import DEFAULT_DATA_FILES, load_and_clean_many
 from paris_avm.paths import PROJECT_ROOT
 
@@ -289,9 +290,7 @@ def main() -> None:
     if not data["date_mutation"].is_monotonic_increasing:
         raise RuntimeError("Gold feature table is not chronologically ordered.")
 
-    args.output.parent.mkdir(parents=True, exist_ok=True)
-    args.quality_report.parent.mkdir(parents=True, exist_ok=True)
-    data.to_parquet(args.output, index=False, compression="zstd")
+    write_parquet_atomic(data, args.output)
     report = {
         "schema_version": 1,
         "generated_at_utc": datetime.now(timezone.utc).isoformat(),
@@ -315,9 +314,7 @@ def main() -> None:
         "feature_columns": data.columns.tolist(),
         "runtime_seconds": round(perf_counter() - started, 3),
     }
-    args.quality_report.write_text(
-        json.dumps(report, indent=2, ensure_ascii=False), encoding="utf-8"
-    )
+    write_json_atomic(args.quality_report, report)
     print(json.dumps(comparable_quality, indent=2, ensure_ascii=False))
     print(f"Saved Gold feature table: {args.output}")
     print(f"Saved quality report: {args.quality_report}")

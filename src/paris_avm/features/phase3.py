@@ -21,7 +21,8 @@ import pandas as pd
 from matplotlib.path import Path as MplPath
 from scipy.spatial import cKDTree
 
-from paris_avm.data.acquire_phase3 import BAN_PATH, BDNB_ARCHIVE, write_json_atomic
+from paris_avm.artifacts import write_json_atomic, write_parquet_atomic
+from paris_avm.data.acquire_phase3 import BAN_PATH, BDNB_ARCHIVE
 from paris_avm.paths import PROJECT_ROOT
 
 
@@ -34,18 +35,6 @@ def sha256(path: Path) -> str:
         for block in iter(lambda: handle.read(1024 * 1024), b""):
             digest.update(block)
     return digest.hexdigest()
-
-
-def write_parquet_atomic(data: pd.DataFrame, path: Path) -> None:
-    """Write a Parquet artifact without replacing a valid file on failure."""
-    path.parent.mkdir(parents=True, exist_ok=True)
-    temporary = path.with_suffix(path.suffix + ".part")
-    temporary.unlink(missing_ok=True)
-    try:
-        data.to_parquet(temporary, index=False, compression="zstd")
-        temporary.replace(path)
-    finally:
-        temporary.unlink(missing_ok=True)
 
 
 def read_bdnb(

@@ -20,6 +20,7 @@ import requests
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
+from paris_avm.artifacts import write_json_atomic
 from paris_avm.paths import PROJECT_ROOT
 
 
@@ -298,19 +299,6 @@ def artifact_record(
     if extra:
         record.update(extra)
     return record
-
-
-def write_json_atomic(path: Path, payload: object) -> None:
-    """Serialize JSON and atomically replace ``path`` only after success."""
-    path.parent.mkdir(parents=True, exist_ok=True)
-    temporary = path.with_suffix(path.suffix + ".part")
-    temporary.unlink(missing_ok=True)
-    try:
-        serialized = json.dumps(payload, indent=2, ensure_ascii=False)
-        temporary.write_text(serialized, encoding="utf-8")
-        temporary.replace(path)
-    finally:
-        temporary.unlink(missing_ok=True)
 
 
 def main() -> None:
