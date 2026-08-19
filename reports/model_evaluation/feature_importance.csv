@@ -1,0 +1,101 @@
+feature,importance,feature_label,family,importance_percent
+log_surface,37.92443003580074,Log surface,Core DVF / spatial,37.9244
+surface_reelle_bati,35.28024247248421,Apartment surface,Core DVF / spatial,35.2802
+local_365d_500m_median_ppm2,2.8834268688937637,"Local median EUR/m2 (365d, 500m)",Historical comparables,2.8834
+code_postal,2.7020014083850894,Arrondissement,Core DVF / spatial,2.702
+local_365d_250m_median_ppm2,2.646392541356886,Local 365d 250m median ppm2,Historical comparables,2.6464
+similar_weighted_comp_ppm2,1.6275368555778729,Similar comparable EUR/m2,Historical comparables,1.6275
+nombre_pieces_principales,1.1179879949696314,Nombre pieces principales,Core DVF / spatial,1.118
+weighted_comp_ppm2,0.9585711674304369,Weighted comparable EUR/m2,Historical comparables,0.9586
+local_730d_500m_median_ppm2,0.8230789271536934,"Local median EUR/m2 (730d, 500m)",Historical comparables,0.8231
+local_365d_1000m_median_ppm2,0.8042190717860049,Local 365d 1000m median ppm2,Historical comparables,0.8042
+h3_r8,0.6971924489590904,H3 r8,Identity / micro-location,0.6972
+local_730d_1000m_median_ppm2,0.682739936560301,Local 730d 1000m median ppm2,Historical comparables,0.6827
+local_180d_1000m_median_ppm2,0.6221768527190049,Local 180d 1000m median ppm2,Historical comparables,0.6222
+rooms_per_10m2,0.599056498485774,Rooms per 10m2,Core DVF / spatial,0.5991
+surface_habitable_logement,0.41350020804356863,Surface habitable logement,DPE / energy,0.4135
+effective_comparable_count,0.35354022369523064,Effective comparable count,Historical comparables,0.3535
+building_footprint_m2,0.3521579173441709,Building footprint m2,Building / linkage,0.3522
+shop_service_count_1000m,0.3199510903283444,Shop service count 1000m,Neighborhood context,0.32
+building_level_count,0.31978319096672314,Building level count,Building / linkage,0.3198
+local_180d_500m_median_ppm2,0.3158337573536246,Local 180d 500m median ppm2,Historical comparables,0.3158
+ban_address_id,0.2924210047062389,BAN address identity,Identity / micro-location,0.2924
+months_since_2021,0.2745723229518762,Market time trend,Core DVF / spatial,0.2746
+local_180d_500m_count,0.2693288098404131,Local 180d 500m count,Historical comparables,0.2693
+building_year,0.2652717116396082,Construction year,Building / linkage,0.2653
+median_comparable_age_days,0.26330644341709114,Median comparable age days,Historical comparables,0.2633
+distance_tram_m,0.2546743408252315,Distance tram m,Neighborhood context,0.2547
+classe_bilan_dpe,0.24458449655347203,DPE energy class,DPE / energy,0.2446
+dpe_match_confidence,0.23675044668730347,Dpe match confidence,DPE / energy,0.2368
+nombre_lots,0.23441577975227346,Nombre lots,Core DVF / spatial,0.2344
+building_dwelling_count,0.21641434487188102,Building dwelling count,Building / linkage,0.2164
+year,0.2139929815325163,Year,Core DVF / spatial,0.214
+dpe_age_days,0.21102184330084117,Dpe age days,DPE / energy,0.211
+dpe_surface_difference_ratio,0.20578066690916572,Dpe surface difference ratio,DPE / energy,0.2058
+building_age_at_sale,0.20446871129994565,Building age at sale,Building / linkage,0.2045
+building_height_m,0.20018352034650874,Building height m,Building / linkage,0.2002
+distance_paris_center_m,0.19302476043729436,Distance paris center m,Core DVF / spatial,0.193
+y_l93,0.18496069901679196,Y l93,Core DVF / spatial,0.185
+distance_shop_service_m,0.17390396575588743,Distance shop service m,Neighborhood context,0.1739
+conso_5_usages_ep_m2,0.1738507114780467,Conso 5 usages ep m2,DPE / energy,0.1739
+building_period_rnc,0.16726293805991801,Building period rnc,Building / linkage,0.1673
+school_count_1000m,0.16667413932091388,School count 1000m,Neighborhood context,0.1667
+distance_metro_m,0.16619803931447796,Distance to Metro,Neighborhood context,0.1662
+day_of_year,0.16530727388839345,Day of year,Core DVF / spatial,0.1653
+h3_r9,0.1615321331036395,H3 r9,Identity / micro-location,0.1615
+x_l93,0.15399231537717384,X l93,Core DVF / spatial,0.154
+ban_match_distance_m,0.15389554864109606,Ban match distance m,Building / linkage,0.1539
+shop_service_count_500m,0.15029918125937128,Shop service count 500m,Neighborhood context,0.1503
+green_area_500m2,0.14774918105312332,Green area 500m2,Neighborhood context,0.1477
+building_dwelling_count_rnc,0.14414437226274082,Building dwelling count rnc,Building / linkage,0.1441
+green_space_count_500m,0.14072360445893123,Green space count 500m,Neighborhood context,0.1407
+bearing_sin,0.13950257024624102,Bearing sin,Core DVF / spatial,0.1395
+distance_train_m,0.1282120734247668,Distance train m,Neighborhood context,0.1282
+distance_rer_m,0.12255271111608432,Distance rer m,Neighborhood context,0.1226
+local_momentum_180v365_1000m,0.11923594798005253,Local momentum 180v365 1000m,Historical comparables,0.1192
+latitude,0.11762663933133773,Latitude,Core DVF / spatial,0.1176
+distance_green_space_centroid_m,0.11577263531152078,Distance green space centroid m,Neighborhood context,0.1158
+adresse_numero,0.10850534810206017,Adresse numero,Core DVF / spatial,0.1085
+local_365d_1000m_count,0.09880929917310217,Local 365d 1000m count,Historical comparables,0.0988
+local_365d_500m_count,0.09871195753898453,Local 365d 500m count,Historical comparables,0.0987
+building_total_lot_count,0.09548504698639199,Building total lot count,Building / linkage,0.0955
+mat_mur_txt,0.09047655560904445,Mat mur txt,Building / linkage,0.0905
+bearing_cos,0.08521937759462304,Bearing cos,Core DVF / spatial,0.0852
+classe_emission_ges,0.08484145280406963,Classe emission ges,DPE / energy,0.0848
+distance_school_m,0.07862527165796432,Distance school m,Neighborhood context,0.0786
+annee_construction_dpe,0.0754505303839053,Annee construction dpe,DPE / energy,0.0755
+type_installation_chauffage,0.07274637278809334,Type installation chauffage,DPE / energy,0.0727
+similar_comparable_count,0.07052385118580902,Similar comparable count,Historical comparables,0.0705
+local_730d_500m_count,0.07027390445945245,Local 730d 500m count,Historical comparables,0.0703
+building_parking_lot_count,0.06879325466140511,Building parking lot count,Building / linkage,0.0688
+local_365d_500m_mad_ppm2,0.0629109292685689,Local 365d 500m mad ppm2,Historical comparables,0.0629
+mat_toit_txt,0.05961295951256698,Mat toit txt,Building / linkage,0.0596
+nearest_prior_sale_m,0.057665554611768255,Nearest prior sale m,Historical comparables,0.0577
+emission_ges_5_usages_m2,0.0446489154699324,Emission ges 5 usages m2,DPE / energy,0.0446
+rail_line_count_1000m,0.0433645109365943,Rail line count 1000m,Neighborhood context,0.0434
+surface_habitable_immeuble,0.04256081144530929,Surface habitable immeuble,DPE / energy,0.0426
+local_180d_1000m_count,0.03940240463072747,Local 180d 1000m count,Historical comparables,0.0394
+longitude,0.03837369995538226,Longitude,Core DVF / spatial,0.0384
+month,0.03556285027070964,Month,Core DVF / spatial,0.0356
+type_energie_chauffage,0.03475497117793908,Type energie chauffage,DPE / energy,0.0348
+local_365d_250m_count,0.032425922603589175,Local 365d 250m count,Historical comparables,0.0324
+local_momentum_180v365_500m,0.029522815711476295,Local momentum 180v365 500m,Historical comparables,0.0295
+rail_station_mode_count_1000m,0.028316336937735248,Rail station mode count 1000m,Neighborhood context,0.0283
+local_730d_1000m_count,0.023800159529413726,Local 730d 1000m count,Historical comparables,0.0238
+usage_niveau_1_txt,0.02268805233490783,Usage niveau 1 txt,Building / linkage,0.0227
+bdnb_parcel_candidate_count,0.016342215940667426,Bdnb parcel candidate count,Building / linkage,0.0163
+noise_transport_lden_max_db,0.014996211838332243,Maximum transport noise,Neighborhood context,0.015
+noise_road_lden_db,0.013871535298452477,Noise road lden db,Neighborhood context,0.0139
+ban_match_confidence,0.011851205008159657,Ban match confidence,Building / linkage,0.0119
+bdnb_building_id,0.008837862766401888,BDNB building identity,Identity / micro-location,0.0088
+nombre_niveau_logement,0.008103291384238284,Nombre niveau logement,DPE / energy,0.0081
+nombre_niveau_immeuble,0.00731740913373096,Nombre niveau immeuble,DPE / energy,0.0073
+bdnb_match_method,0.0039933164494018614,Bdnb match method,Identity / micro-location,0.004
+dpe_available_at_sale,0.0031855010726930286,Dpe available at sale,DPE / energy,0.0032
+surface_terrain,0.0,Surface terrain,Core DVF / spatial,0.0
+bdnb_address_candidate_count,0.0,Bdnb address candidate count,Building / linkage,0.0
+bdnb_match_confidence,0.0,Bdnb match confidence,Building / linkage,0.0
+building_year_missing,0.0,Building year missing,Building / linkage,0.0
+noise_rail_ratp_lden_db,0.0,Noise rail ratp lden db,Neighborhood context,0.0
+noise_rail_sncf_lden_db,0.0,Noise rail sncf lden db,Neighborhood context,0.0
+building_state,0.0,Building state,Building / linkage,0.0

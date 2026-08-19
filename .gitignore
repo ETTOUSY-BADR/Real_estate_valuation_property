@@ -32,6 +32,10 @@ models/**/*.joblib
 reports/**/*.csv
 reports/**/*.json
 visuals/**/*.png
+!reports/model_evaluation/*.csv
+!visuals/phase2/*.png
+!visuals/phase3/*.png
+!visuals/model_evaluation/*.png
 
 # LaTeX build products; final PDFs remain shareable
 *.aux
@@ -39,5 +43,7 @@ visuals/**/*.png
 *.blg
 *.log
 *.out
+*.toc
 *.synctex.gz
 docs/paper/previews/
+.tmp/

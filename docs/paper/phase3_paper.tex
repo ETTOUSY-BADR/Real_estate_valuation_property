@@ -53,11 +53,11 @@ BAN matches cover 99.49\% of sales, 99.997\% receive a BDNB building identity,
 and 76.85\% receive a DPE that existed by the transaction date. No future-DPE
 join is observed. Configuration selection uses 2024 only; selected models are
 refitted on 2021--2024 and evaluated on 28,330 sales from 2025. The selected
-CatBoost model obtains EUR 93,136 mean absolute error (MAE), EUR 192,806 root
+CatBoost model obtains EUR 93,197 mean absolute error (MAE), EUR 192,809 root
 mean squared error, $R^2=0.8679$, and 11.70\% median absolute percentage error.
 Relative to the frozen Phase 2 comparable-sale correction (EUR 96,428 MAE), the
-MAE reduction is EUR 3,293, or 3.41\%, with a paired 95\% bootstrap interval of
-EUR 2,735--3,846. Dated DPE, building and neighborhood ablations each improve
+MAE reduction is EUR 3,231, or 3.35\%, with a paired 95\% bootstrap interval of
+EUR 2,685--3,730. Dated DPE, building and neighborhood ablations each improve
 MAE, although their gains are not additive or causal. Current BAN/BDNB and
 amenity snapshots are explicitly classified as retrospective reconstruction;
 only dated DPE and lagged comparable-sale variables satisfy full point-in-time
@@ -74,8 +74,8 @@ Phase 3 was designed to answer one practical question: does adding reliable
 property identity, building condition proxies, energy information, access and
 neighborhood context improve out-of-year valuation accuracy beyond Phase 2?
 The answer is yes on the fixed 2025 cohort. The selected model reduces MAE by
-EUR 3,293 (3.41\%), improves MdAPE from 12.22\% to 11.70\%, increases the share
-of estimates within 20\% from 71.69\% to 73.39\%, and raises $R^2$ from 0.8601
+EUR 3,231 (3.35\%), improves MdAPE from 12.22\% to 11.70\%, increases the share
+of estimates within 20\% from 71.69\% to 73.40\%, and raises $R^2$ from 0.8601
 to 0.8679. The paired interval for the MAE reduction excludes zero.
 
 The contribution is broader than one score. It includes a versioned Bronze
@@ -334,9 +334,9 @@ that every candidate predicts the same transactions.
 
 Table~\ref{tab:results} reports the principal 2025 results. Every MAE-objective
 enrichment ablation improves on the frozen Phase 2 reference. Dated DPE alone
-reduces MAE by EUR 1,206; building/linkage by EUR 1,858; neighborhood context by
-EUR 796; and the full no-identity LightGBM model by EUR 2,460. Their paired 95\%
-intervals exclude zero. The selected CatBoost model improves MAE by EUR 3,293.
+reduces MAE by EUR 1,245; building/linkage by EUR 1,900; neighborhood context by
+EUR 669; and the full no-identity LightGBM model by EUR 2,225. Their paired 95\%
+intervals exclude zero. The selected CatBoost model improves MAE by EUR 3,231.
 
 \begin{table}[H]
 \centering
@@ -348,20 +348,20 @@ against Phase 2; positive values favor the row method.}
 \toprule
 Method & MAE (EUR) & MdAPE & Within 20\% & Reduction (95\% CI), EUR \\
 \midrule
-CatBoost, full identity/enrichment & \textbf{93,136} & \textbf{11.70\%} & \textbf{73.39\%} & \textbf{3,293 (2,735--3,846)} \\
-LightGBM, full without raw identity & 93,968 & 11.80\% & 73.03\% & 2,460 (1,860--3,137) \\
-LightGBM, building/linkage & 94,571 & 11.90\% & 72.28\% & 1,858 (1,271--2,493) \\
-LightGBM, dated DPE & 95,222 & 11.97\% & 72.28\% & 1,206 (657--1,867) \\
-LightGBM, neighborhood context & 95,632 & 11.99\% & 71.74\% & 796 (293--1,355) \\
+CatBoost, full identity/enrichment & \textbf{93,197} & \textbf{11.70\%} & \textbf{73.40\%} & \textbf{3,231 (2,685--3,730)} \\
+LightGBM, full without raw identity & 94,204 & 11.85\% & 72.79\% & 2,225 (1,616--2,876) \\
+LightGBM, building/linkage & 94,528 & 11.89\% & 72.27\% & 1,900 (1,292--2,506) \\
+LightGBM, dated DPE & 95,183 & 11.91\% & 72.31\% & 1,245 (651--1,875) \\
+LightGBM, neighborhood context & 95,760 & 12.04\% & 71.79\% & 669 (117--1,266) \\
 Phase 2 comparable correction & 96,428 & 12.22\% & 71.69\% & Reference \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-For the winner, RMSE is EUR 192,806, $R^2=0.8679$, MAPE is 18.12\%, 43.68\%
-of estimates are within 10\% and 73.39\% are within 20\%. Phase 3 reduces
-absolute error on 54.21\% of individual test sales; the median transaction-level
-gain is EUR 1,496. The improvement therefore reflects many modest gains plus a
+For the winner, RMSE is EUR 192,809, $R^2=0.8679$, MAPE is 18.13\%, 43.86\%
+of estimates are within 10\% and 73.40\% are within 20\%. Phase 3 reduces
+absolute error on 54.35\% of individual test sales; the median transaction-level
+gain is EUR 1,450. The improvement therefore reflects many modest gains plus a
 smaller number of large corrections, not universal superiority on every sale.
 
 \subsection{Calibration, value segments and time stability}
@@ -425,7 +425,7 @@ test signal under the controlled LightGBM ablations. Second, reliable identity
 is operationally important even when its direct feature importance is small: it
 allows building, DPE and context records to attach to the correct transaction
 and enables CatBoost to learn repeated micro-location patterns. Third, the
-improvement is meaningful but bounded. A 3.41\% MAE reduction does not remove
+improvement is meaningful but bounded. A 3.35\% MAE reduction does not remove
 unobserved apartment condition, renovation quality, floor, elevator, view,
 exposure, occupancy or private outdoor space.
 
@@ -493,7 +493,7 @@ archive.
 Phase 3 converts a transaction-only benchmark into an auditable building-aware
 valuation pipeline. Near-complete address/building resolution, strict dated-DPE
 selection and controlled feature-family experiments produce a statistically
-consistent EUR 3,293 MAE reduction on 28,330 sales from 2025. The strongest
+consistent EUR 3,231 MAE reduction on 28,330 sales from 2025. The strongest
 model remains driven by surface and historical market evidence, while external
 building, energy and context features provide useful refinements. The proper
 next step is not more retrospective tuning: it is prospective evaluation on a

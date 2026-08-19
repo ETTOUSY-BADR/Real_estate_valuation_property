@@ -5,17 +5,17 @@
 Phase 3 links the 143,009-row Paris DVF Gold cohort to authoritative address,
 building, energy, transport, school, green-space, shop/service and strategic
 noise sources. The selected CatBoost model reduces 2025 MAE from **EUR
-96,428.47** for the frozen Phase 2 comparable correction to **EUR 93,135.57**.
-The reduction is **EUR 3,292.89 (3.41%)**, with a paired 95% bootstrap interval
-of **EUR 2,735.12–3,845.97**.
+96,428.47** for the frozen Phase 2 comparable correction to **EUR 93,197.49**.
+The reduction is **EUR 3,230.98 (3.35%)**, with a paired 95% bootstrap interval
+of **EUR 2,685.46–3,730.15**.
 
 | Method | 2025 MAE | MdAPE | Within ±20% | R² |
 |---|---:|---:|---:|---:|
-| CatBoost, full identity/enrichment | **EUR 93,136** | **11.70%** | **73.39%** | **0.8679** |
-| LightGBM, full without identity | EUR 93,968 | 11.80% | 73.03% | 0.8661 |
-| LightGBM, building only | EUR 94,571 | 11.90% | 72.28% | 0.8658 |
-| LightGBM, dated DPE only | EUR 95,222 | 11.97% | 72.28% | 0.8637 |
-| LightGBM, neighborhood context only | EUR 95,632 | 11.99% | 71.74% | 0.8627 |
+| CatBoost, full identity/enrichment | **EUR 93,197** | **11.70%** | **73.40%** | **0.8679** |
+| LightGBM, full without identity | EUR 94,204 | 11.85% | 72.79% | 0.8654 |
+| LightGBM, building only | EUR 94,528 | 11.89% | 72.27% | 0.8660 |
+| LightGBM, dated DPE only | EUR 95,183 | 11.91% | 72.31% | 0.8634 |
+| LightGBM, neighborhood context only | EUR 95,760 | 12.04% | 71.79% | 0.8637 |
 | Frozen Phase 2 correction | EUR 96,428 | 12.22% | 71.69% | 0.8601 |
 
 All model and feature choices use 2024 validation data. The selected candidates

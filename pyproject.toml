@@ -21,6 +21,7 @@ paris-avm-build-phase3 = "paris_avm.features.phase3:main"
 paris-avm-benchmark-phase3 = "paris_avm.modeling.benchmark_phase3:main"
 paris-avm-predict-phase3 = "paris_avm.inference.phase3:main"
 paris-avm-visualize-phase3 = "paris_avm.visualization.phase3:main"
+paris-avm-report-model-evaluation = "paris_avm.visualization.model_evaluation:main"
 
 [tool.setuptools.dynamic]
 dependencies = { file = ["requirements.txt"] }

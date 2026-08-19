@@ -14,10 +14,10 @@ The project follows a chronological research protocol:
 
 ## Current result
 
-The selected Phase 3 CatBoost model reaches **EUR 93,136 MAE** on 28,330 sales
+The selected Phase 3 CatBoost model reaches **EUR 93,197 MAE** on 28,330 sales
 from 2025, versus **EUR 96,428** for the Phase 2 reference. The paired reduction
-is **EUR 3,293 (3.41%)**, with a 95% bootstrap interval of
-**EUR 2,735–3,846**.
+is **EUR 3,231 (3.35%)**, with a 95% bootstrap interval of
+**EUR 2,685–3,730**.
 
 Entity resolution is near-complete: exact BAN address coverage is 99.49%, BDNB
 building coverage is 99.997%, and 76.85% of all historical sales receive a DPE
@@ -151,6 +151,7 @@ artifact-integrity suite.
 ## Research deliverables
 
 - [Phase 3 paper](docs/paper/phase3_paper.pdf)
+- [Complete preprocessing and model-evaluation report](docs/paper/model_evaluation_report.pdf)
 - [Phase 3 technical report](reports/phase3/PHASE3_REPORT.md)
 
 The source manifest, feature-quality contract, model comparison and publication
