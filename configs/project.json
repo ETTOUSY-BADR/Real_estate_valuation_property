@@ -1,6 +1,6 @@
 {
   "project": "paris-avm",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "random_seed": 42,
   "target": "valeur_fonciere",
   "geography": "Paris, France",
@@ -22,5 +22,12 @@
     "bdnb_release": "2026-02-a",
     "dated_dpe_required": true,
     "static_context_interpretation": "retrospective reconstruction"
+  },
+  "phase4": {
+    "geography": "Nationwide France as available in Geo-DVF",
+    "model": "single region-aware CatBoostRegressor",
+    "source_years": [2021, 2022, 2023, 2024, 2025],
+    "known_dvf_gaps": ["57", "67", "68", "976"],
+    "external_enrichment": "not transferred from Paris; nationwide core features only"
   }
 }

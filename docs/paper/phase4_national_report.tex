@@ -1,0 +1,347 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[margin=1.85cm]{geometry}
+\usepackage{amsmath}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{longtable}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{microtype}
+\usepackage{caption}
+\usepackage{float}
+\usepackage{fancyhdr}
+\usepackage{enumitem}
+
+\definecolor{navy}{HTML}{102A43}
+\definecolor{blue}{HTML}{1677B8}
+\definecolor{green}{HTML}{2A9D6F}
+\definecolor{light}{HTML}{F4F7FA}
+\definecolor{muted}{HTML}{627D98}
+\hypersetup{colorlinks=true,linkcolor=blue,urlcolor=blue,
+pdftitle={Nationwide France Apartment Valuation: Phase 4 Benchmark},pdfauthor={Badr Ettousy}}
+\graphicspath{{../../visuals/phase4/}}
+\captionsetup{font=small,labelfont=bf}
+\setlength{\parskip}{0.38em}
+\setlength{\parindent}{0pt}
+\renewcommand{\arraystretch}{1.15}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\textcolor{muted}{France AVM --- Phase 4 national benchmark}}
+\fancyhead[R]{\small\textcolor{muted}{Badr Ettousy}}
+\fancyfoot[C]{\thepage}
+\setlength{\headheight}{14pt}
+
+\newenvironment{statusbox}{\begin{center}\begin{minipage}{0.92\textwidth}\textcolor{navy}{\rule{\textwidth}{0.8pt}}\vspace{0.5em}}{\vspace{0.5em}\textcolor{navy}{\rule{\textwidth}{0.8pt}}\end{minipage}\end{center}}
+\newcommand{\metriccard}[2]{\colorbox{light}{\begin{minipage}[c][1.45cm][c]{0.215\textwidth}\centering\textcolor{navy}{\Large\textbf{#1}}\\[-0.1em]\small\textcolor{muted}{#2}\end{minipage}}}
+
+\title{\textcolor{navy}{\textbf{Nationwide France Apartment Valuation}}\\[0.25em]
+\large Phase 4 Data Engineering, Leakage Controls and\\Chronological Model Benchmark}
+\author{Badr Ettousy}
+\date{26 August 2026\\\small Protocol and pre-benchmark edition}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+This protocol defines a nationwide France apartment automated valuation
+benchmark using annual geolocated DVF transactions from 2021--2025. It specifies the cohort,
+global spatial representation, strictly lagged comparable-sale features, hierarchical baseline,
+CatBoost candidates, chronological split, paired uncertainty analysis and territorial diagnostics
+before national model results are available. This edition intentionally reports no accuracy number;
+rerunning the generator after the benchmark replaces pending sections with audited empirical tables.
+\end{abstract}
+
+\textbf{Keywords:} automated valuation model; Geo-DVF; France; CatBoost;
+historical comparable sales; chronological validation; regional robustness.
+
+\tableofcontents
+\clearpage
+
+\section{Executive assessment}
+
+Phase 4 extends the earlier Paris research into one national apartment model. The
+central design choice is comparability rather than superficial feature parity:
+Paris-only transport, school, park, noise and building snapshots are not copied
+into other regions without a nationally uniform source contract. The national
+model instead uses DVF property attributes, transaction time, hierarchical
+territorial identity, global geometry and point-in-time comparable-sale evidence.
+
+
+\begin{statusbox}
+\textbf{Protocol edition.} The national Gold table and fitted model are not
+present in this workspace. No accuracy number is asserted. The manuscript will
+be regenerated from the frozen benchmark artifacts without manual score entry.
+\end{statusbox}
+
+
+\subsection*{Decision status}
+\begin{itemize}[leftmargin=1.5em]
+\item The data, benchmark and reporting protocols are fully specified and tested.
+\item National accuracy may be claimed only after the 2025 frozen-test artifacts exist.
+\item Regional MAE must be interpreted beside MdAPE, hit rate and test-row count.
+\item The output is an automated indication, not a certified appraisal.
+\end{itemize}
+
+\section{Research objective and contributions}
+
+The target is total transaction value in euros for an ordinary apartment sale.
+The study asks whether one model can learn heterogeneous French markets while
+preserving local evidence and honest temporal evaluation. Its contributions are:
+\begin{enumerate}[leftmargin=1.6em]
+\item chunk-safe processing of the national annual Geo-DVF archives;
+\item explicit support for Corsican and overseas territorial identifiers;
+\item spherical H3 and Cartesian location features valid outside Lambert-93;
+\item local comparables subject to a 90-day information-availability lag;
+\item a training-only hierarchical postcode-to-national median baseline;
+\item a 2021--2023/2024/2025 chronological benchmark with paired bootstrap uncertainty;
+\item region and sufficiently sized department diagnostics;
+\item atomic artifacts, checksums, a reusable production bundle and inference CLI.
+\end{enumerate}
+
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{phase4_national_pipeline.png}
+\caption{Phase 4 source-to-report architecture and chronological evaluation design.}
+\label{fig:architecture}
+\end{figure}
+
+
+\section{Data source and analytical cohort}
+
+The source is the normalized and geolocated Geo-DVF annual full archive for
+2021--2025. CSV files are streamed in bounded chunks. The last mutation in each
+chunk is carried into the next chunk so a multi-line transaction is never
+classified before all its property rows are available.
+
+The cohort retains \emph{Vente} mutations containing exactly one apartment and
+no house or commercial premises. Dependencies such as a cellar or parking place
+may remain bundled in the mutation consideration. Required fields are date,
+transaction value, apartment surface, commune and valid WGS84 coordinates.
+Broad national quality bounds are 9--300 m$^2$, EUR 10,000--10,000,000 and EUR
+100--30,000 per m$^2$.
+
+Territorial row counts are pending the national Gold feature build.
+
+Geo-DVF contains no open observations for departments 57, 67, 68, 976.
+``Nationwide'' therefore means every territory represented upstream, not every
+French department without exception.
+
+\section{Feature engineering contract}
+
+The fitted contract contains 46 inputs:
+39 numeric and
+7 categorical variables. The current
+transaction's target and price per square metre are excluded.
+
+\begin{table}[H]
+\centering
+\caption{Phase 4 feature families.}
+\begin{tabularx}{\textwidth}{p{3.4cm}rX}
+\toprule
+Family & Inputs & Role \\
+\midrule
+Property & 7 & Surface, rooms, lots, terrain and scale/density transforms \\
+Calendar & 4 & Seasonality and elapsed market time \\
+Global location & 5 & WGS84 and unit-sphere Cartesian coordinates \\
+Territorial identity & 7 & Region, department, commune, postcode and H3 r7/r8/r9 \\
+Historical comparables & 23 & Lagged counts, medians, dispersion, similarity, age, distance and momentum \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Global spatial representation}
+
+Lambert-93 is unsuitable for overseas departments. Longitude $\lambda$ and
+latitude $\phi$ are therefore supplemented by unit-sphere coordinates
+\begin{equation}
+(x,y,z)=(\cos\phi\cos\lambda,\cos\phi\sin\lambda,\sin\phi),
+\end{equation}
+and H3 cells. Nearby transactions are queried using haversine distance within
+each department.
+
+\subsection{Leakage-safe comparable sales}
+
+For target sale $i$ at date $t_i$, candidate $j$ is eligible only if
+\begin{equation}
+90 \le t_i-t_j \le 730\quad\text{days},\qquad d(i,j)\le1{,}000\text{ m}.
+\end{equation}
+Windows at 180, 365 and 730 days and radii at 250, 500 and 1,000 metres produce
+counts and median prices per square metre. Exponential recency/distance weights,
+surface and room similarity, effective sample size, dispersion and momentum
+summarize local evidence. The current transaction cannot become its own input.
+
+\begin{table}[H]
+\centering
+\caption{Primary leakage and integrity controls.}
+\begin{tabularx}{\textwidth}{p{4.4cm}X}
+\toprule
+Risk & Enforced control \\
+\midrule
+Mutation target duplication & One row only after transaction-level local-type audit \\
+Future comparable sales & Minimum 90-day age and positive chronological difference \\
+Target-derived leakage & Current value and price/m$^2$ excluded from fitted inputs \\
+Geographic projection failure & Haversine distances and global unit-sphere coordinates \\
+Model-selection leakage & 2024 selection separated from untouched 2025 evaluation \\
+Partial artifact corruption & Sibling \texttt{.part} writes followed by atomic promotion \\
+Silent territorial overclaim & Upstream missing departments recorded in every report \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{Benchmark design}
+
+Development uses 2021--2023. Two predeclared CatBoost configurations are
+compared on 2024; no 2025 outcome participates in selection. The winner is
+refitted through 2024 and evaluated once on 2025. Only after evaluation is the
+production model refitted on all 2021--2025 observations.
+
+
+\begin{table}[H]
+\centering
+\caption{Predeclared CatBoost candidates for 2024 model selection.}
+\begin{tabular}{clll}
+\toprule
+Candidate & Depth & Loss & Regularization \\
+\midrule
+1 & 8 & MAE & $\ell_2=8$ \\
+2 & 9 & Huber ($\delta=1$) & $\ell_2=10$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+
+The objective is fitted to $\log(1+y)$ and transformed back to non-negative
+euros. The benchmark baseline calculates median historical price per square
+metre by postcode and falls back successively to commune, department, region
+and national median. Every lookup is learned exclusively from the corresponding
+training period.
+
+\subsection{Metrics and paired uncertainty}
+
+The report publishes MAE, RMSE, $R^2$, MAPE, median absolute percentage error
+and hit rates within $\pm10\%$ and $\pm20\%$. Because model and baseline predict
+the same transactions, uncertainty is estimated from paired absolute-error
+differences. A deterministic bootstrap uses 300 repetitions and at most 250,000
+test rows to bound memory. The exact sample size is stored in the benchmark JSON.
+
+\section{Frozen national benchmark}
+
+
+\begin{statusbox}
+\textbf{Benchmark pending.} The national Gold table and fitted model are not
+present in this workspace. No accuracy number is asserted in this edition.
+The registered comparison is Phase 4 CatBoost versus the hierarchical
+training-only geographic median on the identical untouched 2025 transactions.
+\end{statusbox}
+
+
+\section{Territorial robustness}
+
+Raw euro MAE is expected to be higher in expensive markets. Regional assessment
+therefore requires MdAPE, hit rates, $R^2$ and sample size beside MAE. Department
+rows require at least 100 test transactions; small segments are suppressed
+rather than presented as stable estimates.
+
+
+\begin{statusbox}
+Regional and department metrics are pending the frozen 2025 evaluation. The
+reporting contract requires at least 100 test sales before a territorial row is
+published and at least 500 calibration sales before a region receives its own
+empirical interval ratios.
+\end{statusbox}
+
+
+\section{Calibration and uncertainty}
+
+The empirical 90\% interval uses 2024 target-to-prediction ratios. A region gets
+its own calibration ratios only with at least 500 observations; otherwise it
+inherits the national interval. Observed 2025 coverage evaluates temporal
+transfer but is not a formal conditional guarantee for a specific apartment.
+
+\section{Visual diagnostic suite}
+
+
+
+Figures are generated only from existing artifacts. Missing benchmark outputs
+produce no placeholder chart and no synthetic metric. Feature importance records
+predictive usage rather than a causal housing premium.
+
+\section{Reproducibility and artifact inventory}
+
+\begin{longtable}{p{5.8cm}lr}
+\toprule
+Artifact & Status & Bytes \\
+\midrule
+\endfirsthead
+\toprule Artifact & Status & Bytes \\
+\midrule
+\endhead
+Source manifest & \textbf{pending} & --- \\
+Gold feature table & \textbf{pending} & --- \\
+Feature quality report & \textbf{pending} & --- \\
+Benchmark JSON & \textbf{pending} & --- \\
+Validation trials & \textbf{pending} & --- \\
+Benchmark comparison & \textbf{pending} & --- \\
+Frozen predictions & \textbf{pending} & --- \\
+Regional metrics & \textbf{pending} & --- \\
+Department metrics & \textbf{pending} & --- \\
+Feature importance & \textbf{pending} & --- \\
+Production model & \textbf{pending} & --- \\
+\bottomrule
+\end{longtable}
+
+\begin{verbatim}
+python -m paris_avm.data.acquire_phase4
+python -m paris_avm.features.phase4
+python -m paris_avm.modeling.benchmark_phase4
+python -m paris_avm.visualization.phase4
+python -m paris_avm.reporting.phase4
+powershell -ExecutionPolicy Bypass -File .\docs\paper\compile_phase4.ps1
+\end{verbatim}
+
+\section{Limitations and responsible use}
+
+\begin{itemize}[leftmargin=1.5em]
+\item DVF omits condition, renovation, floor, elevator, view and occupancy.
+\item Mutation value can bundle dependencies or transaction-specific rights.
+\item Departments 57, 67, 68 and 976 are absent from the source.
+\item Sparse submarkets may have weak comparable coverage and unstable errors.
+\item Administrative/H3 identity is predictive context, not a causal estimate.
+\item A 2025 holdout does not establish performance in 2026 or later markets.
+\item The interval is empirical and marginal, not a certified property guarantee.
+\item Predictions are not notarial valuations, lending decisions or investment advice.
+\end{itemize}
+
+\section{Conclusion}
+
+Phase 4 defines a scalable and auditable path from a Paris research model to a
+national France AVM. Its strongest contribution is the combination of global
+geography, local point-in-time market evidence, chronological evaluation and
+territorial reporting. In this protocol and pre-benchmark edition, claims remain limited to the
+artifacts actually present. The empirical edition is generated by the identical
+source after the full national benchmark completes.
+
+\appendix
+\section{Machine-readable deliverables}
+
+The benchmark publishes JSON metrics, validation trials, a two-method comparison,
+regional and department CSV tables, Parquet predictions with paired errors,
+feature importance and a checksummed Joblib production bundle. The Markdown and
+LaTeX reports consume these outputs without refitting or selecting a model.
+
+\section{Source references}
+
+\begin{itemize}[leftmargin=1.5em]
+\item \href{https://www.data.gouv.fr/datasets/demandes-de-valeurs-foncieres-geolocalisees}{Geo-DVF dataset catalogue on data.gouv.fr}
+\item \href{https://files.data.gouv.fr/geo-dvf/latest/csv/}{Geo-DVF annual file index}
+\item \href{https://www.etalab.gouv.fr/licence-ouverte-open-licence/}{Open Licence 2.0}
+\end{itemize}
+
+\end{document}

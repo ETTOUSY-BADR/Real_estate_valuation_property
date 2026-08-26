@@ -161,6 +161,40 @@ They are intentionally excluded from Git because they are reproducible outputs.
 Earlier Phase 1 and Phase 2 experiments remain available in the same package,
 with their reports, models and papers preserved for traceability.
 
+## Phase 4: nationwide France
+
+Phase 4 applies one region-aware CatBoost model to all ordinary apartment sales
+available in the national geolocated DVF files, rather than restricting the
+cohort to Paris. It uses global spatial coordinates, region/department/commune
+identities, H3 cells, and 90-day-lagged comparable sales. Paris-only Phase 3
+enrichments are intentionally excluded because their definitions are not
+nationally uniform.
+
+```powershell
+$env:PYTHONPATH = '.\src'
+python -m paris_avm.data.acquire_phase4
+python -m paris_avm.features.phase4
+python -m paris_avm.modeling.benchmark_phase4
+python -m paris_avm.visualization.phase4
+```
+
+Or run all stages with `scripts/run_phase4.ps1`. Downloads and model fitting are
+large. After training, use `python -m paris_avm.inference.phase4 --help` for a
+nationwide single-apartment estimate. Geo-DVF has no open observations for
+departments 57, 67, 68, or 976; reports preserve this limitation explicitly.
+
+The reporting command creates a detailed Markdown study at
+`reports/phase4/PHASE4_REPORT.md` and seven publication/diagnostic figures under
+`visuals/phase4/`. Before the national data run, use `--allow-incomplete` to
+render the full methodology, artifact status and pipeline visualization without
+inventing performance results.
+
+A formal manuscript is generated with `python -m paris_avm.reporting.phase4`
+and compiled through `docs/paper/compile_phase4.ps1`. The resulting
+`docs/paper/phase4_national_report.pdf` is artifact-backed: before training it
+is labeled as a protocol edition, and after training it includes the frozen
+benchmark, paired bootstrap interval and territorial results.
+
 ## Citation
 
 If you use Paris AVM in research or another project, cite it using the

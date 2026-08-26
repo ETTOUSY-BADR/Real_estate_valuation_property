@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "paris-avm"
-version = "0.3.0"
-description = "Leakage-aware Paris apartment valuation with DVF, BAN, BDNB, DPE and neighborhood data."
+version = "0.4.0"
+description = "Leakage-aware apartment valuation for Paris and nationwide France using Geo-DVF."
 readme = "README.md"
 requires-python = ">=3.11"
 authors = [{ name = "Badr Ettousy" }]
@@ -22,6 +22,12 @@ paris-avm-benchmark-phase3 = "paris_avm.modeling.benchmark_phase3:main"
 paris-avm-predict-phase3 = "paris_avm.inference.phase3:main"
 paris-avm-visualize-phase3 = "paris_avm.visualization.phase3:main"
 paris-avm-report-model-evaluation = "paris_avm.visualization.model_evaluation:main"
+paris-avm-acquire-phase4 = "paris_avm.data.acquire_phase4:main"
+paris-avm-build-phase4 = "paris_avm.features.phase4:main"
+paris-avm-benchmark-phase4 = "paris_avm.modeling.benchmark_phase4:main"
+paris-avm-predict-phase4 = "paris_avm.inference.phase4:main"
+paris-avm-visualize-phase4 = "paris_avm.visualization.phase4:main"
+paris-avm-report-phase4 = "paris_avm.reporting.phase4:main"
 
 [tool.setuptools.dynamic]
 dependencies = { file = ["requirements.txt"] }

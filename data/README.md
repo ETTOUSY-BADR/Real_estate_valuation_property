@@ -55,3 +55,12 @@ spatial, historical-comparable, building, point-in-time DPE and neighborhood
 groups, including three externally resolved BAN/BDNB identity fields used by
 the selected Phase 3 model. The run-level provenance report is written to
 `../reports/preprocessing/run_summary.json`.
+
+## Phase 4 nationwide contract
+
+`gold/phase4_france_sale_features.parquet` is built from the compressed annual
+files under `raw/dvf_france/`. It covers every department available in Geo-DVF,
+uses spherical coordinates (including overseas departments), and computes
+90-day-lagged nearby comparables independently within each department. Source
+hashes, territorial coverage, cleaning counts, and comparable coverage are
+written to `../reports/phase4/feature_quality.json`.

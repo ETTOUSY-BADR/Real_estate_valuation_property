@@ -18,6 +18,8 @@ Thumbs.db
 # Raw and derived data
 data/raw/dvf/*.csv
 data/raw/dvf/*.csv.gz
+data/raw/dvf_france/*.csv.gz
+data/raw/dvf_france/manifest.json
 data/bronze/**
 !data/bronze/bdnb/
 !data/bronze/bdnb/release=2026-02-a/
@@ -36,6 +38,7 @@ visuals/**/*.png
 !visuals/phase2/*.png
 !visuals/phase3/*.png
 !visuals/model_evaluation/*.png
+!visuals/phase4/phase4_national_pipeline.png
 
 # LaTeX build products; final PDFs remain shareable
 *.aux

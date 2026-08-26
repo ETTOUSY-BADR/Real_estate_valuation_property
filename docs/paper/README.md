@@ -46,6 +46,22 @@ The resulting professional report is
 `visuals/model_evaluation/` and its machine-readable tables in
 `reports/model_evaluation/`.
 
+The Phase 4 nationwide manuscript is generated directly from the national
+benchmark artifacts and then compiled with:
+
+```powershell
+$env:PYTHONPATH = '.\src'
+python -m paris_avm.visualization.phase4 --allow-incomplete
+python -m paris_avm.reporting.phase4
+powershell -ExecutionPolicy Bypass -File .\docs\paper\compile_phase4.ps1
+```
+
+The outputs are `phase4_national_report.tex` and
+`phase4_national_report.pdf`. Before national training, they form an explicitly
+labeled protocol/pre-benchmark edition; after training, the identical commands
+insert the model comparison, paired bootstrap interval, regional table and all
+empirical figures.
+
 To reproduce the empirical inputs before compiling:
 
 ```powershell

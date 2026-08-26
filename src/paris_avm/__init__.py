@@ -1,3 +1,3 @@
-"""Paris apartment automated valuation research package."""
+"""Leakage-aware apartment valuation research for Paris and France."""
 
-__version__ = "0.3.0"
+__version__ = "0.4.0"
