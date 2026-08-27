@@ -645,6 +645,8 @@ Artifact & Status & Bytes \\
 \bottomrule
 \end{{longtable}}
 
+\begin{{minipage}}{{\textwidth}}
+\small
 \begin{{verbatim}}
 python -m paris_avm.data.acquire_phase4
 python -m paris_avm.features.phase4
@@ -654,6 +656,7 @@ python -m paris_avm.visualization.phase4
 python -m paris_avm.reporting.phase4
 powershell -ExecutionPolicy Bypass -File .\docs\paper\compile_phase4.ps1
 \end{{verbatim}}
+\end{{minipage}}
 
 \section{{Limitations and responsible use}}
 
