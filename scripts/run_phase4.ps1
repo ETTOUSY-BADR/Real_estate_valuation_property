@@ -2,6 +2,7 @@ param(
     [string]$PythonExe = "python",
     [switch]$SkipAcquisition,
     [switch]$SkipFeatureBuild,
+    [switch]$SkipPreflight,
     [switch]$SkipBenchmark,
     [switch]$SkipVisualization,
     [switch]$SkipPaper
@@ -20,6 +21,10 @@ try {
     if (-not $SkipFeatureBuild) {
         & $PythonExe -m paris_avm.features.phase4
         if ($LASTEXITCODE -ne 0) { throw "Phase 4 national feature build failed." }
+    }
+    if (-not $SkipPreflight) {
+        & $PythonExe -m paris_avm.analysis.phase4_preflight
+        if ($LASTEXITCODE -ne 0) { throw "Phase 4 national preflight analysis failed." }
     }
     if (-not $SkipBenchmark) {
         & $PythonExe -m paris_avm.modeling.benchmark_phase4

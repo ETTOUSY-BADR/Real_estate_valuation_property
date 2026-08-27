@@ -51,6 +51,7 @@ benchmark artifacts and then compiled with:
 
 ```powershell
 $env:PYTHONPATH = '.\src'
+python -m paris_avm.analysis.phase4_preflight
 python -m paris_avm.visualization.phase4 --allow-incomplete
 python -m paris_avm.reporting.phase4
 powershell -ExecutionPolicy Bypass -File .\docs\paper\compile_phase4.ps1
@@ -61,6 +62,10 @@ The outputs are `phase4_national_report.tex` and
 labeled protocol/pre-benchmark edition; after training, the identical commands
 insert the model comparison, paired bootstrap interval, regional table and all
 empirical figures.
+
+After the national Gold table exists, the preflight command adds an empirical
+data-quality audit, leakage-safe department market clustering, two diagnostic
+figures and the registered with/without-clustering ablation to the paper.
 
 To reproduce the empirical inputs before compiling:
 

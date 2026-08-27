@@ -32,6 +32,8 @@ from paris_avm.paths import PROJECT_ROOT
 
 
 EARTH_RADIUS_METERS = 6_371_008.8
+MIN_TRANSACTION_VALUE_EUR = 10_000.0
+MAX_TRANSACTION_VALUE_EUR = 10_000_000.0
 LOCAL_WINDOWS = (
     (250, 365),
     (500, 180),
@@ -90,7 +92,6 @@ PHASE4_NUMERIC_FEATURES = (
     "nombre_pieces_principales",
     "adresse_numero",
     "nombre_lots",
-    "surface_terrain",
     "log_surface",
     "rooms_per_10m2",
     "month",
@@ -180,7 +181,9 @@ def _clean_transactions(raw: pd.DataFrame) -> tuple[pd.DataFrame, dict[str, int]
 
     apartments = apartments.loc[
         apartments["surface_reelle_bati"].between(9, 300)
-        & apartments["valeur_fonciere"].between(10_000, 10_000_000)
+        & apartments["valeur_fonciere"].between(
+            MIN_TRANSACTION_VALUE_EUR, MAX_TRANSACTION_VALUE_EUR
+        )
         & apartments["price_per_m2"].between(100, 30_000)
         & apartments["latitude"].between(-90, 90)
         & apartments["longitude"].between(-180, 180)
@@ -269,6 +272,11 @@ def load_and_clean_many(
         frame, counts = load_and_clean_file(path, read_chunk_rows=read_chunk_rows)
         frames.append(frame)
         per_file[path.name] = counts
+        print(
+            f"Cleaned {path.name}: {counts['clean_model_rows']:,} eligible rows "
+            f"from {counts['raw_rows']:,} source rows",
+            flush=True,
+        )
     data = pd.concat(frames, ignore_index=True).sort_values(
         ["date_mutation", "id_mutation"]
     ).reset_index(drop=True)

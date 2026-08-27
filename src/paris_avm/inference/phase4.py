@@ -20,6 +20,7 @@ from paris_avm.features.phase4 import (
     add_geography_features,
 )
 from paris_avm.geography import REGION_NAMES, department_from_commune, region_from_department
+from paris_avm.modeling.benchmark_phase4 import safe_inverse_log_prediction
 from paris_avm.paths import PROJECT_ROOT
 
 
@@ -212,11 +213,15 @@ def main() -> None:
         valuation_date=args.date,
     ).items():
         row[name] = value
+    if "department_market_cluster" in bundle["features"]:
+        mapping = bundle.get("department_market_cluster_mapping", {})
+        row["department_market_cluster"] = mapping.get(department, "market_unknown")
     for column in bundle["categorical_features"]:
         row[column] = row[column].astype("string").fillna("__MISSING__")
-    prediction = max(
-        float(np.expm1(bundle["model"].predict(row[bundle["features"]])[0])), 0
+    prediction_values, clipped = safe_inverse_log_prediction(
+        bundle["model"].predict(row[bundle["features"]])
     )
+    prediction = float(prediction_values[0])
     interval = bundle["prediction_interval"]
     regional = interval.get("regional_calibration", {}).get(str(region), interval)
     lower = prediction * float(regional["lower_price_ratio"])
@@ -227,6 +232,8 @@ def main() -> None:
     print(f"Phase 4 estimated value:      EUR {prediction:,.0f}")
     print(f"Estimated value per m2:       EUR {prediction / args.surface:,.0f}/m2")
     print(f"Empirical 90% interval:       EUR {lower:,.0f} - {upper:,.0f}")
+    if clipped:
+        print("Warning: raw model output was clipped to the registered transaction-value bounds.")
     if args.date.year != 2025:
         print("Warning: frozen out-of-time evaluation is for 2025; this date is an extrapolation.")
 

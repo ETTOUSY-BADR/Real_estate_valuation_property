@@ -24,6 +24,13 @@ building coverage is 99.997%, and 76.85% of all historical sales receive a DPE
 that existed by the transaction date. The audited future-DPE leakage count is
 zero.
 
+The nationwide Phase 4 model reaches **EUR 41,936 MAE**, **13.50% median APE**
+and **0.849 R²** on 350,399 untouched 2025 apartment sales. Its MAE is
+**EUR 10,957 lower** than the training-only geographic median baseline, with a
+paired 95% interval of **EUR 10,763–11,114**. A development-only department
+clustering experiment did not improve 2024 validation MAE, so that feature was
+not retained in the final model.
+
 ## Repository structure
 
 ```text
@@ -175,6 +182,7 @@ nationally uniform.
 $env:PYTHONPATH = '.\src'
 python -m paris_avm.data.acquire_phase4
 python -m paris_avm.features.phase4
+python -m paris_avm.analysis.phase4_preflight
 python -m paris_avm.modeling.benchmark_phase4
 python -m paris_avm.visualization.phase4
 ```
@@ -189,6 +197,12 @@ The reporting command creates a detailed Markdown study at
 `visuals/phase4/`. Before the national data run, use `--allow-incomplete` to
 render the full methodology, artifact status and pipeline visualization without
 inventing performance results.
+
+The preflight stage audits distributions, missingness, territorial balance and
+lagged-comparable coverage before training. It also learns development-only
+department market clusters, publishes two diagnostic figures and compares the
+cluster feature through a 2024 CatBoost ablation. Standardization is restricted
+to K-means profiles; CatBoost numeric inputs are intentionally left unscaled.
 
 A formal manuscript is generated with `python -m paris_avm.reporting.phase4`
 and compiled through `docs/paper/compile_phase4.ps1`. The resulting

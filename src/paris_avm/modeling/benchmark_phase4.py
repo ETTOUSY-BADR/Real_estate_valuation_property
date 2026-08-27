@@ -13,8 +13,11 @@ import numpy as np
 import pandas as pd
 from catboost import CatBoostRegressor
 
+from paris_avm.analysis.phase4_preflight import fit_department_clusters
 from paris_avm.artifacts import write_csv_atomic, write_json_atomic, write_parquet_atomic
 from paris_avm.features.phase4 import (
+    MAX_TRANSACTION_VALUE_EUR,
+    MIN_TRANSACTION_VALUE_EUR,
     PHASE4_CATEGORICAL_FEATURES,
     PHASE4_MODEL_FEATURES,
     PHASE4_NUMERIC_FEATURES,
@@ -25,6 +28,20 @@ from paris_avm.geography import REGION_NAMES
 from paris_avm.modeling.benchmark_phase3 import dump_joblib_atomic
 from paris_avm.modeling.train_phase1 import regression_metrics
 from paris_avm.paths import PROJECT_ROOT
+
+
+MARKET_CLUSTER_FEATURE = "department_market_cluster"
+
+
+def safe_inverse_log_prediction(values: np.ndarray) -> tuple[np.ndarray, int]:
+    """Invert log1p predictions within the registered national value bounds."""
+    raw = np.asarray(values, dtype=float)
+    lower = float(np.log1p(MIN_TRANSACTION_VALUE_EUR))
+    upper = float(np.log1p(MAX_TRANSACTION_VALUE_EUR))
+    invalid = (~np.isfinite(raw)) | (raw < lower) | (raw > upper)
+    bounded = np.nan_to_num(raw, nan=lower, posinf=upper, neginf=lower)
+    bounded = np.clip(bounded, lower, upper)
+    return np.expm1(bounded), int(invalid.sum())
 
 
 def prepare_frame(data: pd.DataFrame) -> pd.DataFrame:
@@ -49,19 +66,42 @@ def make_model(configuration: dict[str, Any]) -> CatBoostRegressor:
 
 
 def fit_predict(
-    train: pd.DataFrame, target: pd.DataFrame, configuration: dict[str, Any]
-) -> tuple[CatBoostRegressor, np.ndarray, float]:
+    train: pd.DataFrame,
+    target: pd.DataFrame,
+    configuration: dict[str, Any],
+    *,
+    features: tuple[str, ...] = PHASE4_MODEL_FEATURES,
+    categorical_features: tuple[str, ...] = PHASE4_CATEGORICAL_FEATURES,
+) -> tuple[CatBoostRegressor, np.ndarray, float, int]:
     started = perf_counter()
     model = make_model(configuration)
     model.fit(
-        train[list(PHASE4_MODEL_FEATURES)],
+        train[list(features)],
         np.log1p(train["valeur_fonciere"]),
-        cat_features=list(PHASE4_CATEGORICAL_FEATURES),
+        cat_features=list(categorical_features),
     )
-    prediction = np.maximum(
-        np.expm1(model.predict(target[list(PHASE4_MODEL_FEATURES)])), 0
+    prediction, clipped_predictions = safe_inverse_log_prediction(
+        model.predict(target[list(features)])
     )
-    return model, prediction, perf_counter() - started
+    return model, prediction, perf_counter() - started, clipped_predictions
+
+
+def add_department_clusters(
+    reference: pd.DataFrame, *frames: pd.DataFrame
+) -> tuple[list[pd.DataFrame], dict[str, str], dict[str, Any]]:
+    """Learn clusters from a reference period and apply them to supplied frames."""
+    profiles, metadata = fit_department_clusters(reference)
+    mapping = dict(
+        zip(profiles["code_departement"].astype(str), profiles["market_cluster"])
+    )
+    transformed: list[pd.DataFrame] = []
+    for frame in frames:
+        output = frame.copy()
+        output[MARKET_CLUSTER_FEATURE] = (
+            output["code_departement"].astype(str).map(mapping).fillna("market_unknown")
+        )
+        transformed.append(output)
+    return transformed, mapping, metadata
 
 
 def hierarchical_baseline(reference: pd.DataFrame, target: pd.DataFrame) -> np.ndarray:
@@ -203,35 +243,87 @@ def main() -> None:
             min(args.max_development_rows, len(development)), random_state=42
         ).sort_values("date_mutation")
 
+    cluster_frames, _, validation_cluster_metadata = add_department_clusters(
+        development, development, validation
+    )
+    clustered_development, clustered_validation = cluster_frames
     configurations = (
-        {"depth": 8, "l2_leaf_reg": 8.0, "loss_function": "MAE"},
-        {"depth": 9, "l2_leaf_reg": 10.0, "loss_function": "Huber:delta=1.0"},
+        (False, {"depth": 8, "l2_leaf_reg": 8.0, "loss_function": "MAE"}),
+        (False, {"depth": 9, "l2_leaf_reg": 10.0, "loss_function": "Huber:delta=1.0"}),
+        (True, {"depth": 8, "l2_leaf_reg": 8.0, "loss_function": "MAE"}),
+        (True, {"depth": 9, "l2_leaf_reg": 10.0, "loss_function": "Huber:delta=1.0"}),
     )
     validation_trials: list[dict[str, object]] = []
-    winner: tuple[float, dict[str, Any], np.ndarray] | None = None
-    for candidate, configuration in enumerate(configurations, 1):
-        _, prediction, seconds = fit_predict(development, validation, configuration)
+    winner: tuple[float, dict[str, Any], bool, np.ndarray] | None = None
+    for candidate, (use_market_cluster, configuration) in enumerate(configurations, 1):
+        candidate_train = clustered_development if use_market_cluster else development
+        candidate_validation = clustered_validation if use_market_cluster else validation
+        features = (
+            PHASE4_MODEL_FEATURES + (MARKET_CLUSTER_FEATURE,)
+            if use_market_cluster
+            else PHASE4_MODEL_FEATURES
+        )
+        categoricals = (
+            PHASE4_CATEGORICAL_FEATURES + (MARKET_CLUSTER_FEATURE,)
+            if use_market_cluster
+            else PHASE4_CATEGORICAL_FEATURES
+        )
+        _, prediction, seconds, clipped_predictions = fit_predict(
+            candidate_train,
+            candidate_validation,
+            configuration,
+            features=features,
+            categorical_features=categoricals,
+        )
         metrics = regression_metrics(validation["valeur_fonciere"].to_numpy(), prediction)
         validation_trials.append(
             {
                 "candidate": candidate,
                 "configuration": json.dumps(configuration, sort_keys=True),
+                "market_cluster_feature": use_market_cluster,
+                "market_clusters": (
+                    validation_cluster_metadata["selected_clusters"]
+                    if use_market_cluster
+                    else 0
+                ),
                 "fit_predict_seconds": round(seconds, 3),
+                "clipped_predictions": clipped_predictions,
                 **metrics,
             }
         )
         if winner is None or metrics["mae_eur"] < winner[0]:
-            winner = (metrics["mae_eur"], configuration.copy(), prediction)
-        print(f"Candidate {candidate}: validation MAE EUR {metrics['mae_eur']:,.0f}", flush=True)
+            winner = (metrics["mae_eur"], configuration.copy(), use_market_cluster, prediction)
+        cluster_label = "with clusters" if use_market_cluster else "without clusters"
+        print(
+            f"Candidate {candidate} ({cluster_label}): validation MAE EUR {metrics['mae_eur']:,.0f}",
+            flush=True,
+        )
     assert winner is not None
 
-    evaluation_model, test_prediction, test_seconds = fit_predict(
-        final_train, test, winner[1]
+    selected_features = PHASE4_MODEL_FEATURES
+    selected_categoricals = PHASE4_CATEGORICAL_FEATURES
+    evaluation_mapping: dict[str, str] = {}
+    evaluation_cluster_metadata: dict[str, Any] | None = None
+    evaluation_train = final_train
+    evaluation_test = test
+    if winner[2]:
+        cluster_frames, evaluation_mapping, evaluation_cluster_metadata = add_department_clusters(
+            final_train, final_train, test
+        )
+        evaluation_train, evaluation_test = cluster_frames
+        selected_features = PHASE4_MODEL_FEATURES + (MARKET_CLUSTER_FEATURE,)
+        selected_categoricals = PHASE4_CATEGORICAL_FEATURES + (MARKET_CLUSTER_FEATURE,)
+    evaluation_model, test_prediction, test_seconds, test_clipped_predictions = fit_predict(
+        evaluation_train,
+        evaluation_test,
+        winner[1],
+        features=selected_features,
+        categorical_features=selected_categoricals,
     )
     baseline_prediction = hierarchical_baseline(final_train, test)
     model_metrics = regression_metrics(test["valeur_fonciere"].to_numpy(), test_prediction)
     baseline_metrics = regression_metrics(test["valeur_fonciere"].to_numpy(), baseline_prediction)
-    calibration_prediction = winner[2]
+    calibration_prediction = winner[3]
     calibration_ratios = validation["valeur_fonciere"].to_numpy() / np.maximum(
         calibration_prediction, 1
     )
@@ -263,7 +355,7 @@ def main() -> None:
 
     feature_importance = pd.DataFrame(
         {
-            "feature": list(PHASE4_MODEL_FEATURES),
+            "feature": list(selected_features),
             "importance": evaluation_model.get_feature_importance(),
         }
     ).sort_values("importance", ascending=False)
@@ -319,6 +411,14 @@ def main() -> None:
             "production": int(len(data)),
         },
         "selected_configuration": winner[1],
+        "selected_market_cluster_feature": winner[2],
+        "market_clustering": {
+            "validation_fit": validation_cluster_metadata,
+            "evaluation_fit": evaluation_cluster_metadata,
+            "unseen_test_departments": sorted(
+                set(test["code_departement"].astype(str)).difference(evaluation_mapping)
+            ) if winner[2] else [],
+        },
         "validation_metrics": regression_metrics(
             validation["valeur_fonciere"].to_numpy(), calibration_prediction
         ),
@@ -329,6 +429,7 @@ def main() -> None:
         ),
         "paired_bootstrap": bootstrap,
         "test_fit_predict_seconds": round(test_seconds, 3),
+        "test_clipped_predictions": test_clipped_predictions,
         "prediction_interval": {
             "nominal_coverage": 0.9,
             "observed_test_coverage": round(float(coverage), 4),
@@ -336,7 +437,7 @@ def main() -> None:
             "upper_price_ratio": round(float(upper_ratio), 6),
             "regional_calibration": region_intervals,
         },
-        "features": list(PHASE4_MODEL_FEATURES),
+        "features": list(selected_features),
         "limitations": [
             "DVF has no open data for departments 57, 67, 68 and 976.",
             "The model covers apartments, not houses, commercial property, or certified appraisals.",
@@ -353,18 +454,28 @@ def main() -> None:
     write_parquet_atomic(predictions, args.output_dir / "test_predictions.parquet")
     write_json_atomic(args.output_dir / "benchmark.json", report)
 
+    production_data = data
+    production_mapping: dict[str, str] = {}
+    production_cluster_metadata: dict[str, Any] | None = None
+    if winner[2]:
+        cluster_frames, production_mapping, production_cluster_metadata = add_department_clusters(
+            data, data
+        )
+        production_data = cluster_frames[0]
     production_model = make_model(winner[1])
     production_model.fit(
-        data[list(PHASE4_MODEL_FEATURES)],
-        np.log1p(data["valeur_fonciere"]),
-        cat_features=list(PHASE4_CATEGORICAL_FEATURES),
+        production_data[list(selected_features)],
+        np.log1p(production_data["valeur_fonciere"]),
+        cat_features=list(selected_categoricals),
     )
     bundle = {
         "phase": 4,
         "model": production_model,
-        "features": list(PHASE4_MODEL_FEATURES),
+        "features": list(selected_features),
         "numeric_features": list(PHASE4_NUMERIC_FEATURES),
-        "categorical_features": list(PHASE4_CATEGORICAL_FEATURES),
+        "categorical_features": list(selected_categoricals),
+        "department_market_cluster_mapping": production_mapping,
+        "market_clustering": production_cluster_metadata,
         "training_date_min": data["date_mutation"].min().date().isoformat(),
         "training_date_max": data["date_mutation"].max().date().isoformat(),
         "scope": report["scope"],

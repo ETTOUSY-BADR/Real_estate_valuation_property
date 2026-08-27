@@ -523,6 +523,7 @@ def render_report(
     region: pd.DataFrame | None,
     comparison: pd.DataFrame | None,
     validation_trials: pd.DataFrame | None,
+    preflight: dict[str, Any] | None = None,
 ) -> None:
     inventory, missing = artifact_inventory(paths)
     ready = not missing
@@ -578,27 +579,67 @@ populated automatically by rerunning the reporting command after the national pi
     else:
         benchmark_table = "_Pending `benchmark_comparison.csv` from the frozen test._"
     if validation_trials is not None and not validation_trials.empty:
+        trial_columns = ["candidate", "configuration"]
+        trial_headers = ["Candidate", "Configuration"]
+        for column, header in (
+            ("market_cluster_feature", "Cluster"),
+            ("clipped_predictions", "Clipped"),
+        ):
+            if column in validation_trials:
+                trial_columns.append(column)
+                trial_headers.append(header)
+        trial_columns.extend(
+            ["mae_eur", "median_absolute_percentage_error", "within_20_percent", "r2"]
+        )
+        trial_headers.extend(["2024 MAE", "2024 MdAPE", "Within ±20%", "R²"])
         validation_table = markdown_table(
             validation_trials.sort_values("mae_eur"),
-            ["candidate", "configuration", "mae_eur", "median_absolute_percentage_error", "within_20_percent", "r2"],
-            ["Candidate", "Configuration", "2024 MAE", "2024 MdAPE", "Within ±20%", "R²"],
+            trial_columns,
+            trial_headers,
         )
     else:
         validation_table = "_Pending `validation_trials.csv` from model selection._"
 
     feature_groups = pd.DataFrame(
         [
-            ("Property", 7, "Surface, rooms, address number, lots, terrain, log surface, room density"),
+            ("Property", 6, "Surface, rooms, address number, lots, log surface and room density"),
             ("Calendar", 4, "Month, day of year, year, months since January 2021"),
             ("Global location", 5, "Latitude, longitude and unit-sphere Cartesian x/y/z"),
             ("Territorial identity", len(PHASE4_CATEGORICAL_FEATURES), "Region, department, commune, postcode and H3 r7/r8/r9"),
-            ("Historical comparables", len(PHASE4_MODEL_FEATURES) - 16 - len(PHASE4_CATEGORICAL_FEATURES), "Lagged counts, medians, dispersion, similarity, distance, age and momentum"),
+            ("Historical comparables", len(PHASE4_MODEL_FEATURES) - 15 - len(PHASE4_CATEGORICAL_FEATURES), "Lagged counts, medians, dispersion, similarity, distance, age and momentum"),
         ],
         columns=["group", "features", "interpretation"],
     )
     feature_table = markdown_table(feature_groups, ["group", "features", "interpretation"], ["Family", "Count", "Purpose"])
     figures_section = figure_links or "_No figures generated._"
     missing_text = ", ".join(f"`{name}`" for name in missing) if missing else "none"
+    if preflight:
+        clustering = preflight["clustering"]
+        ablation_text = "The predictive ablation is pending."
+        if validation_trials is not None and not validation_trials.empty and "market_cluster_feature" in validation_trials:
+            flags = validation_trials["market_cluster_feature"].map(
+                lambda value: value if isinstance(value, bool) else str(value).lower() == "true"
+            )
+            base = validation_trials.loc[~flags, "mae_eur"].min()
+            clustered = validation_trials.loc[flags, "mae_eur"].min()
+            difference = float(clustered - base)
+            decision = "not retained" if difference >= 0 else "retained"
+            ablation_text = (
+                f"The best clustered candidate reaches **EUR {clustered:,.0f} MAE** versus "
+                f"**EUR {base:,.0f}** without clustering (difference **EUR {difference:,.0f}**), "
+                f"so the cluster feature is **{decision}**."
+            )
+        preflight_text = f"""The empirical audit covers **{preflight['rows']:,} transactions** across
+**{preflight['departments']} departments** and **{preflight['regions']} regions**. Weighted lagged-comparable
+coverage is **{preflight['weighted_comparable_coverage']:.2%}**. K-means is fitted only on 2021--2023
+department profiles; the current transaction target is excluded. Silhouette selection retains
+**{clustering['selected_clusters']} clusters**. Median imputation and standardization apply only within
+K-means, not to CatBoost inputs.
+
+{ablation_text}
+See [the detailed preflight report](PHASE4_PREFLIGHT_REPORT.md)."""
+    else:
+        preflight_text = "_Pending the national Gold table and `preflight_summary.json`._"
 
     report = f"""# Phase 4 — Nationwide France apartment valuation
 
@@ -671,8 +712,12 @@ or future transaction can enter its own features.
 
 ## Model and chronological protocol
 
+### Pre-training audit and market clustering
+
+{preflight_text}
+
 - **Development:** 2021–2023.
-- **Selection/calibration:** two predeclared CatBoost configurations evaluated on 2024.
+- **Selection/calibration:** two CatBoost configurations, each evaluated with and without clustering on 2024.
 - **Frozen test:** the selected configuration is refitted through 2024 and evaluated once on 2025.
 - **Production artifact:** after reporting test performance, the chosen model is refitted on 2021–2025.
 - **Target:** `log1p(valeur_fonciere)`, transformed back to non-negative euros.
@@ -747,6 +792,7 @@ serialization. The production bundle records the exact feature-table checksum an
 $env:PYTHONPATH = '.\\src'
 python -m paris_avm.data.acquire_phase4
 python -m paris_avm.features.phase4
+python -m paris_avm.analysis.phase4_preflight
 python -m paris_avm.modeling.benchmark_phase4
 python -m paris_avm.visualization.phase4
 ```
@@ -781,6 +827,8 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--feature-importance", type=Path, default=root / "reports/phase4/feature_importance.csv")
     parser.add_argument("--benchmark-comparison", type=Path, default=root / "reports/phase4/benchmark_comparison.csv")
     parser.add_argument("--validation-trials", type=Path, default=root / "reports/phase4/validation_trials.csv")
+    parser.add_argument("--preflight", type=Path, default=root / "reports/phase4/preflight_summary.json")
+    parser.add_argument("--market-clusters", type=Path, default=root / "reports/phase4/department_market_clusters.csv")
     parser.add_argument("--source-manifest", type=Path, default=root / "data/raw/dvf_france/manifest.json")
     parser.add_argument("--model", type=Path, default=root / "models/phase4/france_catboost.joblib")
     parser.add_argument("--output-dir", type=Path, default=root / "visuals/phase4")
@@ -811,6 +859,10 @@ def main(argv: Sequence[str] | None = None) -> None:
         )
     setup_style()
     figures = [draw_architecture(args.output_dir)]
+    for filename in ("phase4_preflight_data_audit.png", "phase4_department_clusters.png"):
+        existing = args.output_dir / filename
+        if existing.exists():
+            figures.append(existing)
     gold = pd.read_parquet(args.gold) if args.gold.exists() else None
     quality = json.loads(args.quality.read_text(encoding="utf-8")) if args.quality.exists() else None
     benchmark = json.loads(args.benchmark.read_text(encoding="utf-8")) if args.benchmark.exists() else None
@@ -820,6 +872,7 @@ def main(argv: Sequence[str] | None = None) -> None:
     importance = pd.read_csv(args.feature_importance) if args.feature_importance.exists() else None
     comparison = pd.read_csv(args.benchmark_comparison) if args.benchmark_comparison.exists() else None
     validation_trials = pd.read_csv(args.validation_trials) if args.validation_trials.exists() else None
+    preflight = json.loads(args.preflight.read_text(encoding="utf-8")) if args.preflight.exists() else None
     if gold is not None:
         figures.append(draw_coverage(gold, args.output_dir))
         figures.append(draw_comparable_coverage(gold, args.output_dir))
@@ -831,16 +884,22 @@ def main(argv: Sequence[str] | None = None) -> None:
         figures.append(draw_regional_performance(region, department, args.output_dir))
     if importance is not None:
         figures.append(draw_feature_importance(importance, args.output_dir))
+    inventory_paths = {
+        **paths,
+        "preflight_summary": args.preflight,
+        "department_market_clusters": args.market_clusters,
+    }
     render_report(
         args.report,
         args.output_dir,
-        paths,
+        inventory_paths,
         figures,
         benchmark,
         quality,
         region,
         comparison,
         validation_trials,
+        preflight,
     )
 
 

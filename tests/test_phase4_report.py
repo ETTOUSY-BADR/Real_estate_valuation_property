@@ -16,7 +16,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class Phase4ReportTests(unittest.TestCase):
-    def test_repository_contains_compiled_protocol_report(self) -> None:
+    def test_repository_contains_compiled_empirical_report(self) -> None:
         latex = ROOT / "docs/paper/phase4_national_report.tex"
         pdf = ROOT / "docs/paper/phase4_national_report.pdf"
         self.assertTrue(latex.exists())
@@ -25,8 +25,10 @@ class Phase4ReportTests(unittest.TestCase):
         self.assertGreater(pdf.stat().st_size, 300_000)
         source = latex.read_text(encoding="utf-8")
         self.assertIn(r"\author{Badr Ettousy}", source)
-        self.assertIn("Protocol and pre-benchmark edition", source)
-        self.assertIn("No accuracy number is asserted", source)
+        self.assertIn("Empirical benchmark edition", source)
+        self.assertIn("EUR 41,936", source)
+        self.assertIn("350,399 untouched 2025 apartment sales", source)
+        self.assertNotIn("No accuracy number is asserted", source)
 
     def test_empirical_latex_is_populated_only_from_artifacts(self) -> None:
         with TemporaryDirectory() as directory:

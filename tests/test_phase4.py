@@ -23,6 +23,7 @@ from paris_avm.geography import (
 from paris_avm.inference.phase4 import parse_args
 from paris_avm.modeling.benchmark_phase4 import hierarchical_baseline
 from paris_avm.modeling.benchmark_phase4 import paired_bootstrap_summary
+from paris_avm.modeling.benchmark_phase4 import safe_inverse_log_prediction
 
 
 def raw_row(
@@ -186,6 +187,15 @@ class Phase4Tests(unittest.TestCase):
         self.assertEqual(result["sample_rows"], 100)
         self.assertEqual(result["repetitions"], 50)
         self.assertGreater(result["reduction_ci95_lower_eur"], 0)
+
+    def test_inverse_log_prediction_bounds_non_finite_outputs(self) -> None:
+        values, clipped = safe_inverse_log_prediction(
+            np.array([np.log1p(250_000), np.inf, -np.inf, np.nan])
+        )
+        self.assertAlmostEqual(values[0], 250_000)
+        self.assertEqual(clipped, 3)
+        self.assertTrue(np.isfinite(values).all())
+        self.assertTrue(((values >= 10_000) & (values <= 10_000_000)).all())
 
 
 if __name__ == "__main__":

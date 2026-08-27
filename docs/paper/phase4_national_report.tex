@@ -43,18 +43,19 @@ pdftitle={Nationwide France Apartment Valuation: Phase 4 Benchmark},pdfauthor={B
 \title{\textcolor{navy}{\textbf{Nationwide France Apartment Valuation}}\\[0.25em]
 \large Phase 4 Data Engineering, Leakage Controls and\\Chronological Model Benchmark}
 \author{Badr Ettousy}
-\date{26 August 2026\\\small Protocol and pre-benchmark edition}
+\date{27 August 2026\\\small Empirical benchmark edition}
 
 \begin{document}
 \maketitle
 
 \begin{abstract}
-This protocol defines a nationwide France apartment automated valuation
-benchmark using annual geolocated DVF transactions from 2021--2025. It specifies the cohort,
-global spatial representation, strictly lagged comparable-sale features, hierarchical baseline,
-CatBoost candidates, chronological split, paired uncertainty analysis and territorial diagnostics
-before national model results are available. This edition intentionally reports no accuracy number;
-rerunning the generator after the benchmark replaces pending sections with audited empirical tables.
+This report evaluates one region-aware CatBoost automated valuation model
+on 350,399 untouched 2025 apartment sales represented in nationwide Geo-DVF.
+Development uses 2021--2023 and model selection uses 2024. The selected model reaches EUR
+41,936 MAE, 13.50\% median absolute
+percentage error and $R^2=0.8490$. It improves MAE by EUR
+10,957 relative to a training-only hierarchical
+geographic median baseline. All comparable-sale features enforce a minimum 90-day information lag.
 \end{abstract}
 
 \textbf{Keywords:} automated valuation model; Geo-DVF; France; CatBoost;
@@ -73,18 +74,19 @@ model instead uses DVF property attributes, transaction time, hierarchical
 territorial identity, global geometry and point-in-time comparable-sale evidence.
 
 
-\begin{statusbox}
-\textbf{Protocol edition.} The national Gold table and fitted model are not
-present in this workspace. No accuracy number is asserted. The manuscript will
-be regenerated from the frozen benchmark artifacts without manual score entry.
-\end{statusbox}
+\begin{center}
+\metriccard{EUR 41,936}{2025 model MAE} \hfill
+\metriccard{13.50\%}{2025 median APE} \hfill
+\metriccard{66.97\%}{within $\pm 20\%$} \hfill
+\metriccard{90.28\%}{90\% interval coverage}
+\end{center}
 
 
 \subsection*{Decision status}
 \begin{itemize}[leftmargin=1.5em]
 \item The data, benchmark and reporting protocols are fully specified and tested.
-\item National accuracy may be claimed only after the 2025 frozen-test artifacts exist.
-\item Regional MAE must be interpreted beside MdAPE, hit rate and test-row count.
+\item The frozen 2025 result covers 350,399 transactions; no 2025 outcome influenced model selection.
+\item Regional MAE is interpreted beside MdAPE, hit rate and test-row count.
 \item The output is an automated indication, not a certified appraisal.
 \end{itemize}
 
@@ -127,7 +129,9 @@ transaction value, apartment surface, commune and valid WGS84 coordinates.
 Broad national quality bounds are 9--300 m$^2$, EUR 10,000--10,000,000 and EUR
 100--30,000 per m$^2$.
 
-Territorial row counts are pending the national Gold feature build.
+The audited Gold table contains 1,850,486 sales from
+2021-01-01 through 2025-12-31, representing
+97 departments and 17 regions.
 
 Geo-DVF contains no open observations for departments 57, 67, 68, 976.
 ``Nationwide'' therefore means every territory represented upstream, not every
@@ -135,8 +139,8 @@ French department without exception.
 
 \section{Feature engineering contract}
 
-The fitted contract contains 46 inputs:
-39 numeric and
+The fitted contract contains 45 inputs:
+38 numeric and
 7 categorical variables. The current
 transaction's target and price per square metre are excluded.
 
@@ -147,7 +151,7 @@ transaction's target and price per square metre are excluded.
 \toprule
 Family & Inputs & Role \\
 \midrule
-Property & 7 & Surface, rooms, lots, terrain and scale/density transforms \\
+Property & 6 & Surface, rooms, address number, lots and scale/density transforms \\
 Calendar & 4 & Seasonality and elapsed market time \\
 Global location & 5 & WGS84 and unit-sphere Cartesian coordinates \\
 Territorial identity & 7 & Region, department, commune, postcode and H3 r7/r8/r9 \\
@@ -197,25 +201,67 @@ Silent territorial overclaim & Upstream missing departments recorded in every re
 
 \section{Benchmark design}
 
-Development uses 2021--2023. Two predeclared CatBoost configurations are
-compared on 2024; no 2025 outcome participates in selection. The winner is
+\subsection{Pre-training audit and market clustering}
+
+
+The empirical preflight covers 1,850,486 retained transactions,
+97 represented departments and 17
+regions. Weighted lagged-comparable coverage is
+94.00\%. The median transaction value is
+EUR 164,000 and median price per square
+metre is EUR 3,261.
+
+K-means is fitted only to 2021--2023 department profiles. Inputs summarize
+transaction volume, apartment structure and strictly lagged comparable evidence;
+the current transaction target is excluded. Median imputation and standardization
+apply only inside clustering, not to CatBoost. Silhouette selection retains
+2 clusters. These groups are descriptive until
+the with/without-cluster 2024 ablation demonstrates predictive value.
+
+The best clustered candidate records EUR 42,161 validation MAE versus EUR 42,147 without clustering (difference EUR 14); the cluster feature is therefore not retained.
+
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{phase4_preflight_data_audit.png}
+\caption{National pre-training audit: annual volume, price distribution, missingness and regional balance.}
+\label{fig:preflight-audit}
+\end{figure}
+
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{phase4_department_clusters.png}
+\caption{Development-only department market-structure clusters and their geographic distribution.}
+\label{fig:department-clusters}
+\end{figure}
+
+
+
+Development uses 2021--2023. Two predeclared CatBoost configurations are each
+evaluated with and without the market-cluster feature on 2024; no 2025 outcome
+participates in selection. The winner is
 refitted through 2024 and evaluated once on 2025. Only after evaluation is the
 production model refitted on all 2021--2025 observations.
 
 
 \begin{table}[H]
 \centering
-\caption{Predeclared CatBoost candidates for 2024 model selection.}
-\begin{tabular}{clll}
+\caption{CatBoost candidate performance on the 2024 selection cohort.}
+\begin{tabularx}{\textwidth}{cXcrrrr}
 \toprule
-Candidate & Depth & Loss & Regularization \\
+Candidate & Configuration & Cluster & Clipped & MAE & MdAPE & Within $\pm20\%$ \\
 \midrule
-1 & 8 & MAE & $\ell_2=8$ \\
-2 & 9 & Huber ($\delta=1$) & $\ell_2=10$ \\
+1 & depth=8, loss=MAE, l2=8.0 & no & 0 & EUR 42,147 & 13.75\% & 65.55\% \\
+3 & depth=8, loss=MAE, l2=8.0 & yes & 0 & EUR 42,161 & 13.74\% & 65.57\% \\
+4 & depth=9, loss=Huber:delta=1.0, l2=10.0 & yes & 111,119 & EUR 1,544,040 & 56.52\% & 22.83\% \\
+2 & depth=9, loss=Huber:delta=1.0, l2=10.0 & no & 201,487 & EUR 6,031,220 & 3289.83\% & 14.88\% \\
 \bottomrule
-\end{tabular}
+\end{tabularx}
 \end{table}
 
+
+The Huber candidates generated extreme inverse-log outputs. The registered transaction-value bounds prevented non-finite metrics (candidate 2: 201,487, candidate 4: 111,119 clipped predictions), and their resulting validation errors rejected them from selection.
 
 The objective is fitted to $\log(1+y)$ and transformed back to non-negative
 euros. The benchmark baseline calculates median historical price per square
@@ -234,12 +280,22 @@ test rows to bound memory. The exact sample size is stored in the benchmark JSON
 \section{Frozen national benchmark}
 
 
-\begin{statusbox}
-\textbf{Benchmark pending.} The national Gold table and fitted model are not
-present in this workspace. No accuracy number is asserted in this edition.
-The registered comparison is Phase 4 CatBoost versus the hierarchical
-training-only geographic median on the identical untouched 2025 transactions.
-\end{statusbox}
+\begin{table}[H]
+\centering
+\caption{Frozen 2025 national benchmark on identical apartment transactions.}
+\label{tab:national-benchmark}
+\begin{tabular}{lrrrr}
+\toprule
+Method & MAE & RMSE & MdAPE & Within $\pm20\%$ \\
+\midrule
+Phase 4 CatBoost & EUR 41,936 & EUR 92,375 & 13.50\% & 66.97\% \\
+Hierarchical median baseline & EUR 52,894 & EUR 108,830 & 18.37\% & 53.65\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The paired MAE reduction is EUR 10,957;
+its deterministic paired-bootstrap 95\% interval is EUR 10,763--11,114.
 
 
 \section{Territorial robustness}
@@ -250,12 +306,35 @@ rows require at least 100 test transactions; small segments are suppressed
 rather than presented as stable estimates.
 
 
-\begin{statusbox}
-Regional and department metrics are pending the frozen 2025 evaluation. The
-reporting contract requires at least 100 test sales before a territorial row is
-published and at least 500 calibration sales before a region receives its own
-empirical interval ratios.
-\end{statusbox}
+\begin{longtable}{p{4.1cm}rrrrr}
+\caption{Frozen-test performance by region.}\label{tab:regions}\\
+\toprule
+Region & Rows & MAE & MdAPE & Within $\pm20\%$ & $R^2$ \\
+\midrule
+\endfirsthead
+\toprule
+Region & Rows & MAE & MdAPE & Within $\pm20\%$ & $R^2$ \\
+\midrule
+\endhead
+Guyane & 315 & EUR 19,966 & 9.22\% & 80.63\% & 0.4994 \\
+Centre-Val de Loire & 7,583 & EUR 21,840 & 13.68\% & 66.58\% & 0.7694 \\
+Grand Est & 9,357 & EUR 24,482 & 16.37\% & 58.56\% & 0.7401 \\
+Bourgogne-Franche-Comté & 11,843 & EUR 25,396 & 16.72\% & 58.13\% & 0.7188 \\
+La Réunion & 2,006 & EUR 26,674 & 12.34\% & 69.49\% & 0.8030 \\
+Normandie & 12,495 & EUR 27,043 & 14.22\% & 64.66\% & 0.7758 \\
+Hauts-de-France & 13,583 & EUR 27,640 & 13.38\% & 67.53\% & 0.7954 \\
+Occitanie & 37,205 & EUR 27,735 & 13.91\% & 65.27\% & 0.7473 \\
+Pays de la Loire & 14,165 & EUR 29,952 & 12.79\% & 69.22\% & 0.7783 \\
+Bretagne & 14,159 & EUR 30,070 & 12.64\% & 70.00\% & 0.7033 \\
+Martinique & 727 & EUR 30,893 & 14.17\% & 64.24\% & 0.6421 \\
+Guadeloupe & 801 & EUR 32,700 & 14.75\% & 62.92\% & 0.7218 \\
+Nouvelle-Aquitaine & 24,590 & EUR 33,378 & 12.85\% & 68.41\% & 0.7878 \\
+Auvergne-Rhône-Alpes & 53,825 & EUR 37,479 & 14.36\% & 64.55\% & 0.8171 \\
+Corse & 2,596 & EUR 47,649 & 16.12\% & 59.05\% & 0.6277 \\
+Provence-Alpes-Côte d'Azur & 56,352 & EUR 49,751 & 15.34\% & 61.36\% & 0.7395 \\
+Île-de-France & 88,797 & EUR 62,277 & 11.71\% & 73.98\% & 0.8533 \\
+\bottomrule
+\end{longtable}
 
 
 \section{Calibration and uncertainty}
@@ -267,6 +346,53 @@ transfer but is not a formal conditional guarantee for a specific apartment.
 
 \section{Visual diagnostic suite}
 
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{phase4_national_coverage.png}
+\caption{National transaction footprint, retained sales by region and chronological cohorts.}
+\label{fig:coverage}
+\end{figure}
+
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{phase4_performance_dashboard.png}
+\caption{Frozen-test model-versus-baseline benchmark and regional error heterogeneity.}
+\label{fig:performance}
+\end{figure}
+
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{phase4_prediction_diagnostics.png}
+\caption{Out-of-time calibration, residual and value-band diagnostics.}
+\label{fig:diagnostics}
+\end{figure}
+
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{phase4_regional_performance.png}
+\caption{Regional evidence and department-level robustness audit.}
+\label{fig:regional}
+\end{figure}
+
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{phase4_feature_importance.png}
+\caption{CatBoost information usage by feature family and individual input.}
+\label{fig:importance}
+\end{figure}
+
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{phase4_comparable_coverage.png}
+\caption{Lagged comparable-sale availability and density by region.}
+\label{fig:comparables}
+\end{figure}
 
 
 Figures are generated only from existing artifacts. Missing benchmark outputs
@@ -283,23 +409,27 @@ Artifact & Status & Bytes \\
 \toprule Artifact & Status & Bytes \\
 \midrule
 \endhead
-Source manifest & \textbf{pending} & --- \\
-Gold feature table & \textbf{pending} & --- \\
-Feature quality report & \textbf{pending} & --- \\
-Benchmark JSON & \textbf{pending} & --- \\
-Validation trials & \textbf{pending} & --- \\
-Benchmark comparison & \textbf{pending} & --- \\
-Frozen predictions & \textbf{pending} & --- \\
-Regional metrics & \textbf{pending} & --- \\
-Department metrics & \textbf{pending} & --- \\
-Feature importance & \textbf{pending} & --- \\
-Production model & \textbf{pending} & --- \\
+Source manifest & available & 2,319 \\
+Gold feature table & available & 340,479,232 \\
+Feature quality report & available & 8,645 \\
+Preflight summary & available & 2,931 \\
+Department market clusters & available & 21,305 \\
+Preflight Markdown report & available & 2,940 \\
+Benchmark JSON & available & 7,425 \\
+Validation trials & available & 817 \\
+Benchmark comparison & available & 462 \\
+Frozen predictions & available & 15,829,165 \\
+Regional metrics & available & 1,399 \\
+Department metrics & available & 5,795 \\
+Feature importance & available & 1,778 \\
+Production model & available & 497,458,679 \\
 \bottomrule
 \end{longtable}
 
 \begin{verbatim}
 python -m paris_avm.data.acquire_phase4
 python -m paris_avm.features.phase4
+python -m paris_avm.analysis.phase4_preflight
 python -m paris_avm.modeling.benchmark_phase4
 python -m paris_avm.visualization.phase4
 python -m paris_avm.reporting.phase4
@@ -324,9 +454,13 @@ powershell -ExecutionPolicy Bypass -File .\docs\paper\compile_phase4.ps1
 Phase 4 defines a scalable and auditable path from a Paris research model to a
 national France AVM. Its strongest contribution is the combination of global
 geography, local point-in-time market evidence, chronological evaluation and
-territorial reporting. In this protocol and pre-benchmark edition, claims remain limited to the
-artifacts actually present. The empirical edition is generated by the identical
-source after the full national benchmark completes.
+territorial reporting. In this empirical benchmark edition, claims remain limited to the
+artifacts actually present. The completed frozen evaluation supports a national
+2025 MAE of EUR 41,936 and a paired improvement of EUR
+10,957 over the training-only baseline.
+The empirical claims in this edition are generated directly from the registered
+benchmark artifacts; limitations remain especially important for sparse territories
+and for applications beyond the 2025 evaluation period.
 
 \appendix
 \section{Machine-readable deliverables}

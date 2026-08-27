@@ -37,6 +37,11 @@ def latex_escape(value: object) -> str:
     return "".join(replacements.get(character, character) for character in text)
 
 
+def latex_fraction_percent(value: object, digits: int = 2) -> str:
+    """Format a 0--1 fraction as a LaTeX-safe percentage."""
+    return f"{float(value) * 100:.{digits}f}\\%"
+
+
 def metric_table(benchmark: dict[str, Any] | None) -> str:
     if benchmark is None:
         return r"""
@@ -65,8 +70,8 @@ training-only geographic median on the identical untouched 2025 transactions.
 \toprule
 Method & MAE & RMSE & MdAPE & Within $\pm20\%$ \\
 \midrule
-Phase 4 CatBoost & EUR {model['mae_eur']:,.0f} & EUR {model['rmse_eur']:,.0f} & {model['median_absolute_percentage_error']:.2f}\% & {model['within_20_percent']:.2%} \\
-Hierarchical median baseline & EUR {baseline['mae_eur']:,.0f} & EUR {baseline['rmse_eur']:,.0f} & {baseline['median_absolute_percentage_error']:.2f}\% & {baseline['within_20_percent']:.2%} \\
+Phase 4 CatBoost & EUR {model['mae_eur']:,.0f} & EUR {model['rmse_eur']:,.0f} & {model['median_absolute_percentage_error']:.2f}\% & {latex_fraction_percent(model['within_20_percent'])} \\
+Hierarchical median baseline & EUR {baseline['mae_eur']:,.0f} & EUR {baseline['rmse_eur']:,.0f} & {baseline['median_absolute_percentage_error']:.2f}\% & {latex_fraction_percent(baseline['within_20_percent'])} \\
 \bottomrule
 \end{{tabular}}
 \end{{table}}
@@ -90,8 +95,8 @@ be regenerated from the frozen benchmark artifacts without manual score entry.
 \begin{{center}}
 \metriccard{{EUR {model['mae_eur']:,.0f}}}{{2025 model MAE}} \hfill
 \metriccard{{{model['median_absolute_percentage_error']:.2f}\%}}{{2025 median APE}} \hfill
-\metriccard{{{model['within_20_percent']:.2%}}}{{within $\pm 20\%$}} \hfill
-\metriccard{{{benchmark['prediction_interval']['observed_test_coverage']:.2%}}}{{90\% interval coverage}}
+\metriccard{{{latex_fraction_percent(model['within_20_percent'])}}}{{within $\pm 20\%$}} \hfill
+\metriccard{{{latex_fraction_percent(benchmark['prediction_interval']['observed_test_coverage'])}}}{{90\% interval coverage}}
 \end{{center}}
 """
 
@@ -101,13 +106,15 @@ def validation_table(trials: pd.DataFrame | None) -> str:
         return r"""
 \begin{table}[H]
 \centering
-\caption{Predeclared CatBoost candidates for 2024 model selection.}
-\begin{tabular}{clll}
+\caption{Predeclared CatBoost and clustering ablations for 2024 model selection.}
+\begin{tabular}{cllll}
 \toprule
-Candidate & Depth & Loss & Regularization \\
+Candidate & Depth & Loss & Cluster & Regularization \\
 \midrule
-1 & 8 & MAE & $\ell_2=8$ \\
-2 & 9 & Huber ($\delta=1$) & $\ell_2=10$ \\
+1 & 8 & MAE & no & $\ell_2=8$ \\
+2 & 9 & Huber ($\delta=1$) & no & $\ell_2=10$ \\
+3 & 8 & MAE & yes & $\ell_2=8$ \\
+4 & 9 & Huber ($\delta=1$) & yes & $\ell_2=10$ \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -123,24 +130,120 @@ Candidate & Depth & Loss & Regularization \\
             )
         except (json.JSONDecodeError, TypeError):
             description = str(row["configuration"])
+        cluster_value = row.get("market_cluster_feature", False)
+        uses_cluster = (
+            cluster_value.strip().lower() in {"true", "1", "yes"}
+            if isinstance(cluster_value, str)
+            else bool(cluster_value)
+        )
         rows.append(
             f"{int(row['candidate'])} & {latex_escape(description)} & "
+            f"{'yes' if uses_cluster else 'no'} & "
+            f"{int(row.get('clipped_predictions', 0)):,} & "
             f"EUR {row['mae_eur']:,.0f} & {row['median_absolute_percentage_error']:.2f}\\% & "
-            f"{row['within_20_percent']:.2%} \\\\"
+            f"{latex_fraction_percent(row['within_20_percent'])} \\\\"
         )
     body = "\n".join(rows)
     return rf"""
 \begin{{table}}[H]
 \centering
 \caption{{CatBoost candidate performance on the 2024 selection cohort.}}
-\begin{{tabularx}}{{\textwidth}}{{cXrrr}}
+\begin{{tabularx}}{{\textwidth}}{{cXcrrrr}}
 \toprule
-Candidate & Configuration & MAE & MdAPE & Within $\pm20\%$ \\
+Candidate & Configuration & Cluster & Clipped & MAE & MdAPE & Within $\pm20\%$ \\
 \midrule
 {body}
 \bottomrule
 \end{{tabularx}}
 \end{{table}}
+"""
+
+
+def validation_notes(trials: pd.DataFrame | None) -> str:
+    if trials is None or trials.empty or "clipped_predictions" not in trials:
+        return ""
+    clipped = trials.loc[trials["clipped_predictions"].gt(0)]
+    if clipped.empty:
+        return "No validation prediction required output bounding."
+    details = ", ".join(
+        f"candidate {int(row['candidate'])}: {int(row['clipped_predictions']):,}"
+        for _, row in clipped.sort_values("candidate").iterrows()
+    )
+    return (
+        "The Huber candidates generated extreme inverse-log outputs. The registered "
+        f"transaction-value bounds prevented non-finite metrics ({details} clipped predictions), "
+        "and their resulting validation errors rejected them from selection."
+    )
+
+
+def preflight_section(
+    preflight: dict[str, Any] | None,
+    visual_dir: Path,
+    trials: pd.DataFrame | None = None,
+) -> str:
+    figures = "\n".join(
+        filter(
+            None,
+            [
+                optional_figure(
+                    visual_dir,
+                    "phase4_preflight_data_audit.png",
+                    "National pre-training audit: annual volume, price distribution, missingness and regional balance.",
+                    "preflight-audit",
+                ),
+                optional_figure(
+                    visual_dir,
+                    "phase4_department_clusters.png",
+                    "Development-only department market-structure clusters and their geographic distribution.",
+                    "department-clusters",
+                ),
+            ],
+        )
+    )
+    if preflight is None:
+        return r"""
+\begin{statusbox}
+The empirical preflight is pending the national Gold table. The registered audit
+covers temporal and territorial balance, feature missingness, lagged-comparable
+coverage and development-only department clustering before model training.
+\end{statusbox}
+"""
+    clustering = preflight["clustering"]
+    ablation = (
+        "The predictive ablation is pending."
+    )
+    if trials is not None and not trials.empty and "market_cluster_feature" in trials:
+        flags = trials["market_cluster_feature"].map(
+            lambda value: value if isinstance(value, bool) else str(value).lower() == "true"
+        )
+        base = trials.loc[~flags, "mae_eur"].min()
+        clustered = trials.loc[flags, "mae_eur"].min()
+        if pd.notna(base) and pd.notna(clustered):
+            difference = float(clustered - base)
+            decision = "not retained" if difference >= 0 else "retained"
+            ablation = (
+                f"The best clustered candidate records EUR {clustered:,.0f} validation MAE versus "
+                f"EUR {base:,.0f} without clustering (difference EUR {difference:,.0f}); the "
+                f"cluster feature is therefore {decision}."
+            )
+    return rf"""
+The empirical preflight covers {preflight['rows']:,} retained transactions,
+{preflight['departments']} represented departments and {preflight['regions']}
+regions. Weighted lagged-comparable coverage is
+{latex_fraction_percent(preflight['weighted_comparable_coverage'])}. The median transaction value is
+EUR {preflight['median_transaction_value_eur']:,.0f} and median price per square
+metre is EUR {preflight['median_price_per_m2_eur']:,.0f}.
+
+K-means is fitted only to 2021--2023 department profiles. Inputs summarize
+transaction volume, apartment structure and strictly lagged comparable evidence;
+the current transaction target is excluded. Median imputation and standardization
+apply only inside clustering, not to CatBoost. Silhouette selection retains
+{clustering['selected_clusters']} clusters. These groups are descriptive until
+the with/without-cluster 2024 ablation demonstrates predictive value.
+
+{latex_escape(ablation)}
+
+{figures}
 """
 
 
@@ -164,7 +267,7 @@ empirical interval ratios.
         rows.append(
             f"{latex_escape(row['region_name'])} & {int(row['rows']):,} & "
             f"EUR {row['mae_eur']:,.0f} & {row['median_absolute_percentage_error']:.2f}\\% & "
-            f"{row['within_20_percent']:.2%} & {row['r2']:.4f} \\\\"
+            f"{latex_fraction_percent(row['within_20_percent'])} & {row['r2']:.4f} \\\\"
         )
     return rf"""
 \begin{{longtable}}{{p{{4.1cm}}rrrrr}}
@@ -214,6 +317,7 @@ def generate_latex(
     quality_path: Path,
     visual_dir: Path,
     artifact_paths: dict[str, Path],
+    preflight_path: Path | None = None,
 ) -> str:
     benchmark = (
         json.loads(benchmark_path.read_text(encoding="utf-8"))
@@ -231,6 +335,11 @@ def generate_latex(
         if quality_path.exists()
         else None
     )
+    preflight = (
+        json.loads(preflight_path.read_text(encoding="utf-8"))
+        if preflight_path is not None and preflight_path.exists()
+        else None
+    )
     empirical = benchmark is not None
     edition = "Empirical benchmark edition" if empirical else "Protocol and pre-benchmark edition"
     if empirical:
@@ -245,14 +354,35 @@ geographic median baseline. All comparable-sale features enforce a minimum 90-da
         coverage = rf"""The audited Gold table contains {quality['row_count']:,} sales from
 {latex_escape(quality['date_min'])} through {latex_escape(quality['date_max'])}, representing
 {len(quality['observed_departments'])} departments and {len(quality['observed_regions'])} regions.""" if quality else "The Gold cohort is recorded in the benchmark artifacts."
+        decision_status = rf"""\begin{{itemize}}[leftmargin=1.5em]
+\item The data, benchmark and reporting protocols are fully specified and tested.
+\item The frozen 2025 result covers {benchmark['rows']['test']:,} transactions; no 2025 outcome influenced model selection.
+\item Regional MAE is interpreted beside MdAPE, hit rate and test-row count.
+\item The output is an automated indication, not a certified appraisal.
+\end{{itemize}}"""
+        conclusion_status = rf"""The completed frozen evaluation supports a national
+2025 MAE of EUR {model['mae_eur']:,.0f} and a paired improvement of EUR
+{benchmark['mae_reduction_vs_baseline_eur']:,.0f} over the training-only baseline.
+The empirical claims in this edition are generated directly from the registered
+benchmark artifacts; limitations remain especially important for sparse territories
+and for applications beyond the 2025 evaluation period."""
     else:
         abstract = r"""This protocol defines a nationwide France apartment automated valuation
 benchmark using annual geolocated DVF transactions from 2021--2025. It specifies the cohort,
 global spatial representation, strictly lagged comparable-sale features, hierarchical baseline,
 CatBoost candidates, chronological split, paired uncertainty analysis and territorial diagnostics
 before national model results are available. This edition intentionally reports no accuracy number;
-rerunning the generator after the benchmark replaces pending sections with audited empirical tables."""
+        rerunning the generator after the benchmark replaces pending sections with audited empirical tables."""
         coverage = "Territorial row counts are pending the national Gold feature build."
+        decision_status = r"""\begin{itemize}[leftmargin=1.5em]
+\item The data, benchmark and reporting protocols are fully specified and tested.
+\item National accuracy may be claimed only after the 2025 frozen-test artifacts exist.
+\item Regional MAE must be interpreted beside MdAPE, hit rate and test-row count.
+\item The output is an automated indication, not a certified appraisal.
+\end{itemize}"""
+        conclusion_status = r"""Claims in this protocol edition remain limited to the
+method and artifacts actually present. Rerunning the identical generator after the
+full national benchmark completes creates the empirical edition."""
 
     figure_sections = "\n".join(
         filter(
@@ -341,12 +471,7 @@ territorial identity, global geometry and point-in-time comparable-sale evidence
 {executive_status(benchmark)}
 
 \subsection*{{Decision status}}
-\begin{{itemize}}[leftmargin=1.5em]
-\item The data, benchmark and reporting protocols are fully specified and tested.
-\item National accuracy may be claimed only after the 2025 frozen-test artifacts exist.
-\item Regional MAE must be interpreted beside MdAPE, hit rate and test-row count.
-\item The output is an automated indication, not a certified appraisal.
-\end{{itemize}}
+{decision_status}
 
 \section{{Research objective and contributions}}
 
@@ -400,7 +525,7 @@ transaction's target and price per square metre are excluded.
 \toprule
 Family & Inputs & Role \\
 \midrule
-Property & 7 & Surface, rooms, lots, terrain and scale/density transforms \\
+Property & 6 & Surface, rooms, address number, lots and scale/density transforms \\
 Calendar & 4 & Seasonality and elapsed market time \\
 Global location & 5 & WGS84 and unit-sphere Cartesian coordinates \\
 Territorial identity & 7 & Region, department, commune, postcode and H3 r7/r8/r9 \\
@@ -450,12 +575,19 @@ Silent territorial overclaim & Upstream missing departments recorded in every re
 
 \section{{Benchmark design}}
 
-Development uses 2021--2023. Two predeclared CatBoost configurations are
-compared on 2024; no 2025 outcome participates in selection. The winner is
+\subsection{{Pre-training audit and market clustering}}
+
+{preflight_section(preflight, visual_dir, trials)}
+
+Development uses 2021--2023. Two predeclared CatBoost configurations are each
+evaluated with and without the market-cluster feature on 2024; no 2025 outcome
+participates in selection. The winner is
 refitted through 2024 and evaluated once on 2025. Only after evaluation is the
 production model refitted on all 2021--2025 observations.
 
 {validation_table(trials)}
+
+{latex_escape(validation_notes(trials))}
 
 The objective is fitted to $\log(1+y)$ and transformed back to non-negative
 euros. The benchmark baseline calculates median historical price per square
@@ -516,6 +648,7 @@ Artifact & Status & Bytes \\
 \begin{{verbatim}}
 python -m paris_avm.data.acquire_phase4
 python -m paris_avm.features.phase4
+python -m paris_avm.analysis.phase4_preflight
 python -m paris_avm.modeling.benchmark_phase4
 python -m paris_avm.visualization.phase4
 python -m paris_avm.reporting.phase4
@@ -541,8 +674,7 @@ Phase 4 defines a scalable and auditable path from a Paris research model to a
 national France AVM. Its strongest contribution is the combination of global
 geography, local point-in-time market evidence, chronological evaluation and
 territorial reporting. In this {edition.lower()}, claims remain limited to the
-artifacts actually present. The empirical edition is generated by the identical
-source after the full national benchmark completes.
+artifacts actually present. {conclusion_status}
 
 \appendix
 \section{{Machine-readable deliverables}}
@@ -576,6 +708,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--validation-trials", type=Path, default=root / "reports/phase4/validation_trials.csv")
     parser.add_argument("--region-performance", type=Path, default=root / "reports/phase4/region_performance.csv")
     parser.add_argument("--quality", type=Path, default=root / "reports/phase4/feature_quality.json")
+    parser.add_argument("--preflight", type=Path, default=root / "reports/phase4/preflight_summary.json")
     parser.add_argument("--visual-dir", type=Path, default=root / "visuals/phase4")
     return parser
 
@@ -587,6 +720,9 @@ def main() -> None:
         "Source manifest": root / "data/raw/dvf_france/manifest.json",
         "Gold feature table": root / "data/gold/phase4_france_sale_features.parquet",
         "Feature quality report": args.quality,
+        "Preflight summary": args.preflight,
+        "Department market clusters": root / "reports/phase4/department_market_clusters.csv",
+        "Preflight Markdown report": root / "reports/phase4/PHASE4_PREFLIGHT_REPORT.md",
         "Benchmark JSON": args.benchmark,
         "Validation trials": args.validation_trials,
         "Benchmark comparison": root / "reports/phase4/benchmark_comparison.csv",
@@ -604,6 +740,7 @@ def main() -> None:
         quality_path=args.quality,
         visual_dir=args.visual_dir,
         artifact_paths=artifact_paths,
+        preflight_path=args.preflight,
     )
 
 

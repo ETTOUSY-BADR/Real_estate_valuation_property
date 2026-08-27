@@ -33,12 +33,13 @@ data/gold/**
 models/**/*.joblib
 reports/**/*.csv
 reports/**/*.json
+reports/**/*.parquet
 visuals/**/*.png
 !reports/model_evaluation/*.csv
 !visuals/phase2/*.png
 !visuals/phase3/*.png
 !visuals/model_evaluation/*.png
-!visuals/phase4/phase4_national_pipeline.png
+!visuals/phase4/*.png
 
 # LaTeX build products; final PDFs remain shareable
 *.aux
