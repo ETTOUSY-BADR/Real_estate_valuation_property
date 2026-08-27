@@ -153,6 +153,7 @@ artifact-integrity suite.
 - [Phase 3 paper](docs/paper/phase3_paper.pdf)
 - [Complete preprocessing and model-evaluation report](docs/paper/model_evaluation_report.pdf)
 - [Phase 3 technical report](reports/phase3/PHASE3_REPORT.md)
+- [Phase 4 nationwide France report](docs/paper/phase4_national_report.pdf)
 
 The source manifest, feature-quality contract, model comparison and publication
 figures are generated locally under `reports/phase3/` and `visuals/phase3/`.
@@ -191,9 +192,10 @@ inventing performance results.
 
 A formal manuscript is generated with `python -m paris_avm.reporting.phase4`
 and compiled through `docs/paper/compile_phase4.ps1`. The resulting
-`docs/paper/phase4_national_report.pdf` is artifact-backed: before training it
-is labeled as a protocol edition, and after training it includes the frozen
-benchmark, paired bootstrap interval and territorial results.
+[Phase 4 nationwide France report](docs/paper/phase4_national_report.pdf) is
+artifact-backed: before training it is labeled as a protocol edition, and after
+training it includes the frozen benchmark, paired bootstrap interval and
+territorial results.
 
 ## Citation
 
