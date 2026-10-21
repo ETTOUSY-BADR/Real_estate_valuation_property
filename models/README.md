@@ -1,9 +1,10 @@
-# Model artifacts
+# Trained model bundles
 
-Training workflows write serialized estimators beneath this directory. Model
-files are intentionally excluded from Git because they are large generated
-artifacts. Rebuild them with the phase workflow scripts from the repository
-root.
+All saved `.joblib` bundles are published using Git LFS. Run `git lfs install`
+and `git lfs pull` after cloning. These include the selected Paris Phase 3 model,
+the nationwide Phase 4 production refit, and earlier benchmark/Phase 2 models.
 
-The Phase 3 integrity tests run automatically when the expected selected-model
-artifact is available and skip with a clear message in a fresh clone.
+See [the collaborator guide](../COLLABORATOR_GUIDE.md) for setup, feature-table
+requirements, checksums, and the distinction between the Phase 4 production
+refit and its separately recorded held-out evaluation. No retraining is needed
+to download these fitted bundles. Raw source data remain excluded.

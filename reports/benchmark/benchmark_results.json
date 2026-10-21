@@ -1,0 +1,326 @@
+{
+  "schema_version": 1,
+  "benchmark_title": "Paris apartment valuation model benchmark",
+  "scope": "Ordinary Paris apartment sales containing exactly one apartment",
+  "protocol": {
+    "development_training": "2021-2023",
+    "model_selection": "2024",
+    "final_training": "2021-2024",
+    "common_test": "2025",
+    "selection_metric": "validation MAE in euros",
+    "target_for_learned_models": "log1p transaction value",
+    "random_seed": 42,
+    "bootstrap_seed": 20250811,
+    "bootstrap_repetitions": 500
+  },
+  "counts": {
+    "raw_rows": 420058,
+    "raw_mutations": 207365,
+    "single_apartment_sale_rows": 149673,
+    "clean_model_rows": 143009,
+    "removed_during_quality_filters": 6664,
+    "per_file": {
+      "75_2021.csv": {
+        "raw_rows": 81517,
+        "raw_mutations": 43743,
+        "single_apartment_sale_rows": 31835,
+        "clean_model_rows": 30397,
+        "removed_during_quality_filters": 1438
+      },
+      "75_2022.csv": {
+        "raw_rows": 98308,
+        "raw_mutations": 47240,
+        "single_apartment_sale_rows": 34566,
+        "clean_model_rows": 33080,
+        "removed_during_quality_filters": 1486
+      },
+      "75_2023.csv": {
+        "raw_rows": 80993,
+        "raw_mutations": 39417,
+        "single_apartment_sale_rows": 28174,
+        "clean_model_rows": 26798,
+        "removed_during_quality_filters": 1376
+      },
+      "75_2024.csv": {
+        "raw_rows": 74800,
+        "raw_mutations": 36154,
+        "single_apartment_sale_rows": 25595,
+        "clean_model_rows": 24404,
+        "removed_during_quality_filters": 1191
+      },
+      "75.csv": {
+        "raw_rows": 84440,
+        "raw_mutations": 40811,
+        "single_apartment_sale_rows": 29503,
+        "clean_model_rows": 28330,
+        "removed_during_quality_filters": 1173
+      }
+    }
+  },
+  "cohort_rows": {
+    "development_train": 90275,
+    "validation": 24404,
+    "final_train": 114679,
+    "test": 28330
+  },
+  "features": [
+    "surface_reelle_bati",
+    "nombre_pieces_principales",
+    "latitude",
+    "longitude",
+    "adresse_numero",
+    "nombre_lots",
+    "month",
+    "day_of_year",
+    "year",
+    "months_since_2021",
+    "code_postal"
+  ],
+  "search_spaces": {
+    "ridge": [
+      {
+        "alpha": 0.1
+      },
+      {
+        "alpha": 1.0
+      },
+      {
+        "alpha": 10.0
+      },
+      {
+        "alpha": 100.0
+      }
+    ],
+    "random_forest": [
+      {
+        "n_estimators": 240,
+        "max_features": 0.7,
+        "min_samples_leaf": 2
+      },
+      {
+        "n_estimators": 240,
+        "max_features": 1.0,
+        "min_samples_leaf": 2
+      },
+      {
+        "n_estimators": 240,
+        "max_features": 0.7,
+        "min_samples_leaf": 5
+      }
+    ],
+    "hist_gradient_boosting": [
+      {
+        "max_leaf_nodes": 15,
+        "min_samples_leaf": 25,
+        "l2_regularization": 1.0
+      },
+      {
+        "max_leaf_nodes": 31,
+        "min_samples_leaf": 25,
+        "l2_regularization": 1.0
+      },
+      {
+        "max_leaf_nodes": 63,
+        "min_samples_leaf": 40,
+        "l2_regularization": 2.0
+      }
+    ],
+    "xgboost": [
+      {
+        "max_depth": 4,
+        "min_child_weight": 5.0
+      },
+      {
+        "max_depth": 6,
+        "min_child_weight": 5.0
+      },
+      {
+        "max_depth": 8,
+        "min_child_weight": 10.0
+      }
+    ],
+    "lightgbm": [
+      {
+        "num_leaves": 15,
+        "min_child_samples": 25
+      },
+      {
+        "num_leaves": 31,
+        "min_child_samples": 25
+      },
+      {
+        "num_leaves": 63,
+        "min_child_samples": 40
+      }
+    ]
+  },
+  "results": [
+    {
+      "mae_rank": 1,
+      "model_key": "lightgbm",
+      "model": "LightGBM",
+      "family": "Gradient-boosted trees",
+      "selected_configuration": "{\"min_child_samples\": 25, \"num_leaves\": 31}",
+      "validation_mae_eur": 95770.21,
+      "tuning_seconds": 6.322,
+      "final_fit_seconds": 2.046,
+      "test_prediction_seconds": 0.146,
+      "prediction_ms_per_1000": 5.145,
+      "artifact_size_mb": 1.8427,
+      "mae_eur": 96980.69,
+      "rmse_eur": 197106.58,
+      "r2": 0.8619,
+      "mape_percent": 18.67,
+      "median_absolute_percentage_error": 12.33,
+      "within_10_percent": 0.4149,
+      "within_20_percent": 0.7141,
+      "mae_ci95_lower_eur": 94935.0,
+      "mae_ci95_upper_eur": 99014.19,
+      "mae_reduction_vs_baseline_eur": 13887.28,
+      "reduction_ci95_lower_eur": 12896.04,
+      "reduction_ci95_upper_eur": 14905.24
+    },
+    {
+      "mae_rank": 2,
+      "model_key": "xgboost",
+      "model": "XGBoost",
+      "family": "Gradient-boosted trees",
+      "selected_configuration": "{\"max_depth\": 6, \"min_child_weight\": 5.0}",
+      "validation_mae_eur": 95947.69,
+      "tuning_seconds": 9.256,
+      "final_fit_seconds": 3.269,
+      "test_prediction_seconds": 0.067,
+      "prediction_ms_per_1000": 2.374,
+      "artifact_size_mb": 2.603,
+      "mae_eur": 97367.35,
+      "rmse_eur": 199022.57,
+      "r2": 0.8592,
+      "mape_percent": 18.68,
+      "median_absolute_percentage_error": 12.34,
+      "within_10_percent": 0.4122,
+      "within_20_percent": 0.7132,
+      "mae_ci95_lower_eur": 95311.9,
+      "mae_ci95_upper_eur": 99484.89,
+      "mae_reduction_vs_baseline_eur": 13500.62,
+      "reduction_ci95_lower_eur": 12494.89,
+      "reduction_ci95_upper_eur": 14523.57
+    },
+    {
+      "mae_rank": 3,
+      "model_key": "hist_gradient_boosting",
+      "model": "Histogram Gradient Boosting",
+      "family": "Gradient-boosted trees",
+      "selected_configuration": "{\"l2_regularization\": 2.0, \"max_leaf_nodes\": 63, \"min_samples_leaf\": 40}",
+      "validation_mae_eur": 96043.9,
+      "tuning_seconds": 8.548,
+      "final_fit_seconds": 2.866,
+      "test_prediction_seconds": 0.133,
+      "prediction_ms_per_1000": 4.68,
+      "artifact_size_mb": 1.3552,
+      "mae_eur": 97752.52,
+      "rmse_eur": 198027.03,
+      "r2": 0.8606,
+      "mape_percent": 18.8,
+      "median_absolute_percentage_error": 12.48,
+      "within_10_percent": 0.4087,
+      "within_20_percent": 0.7087,
+      "mae_ci95_lower_eur": 95729.73,
+      "mae_ci95_upper_eur": 99883.51,
+      "mae_reduction_vs_baseline_eur": 13115.45,
+      "reduction_ci95_lower_eur": 12155.79,
+      "reduction_ci95_upper_eur": 14128.96
+    },
+    {
+      "mae_rank": 4,
+      "model_key": "random_forest",
+      "model": "Random Forest",
+      "family": "Bagged decision trees",
+      "selected_configuration": "{\"max_features\": 0.7, \"min_samples_leaf\": 5, \"n_estimators\": 240}",
+      "validation_mae_eur": 98207.4,
+      "tuning_seconds": 126.081,
+      "final_fit_seconds": 16.631,
+      "test_prediction_seconds": 0.179,
+      "prediction_ms_per_1000": 6.325,
+      "artifact_size_mb": 383.2671,
+      "mae_eur": 99796.62,
+      "rmse_eur": 200908.95,
+      "r2": 0.8566,
+      "mape_percent": 19.06,
+      "median_absolute_percentage_error": 12.89,
+      "within_10_percent": 0.402,
+      "within_20_percent": 0.7006,
+      "mae_ci95_lower_eur": 97725.94,
+      "mae_ci95_upper_eur": 101899.58,
+      "mae_reduction_vs_baseline_eur": 11071.35,
+      "reduction_ci95_lower_eur": 10187.28,
+      "reduction_ci95_upper_eur": 12131.97
+    },
+    {
+      "mae_rank": 5,
+      "model_key": "median_price_m2",
+      "model": "Median price/m² baseline",
+      "family": "Market heuristic",
+      "selected_configuration": "arrondissement median €/m²",
+      "validation_mae_eur": 113802.59,
+      "tuning_seconds": 0.0,
+      "final_fit_seconds": 0.03,
+      "test_prediction_seconds": 0.026,
+      "prediction_ms_per_1000": 0.911,
+      "artifact_size_mb": 0.0005,
+      "mae_eur": 110867.97,
+      "rmse_eur": 221015.27,
+      "r2": 0.8264,
+      "mape_percent": 23.14,
+      "median_absolute_percentage_error": 14.62,
+      "within_10_percent": 0.3654,
+      "within_20_percent": 0.626,
+      "mae_ci95_lower_eur": 108575.45,
+      "mae_ci95_upper_eur": 113271.85,
+      "mae_reduction_vs_baseline_eur": 0.0,
+      "reduction_ci95_lower_eur": 0.0,
+      "reduction_ci95_upper_eur": 0.0
+    },
+    {
+      "mae_rank": 6,
+      "model_key": "ridge",
+      "model": "Ridge regression",
+      "family": "Regularized linear model",
+      "selected_configuration": "{\"alpha\": 100.0}",
+      "validation_mae_eur": 170015.8,
+      "tuning_seconds": 1.595,
+      "final_fit_seconds": 0.219,
+      "test_prediction_seconds": 0.02,
+      "prediction_ms_per_1000": 0.697,
+      "artifact_size_mb": 0.0065,
+      "mae_eur": 169126.41,
+      "rmse_eur": 549279.87,
+      "r2": -0.0722,
+      "mape_percent": 27.64,
+      "median_absolute_percentage_error": 19.99,
+      "within_10_percent": 0.2551,
+      "within_20_percent": 0.5003,
+      "mae_ci95_lower_eur": 163426.62,
+      "mae_ci95_upper_eur": 174924.36,
+      "mae_reduction_vs_baseline_eur": -58258.44,
+      "reduction_ci95_lower_eur": -63750.87,
+      "reduction_ci95_upper_eur": -53457.98
+    }
+  ],
+  "winner_by_test_mae": "lightgbm",
+  "winner_label": "LightGBM",
+  "software": {
+    "numpy": "1.26.4",
+    "pandas": "2.2.2",
+    "scikit-learn": "1.5.1",
+    "xgboost": "3.4.0",
+    "lightgbm": "4.7.0",
+    "joblib": "1.4.2"
+  },
+  "total_runtime_seconds": 294.138,
+  "limitations": [
+    "The benchmark uses a compact, predefined hyperparameter search rather than an exhaustive optimization.",
+    "The 2025 cohort was not used for fitting or hyperparameter selection, but its results had been inspected during earlier baseline development; it is therefore held out computationally but not fully blind to the analyst.",
+    "DVF omits condition, floor, energy rating, view, occupancy, and detailed building quality.",
+    "Reported bootstrap intervals quantify sampling variability on this cohort, not uncertainty under future market regime changes."
+  ]
+}

@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "dataset": "Geolocated DVF - nationwide France",
+  "retrieved_at_utc": "2026-08-27T10:23:27.632907+00:00",
+  "source_index": "https://files.data.gouv.fr/geo-dvf/latest/csv/",
+  "coverage_note": "DVF does not publish Bas-Rhin (67), Haut-Rhin (68), Moselle (57), or Mayotte (976); all other departments present upstream are retained.",
+  "files": [
+    {
+      "year": 2021,
+      "source_url": "https://files.data.gouv.fr/geo-dvf/latest/csv/2021/full.csv.gz",
+      "path": "C:\\Users\\badre\\OneDrive\\Documents\\real_estate_datasets\\real_estate_valuation_property\\data\\raw\\dvf_france\\france_2021.csv.gz",
+      "bytes": 122292058,
+      "sha256": "bf7146c51827415302539b780e3009277530b40e08f3746fc3d73b2145938a07"
+    },
+    {
+      "year": 2022,
+      "source_url": "https://files.data.gouv.fr/geo-dvf/latest/csv/2022/full.csv.gz",
+      "path": "C:\\Users\\badre\\OneDrive\\Documents\\real_estate_datasets\\real_estate_valuation_property\\data\\raw\\dvf_france\\france_2022.csv.gz",
+      "bytes": 122755368,
+      "sha256": "fb4bc89a8ff5dd057525428dbd5335e229e856522090043a6bf2964e62253d09"
+    },
+    {
+      "year": 2023,
+      "source_url": "https://files.data.gouv.fr/geo-dvf/latest/csv/2023/full.csv.gz",
+      "path": "C:\\Users\\badre\\OneDrive\\Documents\\real_estate_datasets\\real_estate_valuation_property\\data\\raw\\dvf_france\\france_2023.csv.gz",
+      "bytes": 101479952,
+      "sha256": "9ecfee4de5cc1e34e9dbe438cb02b2957ecee2e4cd8cad9d28291e947611b5c6"
+    },
+    {
+      "year": 2024,
+      "source_url": "https://files.data.gouv.fr/geo-dvf/latest/csv/2024/full.csv.gz",
+      "path": "C:\\Users\\badre\\OneDrive\\Documents\\real_estate_datasets\\real_estate_valuation_property\\data\\raw\\dvf_france\\france_2024.csv.gz",
+      "bytes": 92633147,
+      "sha256": "f702185bb169c53627cf3619760e0a93d5e39912d3fded30d587e8033e083cc7"
+    },
+    {
+      "year": 2025,
+      "source_url": "https://files.data.gouv.fr/geo-dvf/latest/csv/2025/full.csv.gz",
+      "path": "C:\\Users\\badre\\OneDrive\\Documents\\real_estate_datasets\\real_estate_valuation_property\\data\\raw\\dvf_france\\france_2025.csv.gz",
+      "bytes": 98313852,
+      "sha256": "bf80533b27c44471287026e9ce679fa803ecdd9efd8267cf5710d40fd7a22980"
+    }
+  ]
+}

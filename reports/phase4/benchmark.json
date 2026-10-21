@@ -1,0 +1,253 @@
+{
+  "schema_version": 1,
+  "phase": 4,
+  "generated_at_utc": "2026-08-27T17:41:24.879812+00:00",
+  "scope": "One nationwide model for ordinary apartment sales available in Geo-DVF",
+  "model_family": "CatBoostRegressor on log transaction value",
+  "feature_table": "C:\\Users\\badre\\OneDrive\\Documents\\real_estate_datasets\\real_estate_valuation_property\\data\\gold\\phase4_france_sale_features.parquet",
+  "feature_table_sha256": "14fb2394f153317a2c2e6975d44ebc4d268e411ac1b5a63b12f861f5642e75e2",
+  "protocol": {
+    "development": "through 2023",
+    "validation": 2024,
+    "test_training": "through 2024",
+    "untouched_test": 2025
+  },
+  "rows": {
+    "development": 1194478,
+    "validation": 305609,
+    "test_training": 1500087,
+    "test": 350399,
+    "production": 1850486
+  },
+  "selected_configuration": {
+    "depth": 8,
+    "l2_leaf_reg": 8.0,
+    "loss_function": "MAE"
+  },
+  "selected_market_cluster_feature": false,
+  "market_clustering": {
+    "validation_fit": {
+      "schema_version": 1,
+      "generated_at_utc": "2026-08-27T15:46:30.132415+00:00",
+      "fit_period": "through 2023",
+      "target_used": false,
+      "cluster_inputs": [
+        "log_transactions",
+        "median_surface_m2",
+        "median_rooms_per_10m2",
+        "weighted_comparable_coverage",
+        "log_median_comparable_ppm2",
+        "log_median_local_count",
+        "log_median_effective_comparables"
+      ],
+      "standardization_scope": "department profiles only; CatBoost inputs are not standardized",
+      "departments": 97,
+      "selected_clusters": 2,
+      "silhouette_scores": {
+        "2": 0.317195,
+        "3": 0.257641,
+        "4": 0.238315,
+        "5": 0.233177,
+        "6": 0.228815,
+        "7": 0.24509,
+        "8": 0.253156
+      },
+      "imputation_medians": {
+        "log_transactions": 8.61431990214696,
+        "median_surface_m2": 57.0,
+        "median_rooms_per_10m2": 0.46153846153846156,
+        "weighted_comparable_coverage": 0.9011070110701107,
+        "log_median_comparable_ppm2": 7.6847389362181335,
+        "log_median_local_count": 3.044522437723423,
+        "log_median_effective_comparables": 3.925919909956879
+      },
+      "cluster_sizes": {
+        "market_01": 47,
+        "market_02": 50
+      }
+    },
+    "evaluation_fit": null,
+    "unseen_test_departments": []
+  },
+  "validation_metrics": {
+    "mae_eur": 42146.82,
+    "rmse_eur": 94159.81,
+    "r2": 0.839,
+    "mape_percent": 27.47,
+    "median_absolute_percentage_error": 13.75,
+    "within_10_percent": 0.3829,
+    "within_20_percent": 0.6555
+  },
+  "test_metrics": {
+    "mae_eur": 41936.46,
+    "rmse_eur": 92374.61,
+    "r2": 0.849,
+    "mape_percent": 24.68,
+    "median_absolute_percentage_error": 13.5,
+    "within_10_percent": 0.3852,
+    "within_20_percent": 0.6697
+  },
+  "baseline_test_metrics": {
+    "mae_eur": 52893.66,
+    "rmse_eur": 108830.28,
+    "r2": 0.7905,
+    "mape_percent": 31.29,
+    "median_absolute_percentage_error": 18.37,
+    "within_10_percent": 0.2909,
+    "within_20_percent": 0.5365
+  },
+  "mae_reduction_vs_baseline_eur": 10957.2,
+  "paired_bootstrap": {
+    "repetitions": 300,
+    "sample_rows": 250000,
+    "model_mae_ci95_lower_eur": 41581.49,
+    "model_mae_ci95_upper_eur": 42205.66,
+    "baseline_mae_ci95_lower_eur": 52496.31,
+    "baseline_mae_ci95_upper_eur": 53208.14,
+    "reduction_ci95_lower_eur": 10763.35,
+    "reduction_ci95_upper_eur": 11113.61
+  },
+  "test_fit_predict_seconds": 1100.386,
+  "test_clipped_predictions": 0,
+  "prediction_interval": {
+    "nominal_coverage": 0.9,
+    "observed_test_coverage": 0.9028,
+    "lower_price_ratio": 0.603992,
+    "upper_price_ratio": 1.426326,
+    "regional_calibration": {
+      "01": {
+        "rows": 771,
+        "lower_price_ratio": 0.562901,
+        "upper_price_ratio": 1.549876
+      },
+      "02": {
+        "rows": 768,
+        "lower_price_ratio": 0.5763,
+        "upper_price_ratio": 1.479019
+      },
+      "04": {
+        "rows": 1999,
+        "lower_price_ratio": 0.660024,
+        "upper_price_ratio": 1.470178
+      },
+      "11": {
+        "rows": 75503,
+        "lower_price_ratio": 0.641329,
+        "upper_price_ratio": 1.345027
+      },
+      "24": {
+        "rows": 6545,
+        "lower_price_ratio": 0.617334,
+        "upper_price_ratio": 1.397478
+      },
+      "27": {
+        "rows": 10763,
+        "lower_price_ratio": 0.567462,
+        "upper_price_ratio": 1.551758
+      },
+      "28": {
+        "rows": 11606,
+        "lower_price_ratio": 0.594213,
+        "upper_price_ratio": 1.438915
+      },
+      "32": {
+        "rows": 12069,
+        "lower_price_ratio": 0.638881,
+        "upper_price_ratio": 1.435606
+      },
+      "44": {
+        "rows": 8769,
+        "lower_price_ratio": 0.565187,
+        "upper_price_ratio": 1.522321
+      },
+      "52": {
+        "rows": 12094,
+        "lower_price_ratio": 0.641998,
+        "upper_price_ratio": 1.378815
+      },
+      "53": {
+        "rows": 12360,
+        "lower_price_ratio": 0.633833,
+        "upper_price_ratio": 1.396731
+      },
+      "75": {
+        "rows": 21080,
+        "lower_price_ratio": 0.62176,
+        "upper_price_ratio": 1.384296
+      },
+      "76": {
+        "rows": 32093,
+        "lower_price_ratio": 0.599586,
+        "upper_price_ratio": 1.452319
+      },
+      "84": {
+        "rows": 47920,
+        "lower_price_ratio": 0.591685,
+        "upper_price_ratio": 1.430974
+      },
+      "93": {
+        "rows": 48835,
+        "lower_price_ratio": 0.562916,
+        "upper_price_ratio": 1.509823
+      },
+      "94": {
+        "rows": 2179,
+        "lower_price_ratio": 0.453243,
+        "upper_price_ratio": 1.554166
+      }
+    }
+  },
+  "features": [
+    "surface_reelle_bati",
+    "nombre_pieces_principales",
+    "adresse_numero",
+    "nombre_lots",
+    "log_surface",
+    "rooms_per_10m2",
+    "month",
+    "day_of_year",
+    "year",
+    "months_since_2021",
+    "latitude",
+    "longitude",
+    "geo_x",
+    "geo_y",
+    "geo_z",
+    "local_365d_250m_count",
+    "local_365d_250m_median_ppm2",
+    "local_180d_500m_count",
+    "local_180d_500m_median_ppm2",
+    "local_365d_500m_count",
+    "local_365d_500m_median_ppm2",
+    "local_730d_500m_count",
+    "local_730d_500m_median_ppm2",
+    "local_180d_1000m_count",
+    "local_180d_1000m_median_ppm2",
+    "local_365d_1000m_count",
+    "local_365d_1000m_median_ppm2",
+    "local_730d_1000m_count",
+    "local_730d_1000m_median_ppm2",
+    "local_365d_500m_mad_ppm2",
+    "weighted_comp_ppm2",
+    "similar_weighted_comp_ppm2",
+    "similar_comparable_count",
+    "effective_comparable_count",
+    "nearest_prior_sale_m",
+    "median_comparable_age_days",
+    "local_momentum_180v365_500m",
+    "local_momentum_180v365_1000m",
+    "code_region",
+    "code_departement",
+    "code_commune",
+    "code_postal",
+    "h3_r7",
+    "h3_r8",
+    "h3_r9"
+  ],
+  "limitations": [
+    "DVF has no open data for departments 57, 67, 68 and 976.",
+    "The model covers apartments, not houses, commercial property, or certified appraisals.",
+    "DVF omits condition, floor, view, occupancy, and renovation quality.",
+    "Sparse rural and overseas submarkets can have weak nearby-comparable coverage."
+  ]
+}

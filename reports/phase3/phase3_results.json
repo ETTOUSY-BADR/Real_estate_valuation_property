@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "protocol": {
+    "development": "2021-2023",
+    "validation_selection": "2024",
+    "final_test": "2025"
+  },
+  "winner": {
+    "mae_rank": 1,
+    "model_key": "catboost_full_identity",
+    "family": "CatBoost",
+    "feature_set": "full_identity",
+    "loss": "MAE",
+    "selected_configuration": "{\"depth\": 7, \"l2_leaf_reg\": 5.0, \"loss_function\": \"MAE\"}",
+    "validation_mae_eur": 92057.6,
+    "final_fit_predict_seconds": 100.985,
+    "mae_eur": 93197.49,
+    "rmse_eur": 192809.48,
+    "r2": 0.8679,
+    "mape_percent": 18.13,
+    "median_absolute_percentage_error": 11.7,
+    "within_10_percent": 0.4386,
+    "within_20_percent": 0.734,
+    "mae_ci95_lower_eur": 91240.67,
+    "mae_ci95_upper_eur": 95330.6,
+    "mae_reduction_vs_baseline_eur": 3230.98,
+    "reduction_ci95_lower_eur": 2685.46,
+    "reduction_ci95_upper_eur": 3730.15
+  },
+  "reference_2025_mae_eur": 96428.47,
+  "interpretation_rule": "DPE-only features are point-in-time; building/context/identity features use current static snapshots and are reported as retrospective reconstruction."
+}

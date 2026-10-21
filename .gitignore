@@ -51,3 +51,15 @@ visuals/**/*.png
 *.synctex.gz
 docs/paper/previews/
 .tmp/
+
+# Published collaborator handoff: fitted models, results and diagnostic figures.
+!models/**/*.joblib
+!reports/**/*.csv
+!reports/**/*.json
+!reports/**/*.parquet
+!visuals/**/*.png
+# Prepared feature tables required by the prediction commands (Git LFS).
+!data/gold/phase2_sale_features.parquet
+!data/gold/phase3_sale_features.parquet
+!data/gold/phase4_france_sale_features.parquet
+!data/raw/dvf_france/manifest.json

@@ -1,0 +1,49 @@
+{
+  "point_estimate_eur": 495595.31,
+  "distribution_method": "Bootstrap of out-of-sample actual/predicted price ratios",
+  "calibration_period": "2024",
+  "coverage_test_period": "2025",
+  "calibration_selection": "same arrondissement and comparable predicted-price band",
+  "calibration_observations": 1396,
+  "simulation_samples": 20000,
+  "quantiles": {
+    "p05_eur": 342214.32,
+    "p10_eur": 397452.42,
+    "p25_eur": 450250.56,
+    "p50_eur": 501662.58,
+    "p75_eur": 553793.02,
+    "p90_eur": 611525.19,
+    "p95_eur": 645261.65
+  },
+  "probability_within_10_percent_of_point_estimate": 0.479,
+  "probability_within_20_percent_of_point_estimate": 0.7672,
+  "interval_calibration_test": [
+    {
+      "nominal": 0.5,
+      "observed": 0.48408048005647725,
+      "lower_ratio": 0.869103696080194,
+      "upper_ratio": 1.1177255043971683
+    },
+    {
+      "nominal": 0.8,
+      "observed": 0.7768090363572185,
+      "lower_ratio": 0.7489903262352076,
+      "upper_ratio": 1.2559585393345984
+    },
+    {
+      "nominal": 0.9,
+      "observed": 0.8902223791034239,
+      "lower_ratio": 0.6492576810724869,
+      "upper_ratio": 1.3733511556334548
+    },
+    {
+      "nominal": 0.95,
+      "observed": 0.944405224144017,
+      "lower_ratio": 0.5328659641657453,
+      "upper_ratio": 1.5119089804383266
+    }
+  ],
+  "warning": "This empirical uncertainty distribution is not a guaranteed appraisal or a Bayesian posterior.",
+  "asking_price_eur": 475000.0,
+  "probability_value_at_least_asking_price": 0.6341
+}

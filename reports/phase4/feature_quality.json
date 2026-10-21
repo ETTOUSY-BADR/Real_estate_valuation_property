@@ -1,0 +1,353 @@
+{
+  "schema_version": 1,
+  "phase": 4,
+  "generated_at_utc": "2026-08-27T11:21:01.183099+00:00",
+  "scope": "All ordinary apartment sales available in nationwide Geo-DVF",
+  "known_upstream_gaps": [
+    "57",
+    "67",
+    "68",
+    "976"
+  ],
+  "observed_departments": [
+    "01",
+    "02",
+    "03",
+    "04",
+    "05",
+    "06",
+    "07",
+    "08",
+    "09",
+    "10",
+    "11",
+    "12",
+    "13",
+    "14",
+    "15",
+    "16",
+    "17",
+    "18",
+    "19",
+    "21",
+    "22",
+    "23",
+    "24",
+    "25",
+    "26",
+    "27",
+    "28",
+    "29",
+    "2A",
+    "2B",
+    "30",
+    "31",
+    "32",
+    "33",
+    "34",
+    "35",
+    "36",
+    "37",
+    "38",
+    "39",
+    "40",
+    "41",
+    "42",
+    "43",
+    "44",
+    "45",
+    "46",
+    "47",
+    "48",
+    "49",
+    "50",
+    "51",
+    "52",
+    "53",
+    "54",
+    "55",
+    "56",
+    "58",
+    "59",
+    "60",
+    "61",
+    "62",
+    "63",
+    "64",
+    "65",
+    "66",
+    "69",
+    "70",
+    "71",
+    "72",
+    "73",
+    "74",
+    "75",
+    "76",
+    "77",
+    "78",
+    "79",
+    "80",
+    "81",
+    "82",
+    "83",
+    "84",
+    "85",
+    "86",
+    "87",
+    "88",
+    "89",
+    "90",
+    "91",
+    "92",
+    "93",
+    "94",
+    "95",
+    "971",
+    "972",
+    "973",
+    "974"
+  ],
+  "observed_regions": [
+    "01",
+    "02",
+    "03",
+    "04",
+    "11",
+    "24",
+    "27",
+    "28",
+    "32",
+    "44",
+    "52",
+    "53",
+    "75",
+    "76",
+    "84",
+    "93",
+    "94"
+  ],
+  "gold_table": "C:\\Users\\badre\\OneDrive\\Documents\\real_estate_datasets\\real_estate_valuation_property\\data\\gold\\phase4_france_sale_features.parquet",
+  "output_sha256": "14fb2394f153317a2c2e6975d44ebc4d268e411ac1b5a63b12f861f5642e75e2",
+  "row_count": 1850486,
+  "date_min": "2021-01-01",
+  "date_max": "2025-12-31",
+  "source_files": [
+    {
+      "path": "C:\\Users\\badre\\OneDrive\\Documents\\real_estate_datasets\\real_estate_valuation_property\\data\\raw\\dvf_france\\france_2021.csv.gz",
+      "bytes": 122292058,
+      "sha256": "bf7146c51827415302539b780e3009277530b40e08f3746fc3d73b2145938a07"
+    },
+    {
+      "path": "C:\\Users\\badre\\OneDrive\\Documents\\real_estate_datasets\\real_estate_valuation_property\\data\\raw\\dvf_france\\france_2022.csv.gz",
+      "bytes": 122755368,
+      "sha256": "fb4bc89a8ff5dd057525428dbd5335e229e856522090043a6bf2964e62253d09"
+    },
+    {
+      "path": "C:\\Users\\badre\\OneDrive\\Documents\\real_estate_datasets\\real_estate_valuation_property\\data\\raw\\dvf_france\\france_2023.csv.gz",
+      "bytes": 101479952,
+      "sha256": "9ecfee4de5cc1e34e9dbe438cb02b2957ecee2e4cd8cad9d28291e947611b5c6"
+    },
+    {
+      "path": "C:\\Users\\badre\\OneDrive\\Documents\\real_estate_datasets\\real_estate_valuation_property\\data\\raw\\dvf_france\\france_2024.csv.gz",
+      "bytes": 92633147,
+      "sha256": "f702185bb169c53627cf3619760e0a93d5e39912d3fded30d587e8033e083cc7"
+    },
+    {
+      "path": "C:\\Users\\badre\\OneDrive\\Documents\\real_estate_datasets\\real_estate_valuation_property\\data\\raw\\dvf_france\\france_2025.csv.gz",
+      "bytes": 98313852,
+      "sha256": "bf80533b27c44471287026e9ce679fa803ecdd9efd8267cf5710d40fd7a22980"
+    }
+  ],
+  "source_cleaning_counts": {
+    "raw_rows": 20382915,
+    "raw_mutations": 7319609,
+    "single_apartment_sale_rows": 1878785,
+    "clean_model_rows": 1850486,
+    "removed_during_quality_filters": 28299,
+    "per_file": {
+      "france_2021.csv.gz": {
+        "raw_rows": 4674542,
+        "raw_mutations": 1726304,
+        "single_apartment_sale_rows": 432524,
+        "clean_model_rows": 423325,
+        "removed_during_quality_filters": 9199
+      },
+      "france_2022.csv.gz": {
+        "raw_rows": 4676187,
+        "raw_mutations": 1688428,
+        "single_apartment_sale_rows": 435059,
+        "clean_model_rows": 427567,
+        "removed_during_quality_filters": 7492
+      },
+      "france_2023.csv.gz": {
+        "raw_rows": 3817426,
+        "raw_mutations": 1361455,
+        "single_apartment_sale_rows": 349036,
+        "clean_model_rows": 343586,
+        "removed_during_quality_filters": 5450
+      },
+      "france_2024.csv.gz": {
+        "raw_rows": 3499931,
+        "raw_mutations": 1229371,
+        "single_apartment_sale_rows": 309277,
+        "clean_model_rows": 305609,
+        "removed_during_quality_filters": 3668
+      },
+      "france_2025.csv.gz": {
+        "raw_rows": 3714829,
+        "raw_mutations": 1314051,
+        "single_apartment_sale_rows": 352889,
+        "clean_model_rows": 350399,
+        "removed_during_quality_filters": 2490
+      }
+    }
+  },
+  "comparable_feature_contract": {
+    "availability_lag_days": 90,
+    "maximum_radius_meters": 1000,
+    "maximum_history_days": 730,
+    "distance_method": "BallTree haversine, processed independently by department",
+    "coverage_by_region": {
+      "01": {
+        "name": "Guadeloupe",
+        "rows": 4795,
+        "weighted_comparable_coverage": 0.9245
+      },
+      "02": {
+        "name": "Martinique",
+        "rows": 4211,
+        "weighted_comparable_coverage": 0.928
+      },
+      "03": {
+        "name": "Guyane",
+        "rows": 1516,
+        "weighted_comparable_coverage": 0.9334
+      },
+      "04": {
+        "name": "La Réunion",
+        "rows": 11761,
+        "weighted_comparable_coverage": 0.9355
+      },
+      "11": {
+        "name": "Île-de-France",
+        "rows": 466641,
+        "weighted_comparable_coverage": 0.9465
+      },
+      "24": {
+        "name": "Centre-Val de Loire",
+        "rows": 39479,
+        "weighted_comparable_coverage": 0.9371
+      },
+      "27": {
+        "name": "Bourgogne-Franche-Comté",
+        "rows": 62931,
+        "weighted_comparable_coverage": 0.9292
+      },
+      "28": {
+        "name": "Normandie",
+        "rows": 66801,
+        "weighted_comparable_coverage": 0.9398
+      },
+      "32": {
+        "name": "Hauts-de-France",
+        "rows": 73507,
+        "weighted_comparable_coverage": 0.9346
+      },
+      "44": {
+        "name": "Grand Est",
+        "rows": 51017,
+        "weighted_comparable_coverage": 0.9325
+      },
+      "52": {
+        "name": "Pays de la Loire",
+        "rows": 74360,
+        "weighted_comparable_coverage": 0.9381
+      },
+      "53": {
+        "name": "Bretagne",
+        "rows": 75081,
+        "weighted_comparable_coverage": 0.9353
+      },
+      "75": {
+        "name": "Nouvelle-Aquitaine",
+        "rows": 128051,
+        "weighted_comparable_coverage": 0.9367
+      },
+      "76": {
+        "name": "Occitanie",
+        "rows": 195034,
+        "weighted_comparable_coverage": 0.9394
+      },
+      "84": {
+        "name": "Auvergne-Rhône-Alpes",
+        "rows": 286894,
+        "weighted_comparable_coverage": 0.937
+      },
+      "93": {
+        "name": "Provence-Alpes-Côte d'Azur",
+        "rows": 295260,
+        "weighted_comparable_coverage": 0.9438
+      },
+      "94": {
+        "name": "Corse",
+        "rows": 13147,
+        "weighted_comparable_coverage": 0.9022
+      }
+    }
+  },
+  "numeric_features": [
+    "surface_reelle_bati",
+    "nombre_pieces_principales",
+    "adresse_numero",
+    "nombre_lots",
+    "surface_terrain",
+    "log_surface",
+    "rooms_per_10m2",
+    "month",
+    "day_of_year",
+    "year",
+    "months_since_2021",
+    "latitude",
+    "longitude",
+    "geo_x",
+    "geo_y",
+    "geo_z",
+    "local_365d_250m_count",
+    "local_365d_250m_median_ppm2",
+    "local_180d_500m_count",
+    "local_180d_500m_median_ppm2",
+    "local_365d_500m_count",
+    "local_365d_500m_median_ppm2",
+    "local_730d_500m_count",
+    "local_730d_500m_median_ppm2",
+    "local_180d_1000m_count",
+    "local_180d_1000m_median_ppm2",
+    "local_365d_1000m_count",
+    "local_365d_1000m_median_ppm2",
+    "local_730d_1000m_count",
+    "local_730d_1000m_median_ppm2",
+    "local_365d_500m_mad_ppm2",
+    "weighted_comp_ppm2",
+    "similar_weighted_comp_ppm2",
+    "similar_comparable_count",
+    "effective_comparable_count",
+    "nearest_prior_sale_m",
+    "median_comparable_age_days",
+    "local_momentum_180v365_500m",
+    "local_momentum_180v365_1000m"
+  ],
+  "categorical_features": [
+    "code_region",
+    "code_departement",
+    "code_commune",
+    "code_postal",
+    "h3_r7",
+    "h3_r8",
+    "h3_r9"
+  ],
+  "excluded_target_derived_columns": [
+    "price_per_m2"
+  ],
+  "runtime_seconds": 3212.179
+}

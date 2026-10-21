@@ -1,0 +1,82 @@
+{
+  "schema_version": 1,
+  "generated_at_utc": "2026-08-27T11:22:13.283311+00:00",
+  "status": "empirical preflight complete",
+  "rows": 1850486,
+  "date_min": "2021-01-01",
+  "date_max": "2025-12-31",
+  "departments": 97,
+  "regions": 17,
+  "rows_by_year": {
+    "2021": 423325,
+    "2022": 427567,
+    "2023": 343586,
+    "2024": 305609,
+    "2025": 350399
+  },
+  "median_transaction_value_eur": 164000.0,
+  "median_price_per_m2_eur": 3260.87,
+  "weighted_comparable_coverage": 0.939985,
+  "preprocessing_decisions": {
+    "surface_terrain_missingness": 0.994423,
+    "surface_terrain_model_status": "excluded after preflight",
+    "catboost_numeric_scaling": "not applied",
+    "kmeans_profile_scaling": "median imputation followed by StandardScaler fitted on development only"
+  },
+  "highest_missingness": {
+    "local_180d_500m_median_ppm2": 0.100356,
+    "local_momentum_180v365_500m": 0.100356,
+    "local_365d_250m_median_ppm2": 0.100321,
+    "local_180d_1000m_median_ppm2": 0.07645,
+    "local_momentum_180v365_1000m": 0.07645,
+    "similar_weighted_comp_ppm2": 0.07512,
+    "local_365d_500m_mad_ppm2": 0.074819,
+    "local_365d_500m_median_ppm2": 0.074819,
+    "local_730d_500m_median_ppm2": 0.068221,
+    "local_365d_1000m_median_ppm2": 0.063563,
+    "effective_comparable_count": 0.060015,
+    "nearest_prior_sale_m": 0.060015
+  },
+  "clustering": {
+    "schema_version": 1,
+    "generated_at_utc": "2026-08-27T11:22:12.497056+00:00",
+    "fit_period": "through 2023",
+    "target_used": false,
+    "cluster_inputs": [
+      "log_transactions",
+      "median_surface_m2",
+      "median_rooms_per_10m2",
+      "weighted_comparable_coverage",
+      "log_median_comparable_ppm2",
+      "log_median_local_count",
+      "log_median_effective_comparables"
+    ],
+    "standardization_scope": "department profiles only; CatBoost inputs are not standardized",
+    "departments": 97,
+    "selected_clusters": 2,
+    "silhouette_scores": {
+      "2": 0.317195,
+      "3": 0.257641,
+      "4": 0.238315,
+      "5": 0.233177,
+      "6": 0.228815,
+      "7": 0.24509,
+      "8": 0.253156
+    },
+    "imputation_medians": {
+      "log_transactions": 8.61431990214696,
+      "median_surface_m2": 57.0,
+      "median_rooms_per_10m2": 0.46153846153846156,
+      "weighted_comparable_coverage": 0.9011070110701107,
+      "log_median_comparable_ppm2": 7.6847389362181335,
+      "log_median_local_count": 3.044522437723423,
+      "log_median_effective_comparables": 3.925919909956879
+    },
+    "cluster_sizes": {
+      "market_01": 47,
+      "market_02": 50
+    }
+  },
+  "cluster_profile_rows": 97,
+  "interpretation": "Clusters are descriptive market-structure groups learned from development-period features. They are not administrative boundaries, causal market definitions, or evidence of predictive improvement until the 2024 ablation is evaluated."
+}

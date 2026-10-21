@@ -1,0 +1,170 @@
+{
+  "schema_version": 1,
+  "generated_at_utc": "2026-08-18T23:26:51.384040+00:00",
+  "status": "complete",
+  "source_files": [
+    "C:\\Users\\badre\\OneDrive\\Documents\\real_estate_datasets\\real_estate_valuation_property\\data\\raw\\dvf\\75_2021.csv",
+    "C:\\Users\\badre\\OneDrive\\Documents\\real_estate_datasets\\real_estate_valuation_property\\data\\raw\\dvf\\75_2022.csv",
+    "C:\\Users\\badre\\OneDrive\\Documents\\real_estate_datasets\\real_estate_valuation_property\\data\\raw\\dvf\\75_2023.csv",
+    "C:\\Users\\badre\\OneDrive\\Documents\\real_estate_datasets\\real_estate_valuation_property\\data\\raw\\dvf\\75_2024.csv",
+    "C:\\Users\\badre\\OneDrive\\Documents\\real_estate_datasets\\real_estate_valuation_property\\data\\raw\\dvf\\75.csv"
+  ],
+  "availability_lag_days": 90,
+  "feature_contract": {
+    "target": "valeur_fonciere",
+    "phase2_feature_count": 44,
+    "phase3_feature_count": 100,
+    "phase2_groups": {
+      "property": [
+        "surface_reelle_bati",
+        "nombre_pieces_principales",
+        "adresse_numero",
+        "nombre_lots",
+        "log_surface",
+        "rooms_per_10m2",
+        "surface_terrain"
+      ],
+      "time": [
+        "month",
+        "day_of_year",
+        "year",
+        "months_since_2021"
+      ],
+      "coordinates": [
+        "latitude",
+        "longitude"
+      ],
+      "spatial": [
+        "x_l93",
+        "y_l93",
+        "distance_paris_center_m",
+        "bearing_sin",
+        "bearing_cos",
+        "h3_r8",
+        "h3_r9"
+      ],
+      "historical_comparables": [
+        "local_365d_250m_count",
+        "local_365d_250m_median_ppm2",
+        "local_180d_500m_count",
+        "local_180d_500m_median_ppm2",
+        "local_365d_500m_count",
+        "local_365d_500m_median_ppm2",
+        "local_730d_500m_count",
+        "local_730d_500m_median_ppm2",
+        "local_180d_1000m_count",
+        "local_180d_1000m_median_ppm2",
+        "local_365d_1000m_count",
+        "local_365d_1000m_median_ppm2",
+        "local_730d_1000m_count",
+        "local_730d_1000m_median_ppm2",
+        "local_365d_500m_mad_ppm2",
+        "weighted_comp_ppm2",
+        "similar_weighted_comp_ppm2",
+        "similar_comparable_count",
+        "effective_comparable_count",
+        "nearest_prior_sale_m",
+        "median_comparable_age_days",
+        "local_momentum_180v365_500m",
+        "local_momentum_180v365_1000m"
+      ],
+      "categorical": [
+        "code_postal"
+      ]
+    },
+    "phase3_groups": {
+      "building": [
+        "ban_match_distance_m",
+        "ban_match_confidence",
+        "bdnb_match_confidence",
+        "bdnb_address_candidate_count",
+        "bdnb_parcel_candidate_count",
+        "building_level_count",
+        "building_year",
+        "building_dwelling_count",
+        "building_height_m",
+        "building_footprint_m2",
+        "building_parking_lot_count",
+        "building_total_lot_count",
+        "building_dwelling_count_rnc",
+        "building_age_at_sale",
+        "building_year_missing",
+        "usage_niveau_1_txt",
+        "mat_mur_txt",
+        "mat_toit_txt",
+        "building_state",
+        "building_period_rnc"
+      ],
+      "dpe_point_in_time": [
+        "dpe_available_at_sale",
+        "dpe_age_days",
+        "dpe_surface_difference_ratio",
+        "dpe_match_confidence",
+        "annee_construction_dpe",
+        "nombre_niveau_logement",
+        "nombre_niveau_immeuble",
+        "surface_habitable_immeuble",
+        "surface_habitable_logement",
+        "conso_5_usages_ep_m2",
+        "emission_ges_5_usages_m2",
+        "classe_bilan_dpe",
+        "classe_emission_ges",
+        "type_installation_chauffage",
+        "type_energie_chauffage"
+      ],
+      "neighborhood_context": [
+        "distance_metro_m",
+        "distance_rer_m",
+        "distance_train_m",
+        "distance_tram_m",
+        "rail_station_mode_count_1000m",
+        "rail_line_count_1000m",
+        "distance_school_m",
+        "school_count_1000m",
+        "distance_green_space_centroid_m",
+        "green_space_count_500m",
+        "green_area_500m2",
+        "distance_shop_service_m",
+        "shop_service_count_500m",
+        "shop_service_count_1000m",
+        "noise_road_lden_db",
+        "noise_rail_ratp_lden_db",
+        "noise_rail_sncf_lden_db",
+        "noise_transport_lden_max_db"
+      ],
+      "external_identity": [
+        "ban_address_id",
+        "bdnb_building_id",
+        "bdnb_match_method"
+      ]
+    },
+    "audit_columns": [
+      "id_mutation",
+      "date_mutation",
+      "id_parcelle",
+      "street_id",
+      "address_id",
+      "parcel_id",
+      "h3_r10",
+      "source_file"
+    ],
+    "excluded_target_derived_columns": [
+      "price_per_m2"
+    ]
+  },
+  "phase2": {
+    "rows": 143009,
+    "output": "C:\\Users\\badre\\OneDrive\\Documents\\real_estate_datasets\\real_estate_valuation_property\\data\\gold\\phase2_sale_features.parquet",
+    "output_sha256": "c18bc693950c36d22fef2125237a8e2426f1cac5aa3eaeaa3bc1bc5bee246c2a",
+    "quality_report": "C:\\Users\\badre\\OneDrive\\Documents\\real_estate_datasets\\real_estate_valuation_property\\reports\\phase2\\feature_quality.json"
+  },
+  "phase3": {
+    "rows": 143009,
+    "columns": 141,
+    "output": "C:\\Users\\badre\\OneDrive\\Documents\\real_estate_datasets\\real_estate_valuation_property\\data\\gold\\phase3_sale_features.parquet",
+    "output_sha256": "8bf9adbaf73f35e1dc286e295e79a0d95fa3e68f7fe9a0eac617611cd18b098c",
+    "quality_report": "C:\\Users\\badre\\OneDrive\\Documents\\real_estate_datasets\\real_estate_valuation_property\\reports\\phase3\\feature_quality.json",
+    "match_audit": "C:\\Users\\badre\\OneDrive\\Documents\\real_estate_datasets\\real_estate_valuation_property\\data\\silver\\phase3_match_audit.parquet"
+  },
+  "runtime_seconds": 364.926
+}

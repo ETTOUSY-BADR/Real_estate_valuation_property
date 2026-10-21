@@ -1,0 +1,133 @@
+{
+  "schema_version": 1,
+  "retrieved_at_utc": "2026-08-12T23:19:53.833561+00:00",
+  "geography": "Paris, department 75",
+  "artifacts": [
+    {
+      "source_id": "ban_paris",
+      "producer": "Base Adresse Nationale / IGN",
+      "license": "Licence Ouverte 2.0",
+      "url": "https://adresse.data.gouv.fr/data/ban/adresses/latest/csv/adresses-75.csv.gz",
+      "path": "data/bronze/ban/snapshot=2026-08-12/adresses-75.csv.gz",
+      "retrieved_at_utc": "2026-08-12T23:19:53.833561+00:00",
+      "bytes": 6359694,
+      "sha256": "38dd8f34090c4a9d8bc04ddf56868f911625de7455592f0e70516288a76a86a7",
+      "snapshot_semantics": "current static address reference"
+    },
+    {
+      "source_id": "bdnb_paris_2026_02_a",
+      "producer": "CSTB",
+      "license": "Licence Ouverte 2.0",
+      "url": "https://open-data.s3.fr-par.scw.cloud/bdnb_millesime_2026-02-a/millesime_2026-02-a_dep75/open_data_millesime_2026-02-a_dep75_csv.zip",
+      "path": "data/bronze/bdnb/release=2026-02-a/open_data_millesime_2026-02-a_dep75_csv.zip",
+      "retrieved_at_utc": "2026-08-12T23:19:53.833561+00:00",
+      "bytes": 263291335,
+      "sha256": "9476d90130607bc33b72cf578bf931210de525c6748dd21a338aac9e8ce972df",
+      "snapshot_semantics": "retrospective static reconstruction"
+    },
+    {
+      "source_id": "bdnb_paris_2026_02_a_metadata",
+      "producer": "CSTB",
+      "license": "Licence Ouverte 2.0",
+      "url": "https://open-data.s3.fr-par.scw.cloud/bdnb_millesime_2026-02-a/millesime_2026-02-a_dep75/open_data_millesime_2026-02-a_dep75_csv_metadata.yml",
+      "path": "data/bronze/bdnb/release=2026-02-a/metadata.yml",
+      "retrieved_at_utc": "2026-08-12T23:19:53.833561+00:00",
+      "bytes": 411,
+      "sha256": "6db5f37b06ca0ae71a987f070cf23ba64f9c23f59a9f3d3364fc8dd632280865"
+    },
+    {
+      "source_id": "idfm_stations",
+      "producer": "Ile-de-France Mobilites",
+      "license": "Licence Ouverte 2.0",
+      "url": "https://data.iledefrance.fr/api/explore/v2.1/catalog/datasets/gares-et-stations-du-reseau-ferre-dile-de-france-par-ligne/exports/csv?lang=fr&timezone=Europe%2FParis&use_labels=false&delimiter=%3B",
+      "path": "data/bronze/phase3/idfm_stations.csv",
+      "retrieved_at_utc": "2026-08-12T23:19:53.833561+00:00",
+      "bytes": 532289,
+      "sha256": "b03cc553ac6ad2b1f16bf2279da1f08e8f6a517b9f73f8c30d2c50addc0e49eb",
+      "snapshot_semantics": "current static context"
+    },
+    {
+      "source_id": "schools_elementary",
+      "producer": "Ville de Paris - DASCO",
+      "license": "ODbL",
+      "url": "https://opendata.paris.fr/api/explore/v2.1/catalog/datasets/etablissements-scolaires-ecoles-elementaires/exports/csv?lang=fr&timezone=Europe%2FParis&use_labels=false&delimiter=%3B",
+      "path": "data/bronze/phase3/schools_elementary.csv",
+      "retrieved_at_utc": "2026-08-12T23:19:53.833561+00:00",
+      "bytes": 544831,
+      "sha256": "3c1a085cb3b4a316ce8cb8946f7e94a48563fdb4bc552fedd25530d4f513e93b",
+      "snapshot_semantics": "current static context"
+    },
+    {
+      "source_id": "schools_maternelle",
+      "producer": "Ville de Paris - DASCO",
+      "license": "ODbL",
+      "url": "https://opendata.paris.fr/api/explore/v2.1/catalog/datasets/etablissements-scolaires-maternelles/exports/csv?lang=fr&timezone=Europe%2FParis&use_labels=false&delimiter=%3B",
+      "path": "data/bronze/phase3/schools_maternelle.csv",
+      "retrieved_at_utc": "2026-08-12T23:19:53.833561+00:00",
+      "bytes": 539240,
+      "sha256": "879e52e11d4359ae1aec698042a047ea34b5f3c0a4efc7604ab94c20d9ef3807",
+      "snapshot_semantics": "current static context"
+    },
+    {
+      "source_id": "schools_colleges",
+      "producer": "Ville de Paris - DASCO",
+      "license": "ODbL",
+      "url": "https://opendata.paris.fr/api/explore/v2.1/catalog/datasets/etablissements-scolaires-colleges/exports/csv?lang=fr&timezone=Europe%2FParis&use_labels=false&delimiter=%3B",
+      "path": "data/bronze/phase3/schools_colleges.csv",
+      "retrieved_at_utc": "2026-08-12T23:19:53.833561+00:00",
+      "bytes": 183176,
+      "sha256": "a2da2bf6a7967b7a0b89f6688fc096b5a3a9a92e12cd759929551f8d770f1bb6",
+      "snapshot_semantics": "current static context"
+    },
+    {
+      "source_id": "green_spaces",
+      "producer": "Ville de Paris - DEVE",
+      "license": "ODbL",
+      "url": "https://opendata.paris.fr/api/explore/v2.1/catalog/datasets/espaces_verts/exports/csv?lang=fr&timezone=Europe%2FParis&use_labels=false&delimiter=%3B",
+      "path": "data/bronze/phase3/green_spaces.csv",
+      "retrieved_at_utc": "2026-08-12T23:19:53.833561+00:00",
+      "bytes": 10961823,
+      "sha256": "97c461e67c2c4af26cff7d4283f39148b77afbf49a370596d27c7dced884aede",
+      "snapshot_semantics": "current static context"
+    },
+    {
+      "source_id": "noise_road_lden",
+      "producer": "DRIEAT Ile-de-France / CEREMA / RATP / SNCF",
+      "license": "Licence Ouverte 2.0",
+      "url": "https://ogc.geo-ide.developpement-durable.gouv.fr/wxs?map=%2Fopt%2Fdata%2Fstack%2Fmapfiles%2F1.4%2Forg_3954051%2Ffr-120066022-orphan-63989501-bf01-4322-b948-5cd1b8b03e05.internet.map&SERVICE=WFS&VERSION=2.0.0&REQUEST=GetFeature&TYPENAMES=ms%3AN_BRUIT_ZBR_INFRA_R_A_LD_S_075&SRSNAME=EPSG%3A2154",
+      "path": "data/bronze/phase3/noise_road_lden.gml",
+      "retrieved_at_utc": "2026-08-12T23:19:53.833561+00:00",
+      "bytes": 112303225,
+      "sha256": "15c7de0e9875baf9e23216976cef48b28d93f39cb779becfd3ea4e8b067d1c29",
+      "snapshot_semantics": "2022 strategic Lden noise map (static)"
+    },
+    {
+      "source_id": "noise_rail_ratp_lden",
+      "producer": "DRIEAT Ile-de-France / CEREMA / RATP / SNCF",
+      "license": "Licence Ouverte 2.0",
+      "url": "https://ogc.geo-ide.developpement-durable.gouv.fr/wxs?map=%2Fopt%2Fdata%2Fstack%2Fmapfiles%2F1.4%2Forg_3954051%2Ffr-120066022-orphan-63989501-bf01-4322-b948-5cd1b8b03e05.internet.map&SERVICE=WFS&VERSION=2.0.0&REQUEST=GetFeature&TYPENAMES=ms%3AN_BRUIT_ZBR_INFRA_RATP_F_A_LD_S_075&SRSNAME=EPSG%3A2154",
+      "path": "data/bronze/phase3/noise_rail_ratp_lden.gml",
+      "retrieved_at_utc": "2026-08-12T23:19:53.833561+00:00",
+      "bytes": 3724750,
+      "sha256": "84dd2863522f0dd6f5d9c2cce978e2f619458d9917b03ffb200764de177f2f81",
+      "snapshot_semantics": "2022 strategic Lden noise map (static)"
+    },
+    {
+      "source_id": "noise_rail_sncf_lden",
+      "producer": "DRIEAT Ile-de-France / CEREMA / RATP / SNCF",
+      "license": "Licence Ouverte 2.0",
+      "url": "https://ogc.geo-ide.developpement-durable.gouv.fr/wxs?map=%2Fopt%2Fdata%2Fstack%2Fmapfiles%2F1.4%2Forg_3954051%2Ffr-120066022-orphan-63989501-bf01-4322-b948-5cd1b8b03e05.internet.map&SERVICE=WFS&VERSION=2.0.0&REQUEST=GetFeature&TYPENAMES=ms%3AN_BRUIT_ZBR_INFRA_SNCF_F_A_LD_S_075&SRSNAME=EPSG%3A2154",
+      "path": "data/bronze/phase3/noise_rail_sncf_lden.gml",
+      "retrieved_at_utc": "2026-08-12T23:19:53.833561+00:00",
+      "bytes": 14568443,
+      "sha256": "14a786dbedc9d8e2d11fc734cb004e3be70c817ba3b6ddfc93dde1fce81e0c4d",
+      "snapshot_semantics": "2022 strategic Lden noise map (static)"
+    }
+  ],
+  "notes": [
+    "DPE must be joined with date_etablissement_dpe <= valuation date.",
+    "BAN, BDNB, transport and amenity releases are current static snapshots.",
+    "No public elevator field was found in the selected open BDNB/DPE schemas.",
+    "BDNB BPE supplies shop/service POIs; Paris Open Data supplies schools and parks."
+  ]
+}

@@ -164,7 +164,7 @@ artifact-integrity suite.
 
 The source manifest, feature-quality contract, model comparison and publication
 figures are generated locally under `reports/phase3/` and `visuals/phase3/`.
-They are intentionally excluded from Git because they are reproducible outputs.
+They are now published for collaborators; trained models and prepared feature tables use Git LFS.
 
 Earlier Phase 1 and Phase 2 experiments remain available in the same package,
 with their reports, models and papers preserved for traceability.
@@ -225,3 +225,7 @@ retrospective reconstruction. Public data did not provide reliable apartment
 floor or elevator fields, so both are explicitly unavailable rather than
 fabricated. Predictions are statistical indications, not certified appraisals
 or investment guarantees.
+
+## Download trained models and results
+
+See [COLLABORATOR_GUIDE.md](COLLABORATOR_GUIDE.md) for Git LFS setup, saved models, prepared inference tables, result files, and checksum verification.

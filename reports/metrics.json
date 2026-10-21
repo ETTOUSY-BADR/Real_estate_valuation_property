@@ -1,0 +1,155 @@
+{
+  "schema_version": 2,
+  "scope": "Ordinary Paris apartment sales with exactly one apartment per transaction",
+  "data_files": [
+    "C:\\Users\\badre\\OneDrive\\Documents\\real_estate_datasets\\75.csv\\75_2021.csv",
+    "C:\\Users\\badre\\OneDrive\\Documents\\real_estate_datasets\\75.csv\\75_2022.csv",
+    "C:\\Users\\badre\\OneDrive\\Documents\\real_estate_datasets\\75.csv\\75_2023.csv",
+    "C:\\Users\\badre\\OneDrive\\Documents\\real_estate_datasets\\75.csv\\75_2024.csv",
+    "C:\\Users\\badre\\OneDrive\\Documents\\real_estate_datasets\\75.csv\\75.csv"
+  ],
+  "counts": {
+    "raw_rows": 420058,
+    "raw_mutations": 207365,
+    "single_apartment_sale_rows": 149673,
+    "clean_model_rows": 143009,
+    "removed_during_quality_filters": 6664,
+    "per_file": {
+      "75_2021.csv": {
+        "raw_rows": 81517,
+        "raw_mutations": 43743,
+        "single_apartment_sale_rows": 31835,
+        "clean_model_rows": 30397,
+        "removed_during_quality_filters": 1438
+      },
+      "75_2022.csv": {
+        "raw_rows": 98308,
+        "raw_mutations": 47240,
+        "single_apartment_sale_rows": 34566,
+        "clean_model_rows": 33080,
+        "removed_during_quality_filters": 1486
+      },
+      "75_2023.csv": {
+        "raw_rows": 80993,
+        "raw_mutations": 39417,
+        "single_apartment_sale_rows": 28174,
+        "clean_model_rows": 26798,
+        "removed_during_quality_filters": 1376
+      },
+      "75_2024.csv": {
+        "raw_rows": 74800,
+        "raw_mutations": 36154,
+        "single_apartment_sale_rows": 25595,
+        "clean_model_rows": 24404,
+        "removed_during_quality_filters": 1191
+      },
+      "75.csv": {
+        "raw_rows": 84440,
+        "raw_mutations": 40811,
+        "single_apartment_sale_rows": 29503,
+        "clean_model_rows": 28330,
+        "removed_during_quality_filters": 1173
+      }
+    }
+  },
+  "protocol": {
+    "development_train": "2021–2023",
+    "validation_and_interval_calibration": "2024",
+    "test_training": "2021–2024",
+    "untouched_test": "2025",
+    "production_refit": "2021–2025"
+  },
+  "date_range": {
+    "all_clean_start": "2021-01-04",
+    "all_clean_end": "2025-12-31",
+    "train_start": "2021-01-04",
+    "train_end": "2023-12-30",
+    "validation_start": "2024-01-02",
+    "validation_end": "2024-12-31",
+    "test_start": "2025-01-02",
+    "test_end": "2025-12-31"
+  },
+  "train_rows": 90275,
+  "validation_rows": 24404,
+  "test_rows": 28330,
+  "production_fit_rows": 143009,
+  "validation_model_metrics": {
+    "mae_eur": 96148.15,
+    "rmse_eur": 195570.64,
+    "r2": 0.8623,
+    "mape_percent": 19.61,
+    "median_absolute_percentage_error": 12.48,
+    "within_10_percent": 0.4146,
+    "within_20_percent": 0.7054
+  },
+  "validation_baseline_metrics": {
+    "mae_eur": 113802.59,
+    "rmse_eur": 218200.05,
+    "r2": 0.8286,
+    "mape_percent": 25.16,
+    "median_absolute_percentage_error": 16.01,
+    "within_10_percent": 0.3377,
+    "within_20_percent": 0.5862
+  },
+  "model_metrics": {
+    "mae_eur": 97817.17,
+    "rmse_eur": 198455.7,
+    "r2": 0.86,
+    "mape_percent": 18.8,
+    "median_absolute_percentage_error": 12.51,
+    "within_10_percent": 0.412,
+    "within_20_percent": 0.7088
+  },
+  "baseline_metrics": {
+    "mae_eur": 110867.97,
+    "rmse_eur": 221015.27,
+    "r2": 0.8264,
+    "mape_percent": 23.14,
+    "median_absolute_percentage_error": 14.62,
+    "within_10_percent": 0.3654,
+    "within_20_percent": 0.626
+  },
+  "feature_importance_mae_increase_eur": {
+    "surface_reelle_bati": 293331.63,
+    "longitude": 30562.34,
+    "latitude": 30116.78,
+    "code_postal": 6780.1,
+    "nombre_pieces_principales": 869.39,
+    "nombre_lots": 833.38,
+    "adresse_numero": 194.07,
+    "month": 42.9,
+    "day_of_year": 35.86,
+    "year": 0.0,
+    "months_since_2021": 0.0
+  },
+  "prediction_interval": {
+    "nominal_coverage": 0.9,
+    "observed_test_coverage": 0.8902,
+    "observed_later_holdout_coverage": 0.8902,
+    "lower_price_ratio": 0.649258,
+    "upper_price_ratio": 1.373351,
+    "calibration_rows": 24404,
+    "evaluation_rows": 28330,
+    "method": "Rolling-origin empirical target/prediction ratios calibrated on 2024 and evaluated on 2025"
+  },
+  "features": [
+    "surface_reelle_bati",
+    "nombre_pieces_principales",
+    "latitude",
+    "longitude",
+    "adresse_numero",
+    "nombre_lots",
+    "month",
+    "day_of_year",
+    "year",
+    "months_since_2021",
+    "code_postal"
+  ],
+  "limitations": [
+    "This is an automated valuation model, not a future-market forecast or certified appraisal.",
+    "DVF prices may include bundled dependencies such as parking or a cellar.",
+    "Renovation quality, floor level, energy rating, and building condition are unavailable.",
+    "The fixed quality bounds restrict the model to ordinary Paris apartments.",
+    "The empirical interval is evaluated under temporal shift and is not a formal conditional guarantee."
+  ]
+}

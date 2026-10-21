@@ -1,0 +1,502 @@
+{
+    "schema_version":  1,
+    "source_commit":  "f0da03184245390d14861c293a4656e64817b745",
+    "description":  "Existing trained artifacts and results; no retraining performed",
+    "files":  [
+                  {
+                      "path":  "data/gold/phase2_sale_features.parquet",
+                      "bytes":  22449357,
+                      "sha256":  "c18bc693950c36d22fef2125237a8e2426f1cac5aa3eaeaa3bc1bc5bee246c2a"
+                  },
+                  {
+                      "path":  "data/gold/phase3_sale_features.parquet",
+                      "bytes":  61538829,
+                      "sha256":  "8bf9adbaf73f35e1dc286e295e79a0d95fa3e68f7fe9a0eac617611cd18b098c"
+                  },
+                  {
+                      "path":  "data/gold/phase4_france_sale_features.parquet",
+                      "bytes":  340479232,
+                      "sha256":  "14fb2394f153317a2c2e6975d44ebc4d268e411ac1b5a63b12f861f5642e75e2"
+                  },
+                  {
+                      "path":  "data/raw/dvf_france/manifest.json",
+                      "bytes":  2319,
+                      "sha256":  "bbcf87f0126b7db1f743fd8f7f4787deab57b63236b14287f206c47b1d27a1aa"
+                  },
+                  {
+                      "path":  "models/benchmark/hist_gradient_boosting.joblib",
+                      "bytes":  1421063,
+                      "sha256":  "b9473462d754ae28bdc06972f5b4e441d4490d643c633b95c277ba40b9c24b0f"
+                  },
+                  {
+                      "path":  "models/benchmark/lightgbm.joblib",
+                      "bytes":  1932176,
+                      "sha256":  "98f253e0ffed59f113996612fff092dabc7c76b450645538af2cf339b9a93768"
+                  },
+                  {
+                      "path":  "models/benchmark/median_price_m2.joblib",
+                      "bytes":  482,
+                      "sha256":  "c1cee912c3cdcfe6447717eb760930a3ee080d483645d273973966753d0be0a0"
+                  },
+                  {
+                      "path":  "models/benchmark/random_forest.joblib",
+                      "bytes":  401884647,
+                      "sha256":  "52c08f63d89f445c40277f3b8e1b71c41aa7a0854822ead6b4b22050fca165cf"
+                  },
+                  {
+                      "path":  "models/benchmark/ridge.joblib",
+                      "bytes":  6816,
+                      "sha256":  "ed80432c0962c43b0019b2156945a768651769a677ee2c7bea0423ec54bbbaa3"
+                  },
+                  {
+                      "path":  "models/benchmark/xgboost.joblib",
+                      "bytes":  2729411,
+                      "sha256":  "51813cf1ba88925ed1713bf180d69dc41a61559290ebd80787f7670840e503d2"
+                  },
+                  {
+                      "path":  "models/phase2/phase2_lightgbm_ppm2.joblib",
+                      "bytes":  2225069,
+                      "sha256":  "6b11592d60fe61efb598f269ca75f011aad4fa0156b6a62526ce10ada30f765f"
+                  },
+                  {
+                      "path":  "models/phase2/phase2_lightgbm_residual.joblib",
+                      "bytes":  2182032,
+                      "sha256":  "1badc024e56865312a2248a7e58a7472d8561f28f30e6d45f59a9bd74bbda20c"
+                  },
+                  {
+                      "path":  "models/phase2/phase2_lightgbm_total.joblib",
+                      "bytes":  2167729,
+                      "sha256":  "f0acdb19e0f618881e510919bf01635919f3bba4f46c78cf513657c7adacd0ab"
+                  },
+                  {
+                      "path":  "models/phase2/phase2_xgboost_ppm2.joblib",
+                      "bytes":  5202552,
+                      "sha256":  "98ced01674f3c6346f22f771a24a94ef2eecad81c5feb4c4441032793ed3d4fc"
+                  },
+                  {
+                      "path":  "models/phase2/phase2_xgboost_residual.joblib",
+                      "bytes":  4762894,
+                      "sha256":  "28a6af10f6299811af9618cb81851a30786ee3b5caa3857e17e4f573b5bb90db"
+                  },
+                  {
+                      "path":  "models/phase2/phase2_xgboost_total.joblib",
+                      "bytes":  5088127,
+                      "sha256":  "582cf335643fa3605b244e0671392c7221d5250dde2b64070ba4aaa7d12e61be"
+                  },
+                  {
+                      "path":  "models/phase3/phase3_selected_model.joblib",
+                      "bytes":  8742014,
+                      "sha256":  "748de114f810c8c4e9593138b71bf8796377d6cafaaf37eb461d61328663f40a"
+                  },
+                  {
+                      "path":  "models/phase4/france_catboost.joblib",
+                      "bytes":  497458679,
+                      "sha256":  "28b15ec3f106fadfa1a4610f8099f5304e98e2c4196ac6db22317735f7698797"
+                  },
+                  {
+                      "path":  "models/valuation_model.joblib",
+                      "bytes":  1474327,
+                      "sha256":  "f138b8291c3da610eeb2da3c9c30960b417313ede2e693996cb794c1ff078f00"
+                  },
+                  {
+                      "path":  "reports/benchmark/benchmark_results.json",
+                      "bytes":  10078,
+                      "sha256":  "2628ccb54592a93763bd09b96f739c1f17248abffa330410e57be9f18bcfecf5"
+                  },
+                  {
+                      "path":  "reports/benchmark/model_comparison.csv",
+                      "bytes":  1836,
+                      "sha256":  "e72ef313a7f29aca205910abe0d9a7fe37ff40515bd80113a981578051261867"
+                  },
+                  {
+                      "path":  "reports/benchmark/monthly_model_errors.csv",
+                      "bytes":  2524,
+                      "sha256":  "ecf9216fa280f41e773da93be373b01a861429045616bc374a98043744eeeb98"
+                  },
+                  {
+                      "path":  "reports/benchmark/paired_mae_comparisons.csv",
+                      "bytes":  3033,
+                      "sha256":  "ff78cea83a0a50cb22e3377f18b77a6611a6bfdc4d6a1a72fc188a7bd66ac46e"
+                  },
+                  {
+                      "path":  "reports/benchmark/test_predictions_all_models.csv",
+                      "bytes":  3610775,
+                      "sha256":  "f2c584ace96d8206d7fef9811622aa02de724bc2f562580be8712e5b5d796d4c"
+                  },
+                  {
+                      "path":  "reports/benchmark/validation_predictions_all_models.csv",
+                      "bytes":  2429345,
+                      "sha256":  "d5c6d66954309a9b626580dd6cb69feef4c4340668078dc3974f40608e7c3795"
+                  },
+                  {
+                      "path":  "reports/benchmark/validation_search_results.csv",
+                      "bytes":  2513,
+                      "sha256":  "ac91106b107b1d54b37a2971443c68bf6e1fda39959917237b85810a3b063d37"
+                  },
+                  {
+                      "path":  "reports/metrics.json",
+                      "bytes":  5067,
+                      "sha256":  "07674b41fe025465d80a9272d479923cb1a9cf272fc74641de2fead98c28e63e"
+                  },
+                  {
+                      "path":  "reports/model_evaluation/calibration_by_value_decile.csv",
+                      "bytes":  625,
+                      "sha256":  "9b645bb281499375d20f979ce71d7375c216e25465c229bb5cdf96e9692509bb"
+                  },
+                  {
+                      "path":  "reports/model_evaluation/feature_family_importance.csv",
+                      "bytes":  207,
+                      "sha256":  "4a9eaab645380cb8067137701ba7bdc160aad9b1d8f8a6df8c68006af1391733"
+                  },
+                  {
+                      "path":  "reports/model_evaluation/feature_importance.csv",
+                      "bytes":  8810,
+                      "sha256":  "d8a9c6ec59c9f19c7a218cd1605da3ec18eced88eb7fe530f2fb735af8dcc403"
+                  },
+                  {
+                      "path":  "reports/model_evaluation/model_performance.csv",
+                      "bytes":  3037,
+                      "sha256":  "80f6aab91dc7406b98d95a5899f1370f67f1f9144a1781100fa2cd38edc95f1a"
+                  },
+                  {
+                      "path":  "reports/model_evaluation/segment_performance.csv",
+                      "bytes":  4174,
+                      "sha256":  "7570f551d1355bec7507e6710f90651891cfc00982aafa497ee75b011dde7473"
+                  },
+                  {
+                      "path":  "reports/phase2/comparable_correction_search.csv",
+                      "bytes":  20658,
+                      "sha256":  "dafa2ed8edf1c8b57363bbf62718038153cfa148d3f7902e20b7ab669e3bd842"
+                  },
+                  {
+                      "path":  "reports/phase2/feature_quality.json",
+                      "bytes":  11049,
+                      "sha256":  "48efc81087c295c611c192d990bee4a18985e99c2c542e668667cf59186e581d"
+                  },
+                  {
+                      "path":  "reports/phase2/phase2_feature_importance.csv",
+                      "bytes":  23433,
+                      "sha256":  "b159677f97f6ff67f324dc0fce2949ac2dd82b7f743b28d4c7e88759ce7838aa"
+                  },
+                  {
+                      "path":  "reports/phase2/phase2_model_comparison.csv",
+                      "bytes":  3320,
+                      "sha256":  "7816c1fc10949bde01a84e96fbfe53e538745b625c6c6f1df0d295cf28493aa7"
+                  },
+                  {
+                      "path":  "reports/phase2/phase2_monthly_mae.csv",
+                      "bytes":  493,
+                      "sha256":  "b8ec243022c3615a692a69de903e4e08518b6f0cca6387311ffa509c411e9fd9"
+                  },
+                  {
+                      "path":  "reports/phase2/phase2_results.json",
+                      "bytes":  15433,
+                      "sha256":  "95ad0fb936420f0432fbf3b772a9e0231706b760a111b16d2d989a3b51b9d59a"
+                  },
+                  {
+                      "path":  "reports/phase2/phase2_test_predictions.csv",
+                      "bytes":  4387657,
+                      "sha256":  "a91aaaa9e4227a5fc60b9e6fdcf2dc86343a3a61aa18933b99edf8e8bedb9248"
+                  },
+                  {
+                      "path":  "reports/phase2/phase2_validation_search.csv",
+                      "bytes":  3318,
+                      "sha256":  "179f0d51a9666a61f85d0110c0692295c445b67b7ce68a753c6eb1beededba86"
+                  },
+                  {
+                      "path":  "reports/phase3/feature_quality.json",
+                      "bytes":  10404,
+                      "sha256":  "f5e0aa03fed6446cca2a8657cd26b7e8df8605b5dea20af52c373553dcc90309"
+                  },
+                  {
+                      "path":  "reports/phase3/phase3_model_comparison.csv",
+                      "bytes":  3037,
+                      "sha256":  "80f6aab91dc7406b98d95a5899f1370f67f1f9144a1781100fa2cd38edc95f1a"
+                  },
+                  {
+                      "path":  "reports/phase3/phase3_results.json",
+                      "bytes":  1130,
+                      "sha256":  "875524d7b39ef0160666acaffa850410ecf133edbbfd59d9253795617e96f847"
+                  },
+                  {
+                      "path":  "reports/phase3/phase3_test_predictions.csv",
+                      "bytes":  4681684,
+                      "sha256":  "68e0f9f0bfca1bdb0edc59287c5e987cd03782c79e7fa453f00624b1f9718d4d"
+                  },
+                  {
+                      "path":  "reports/phase3/phase3_validation_search.csv",
+                      "bytes":  4003,
+                      "sha256":  "23db6bd36f2706c1a34398c833d7924ba287a2ef5fab34c8f2417a3c591d3a06"
+                  },
+                  {
+                      "path":  "reports/phase3/source_manifest.json",
+                      "bytes":  7543,
+                      "sha256":  "7973989a1f406282a4655da5433696da8c82a0a51bbe4ab9041f14ddf5ccc039"
+                  },
+                  {
+                      "path":  "reports/phase4/benchmark.json",
+                      "bytes":  7425,
+                      "sha256":  "d86405cbe0cc7db3a801775af1a6aa7d30f35c47599ab9d7bd71a5d347ced08d"
+                  },
+                  {
+                      "path":  "reports/phase4/benchmark_comparison.csv",
+                      "bytes":  462,
+                      "sha256":  "4fe870f24b6c5064a07c0c95c1406ed8234306f1b2f5825ff7fa6933fb15afef"
+                  },
+                  {
+                      "path":  "reports/phase4/department_market_clusters.csv",
+                      "bytes":  21305,
+                      "sha256":  "852d4824e801f8cc8b95484ca4c10a38a9b2fcff5a0bd5f34f71ec8254b926cc"
+                  },
+                  {
+                      "path":  "reports/phase4/department_performance.csv",
+                      "bytes":  5795,
+                      "sha256":  "363a9dfc2e2d523d995301d1d898ab685706187b806da56e197e3a348f393e6b"
+                  },
+                  {
+                      "path":  "reports/phase4/feature_importance.csv",
+                      "bytes":  1778,
+                      "sha256":  "dd62f8b44e8eeb42b89cc73031a80e98fadc968cd819549d55a73c71d5a86a0e"
+                  },
+                  {
+                      "path":  "reports/phase4/feature_quality.json",
+                      "bytes":  8645,
+                      "sha256":  "4214841f2c1d0d557c36e7cb164aa0b62abd9a27f18cb73aff793f4e168847fe"
+                  },
+                  {
+                      "path":  "reports/phase4/preflight_summary.json",
+                      "bytes":  2931,
+                      "sha256":  "2a0023a5c60fff673e3567149a67749c05fefc5afd28af7e7a00de466ffa0137"
+                  },
+                  {
+                      "path":  "reports/phase4/region_performance.csv",
+                      "bytes":  1399,
+                      "sha256":  "3fd4575a277d392c862b5f00165bd45caf1d138d101ed57f302f935dfc3fd524"
+                  },
+                  {
+                      "path":  "reports/phase4/test_predictions.parquet",
+                      "bytes":  15829165,
+                      "sha256":  "052613cc4ddd388bf9d6ee4fe526f64e97bc87c5822f627953f74274a389e292"
+                  },
+                  {
+                      "path":  "reports/phase4/validation_trials.csv",
+                      "bytes":  817,
+                      "sha256":  "1cec3f55b6091ea657abb8848002e4ddbb60890ecc206b92725a42a6d7f164f6"
+                  },
+                  {
+                      "path":  "reports/preprocessing/run_summary.json",
+                      "bytes":  5959,
+                      "sha256":  "683d147740c4c5709a8136e8f45452f05e4375a47cce2e0e1be4eebaf3d5694d"
+                  },
+                  {
+                      "path":  "reports/property_probability.json",
+                      "bytes":  1562,
+                      "sha256":  "f5bb370c61d8f581cba311595de385f1076320a895444b8f0bbc682b664c0e98"
+                  },
+                  {
+                      "path":  "reports/test_predictions.csv",
+                      "bytes":  2854793,
+                      "sha256":  "014a134df39caaa350ae0e4c41abd300e3f27a7cb05b82a6cf4141b74a26e225"
+                  },
+                  {
+                      "path":  "reports/validation_predictions.csv",
+                      "bytes":  2460659,
+                      "sha256":  "5ab60f046fe41511cc5dd65e03df4ca0b6caaff300c0bab7e2b5595b97ec7cd7"
+                  },
+                  {
+                      "path":  "visuals/arrondissement_market_comparison.png",
+                      "bytes":  153675,
+                      "sha256":  "18e3dfc0a2008776554d9b844b80b97b08c5bfa5c9a8348915e118de8c05bed8"
+                  },
+                  {
+                      "path":  "visuals/benchmark/benchmark_accuracy.png",
+                      "bytes":  310103,
+                      "sha256":  "8e3da36324b0657c90828f91a4229a7ed1d1d534d251fc31109d30a7675e2d89"
+                  },
+                  {
+                      "path":  "visuals/benchmark/benchmark_efficiency.png",
+                      "bytes":  154497,
+                      "sha256":  "be861d52432526ef32be53d5e5e995fbeb27dfa5137d5159d3b6a7972d3ba085"
+                  },
+                  {
+                      "path":  "visuals/benchmark/benchmark_monthly_stability.png",
+                      "bytes":  204346,
+                      "sha256":  "47346e4e0ec9b2106adca01810d985d11e5dc285d4da48f44749085258c172bc"
+                  },
+                  {
+                      "path":  "visuals/benchmark/benchmark_pairwise_differences.png",
+                      "bytes":  194729,
+                      "sha256":  "00dba3c41d7ecba80f6d90f10d25c2c006ced48d97c08a24b8de698f3f921ff6"
+                  },
+                  {
+                      "path":  "visuals/bias_and_stability_dashboard.png",
+                      "bytes":  606083,
+                      "sha256":  "5961664cabf8863c6c2040c3d37b0d71f41d1d1885a11b02fee15d7cdd2f27a1"
+                  },
+                  {
+                      "path":  "visuals/holdout_price_per_m2_map.png",
+                      "bytes":  1264586,
+                      "sha256":  "6ff414693662eed2f99217034eac2f5431602579319c2558dbc901fec4096a00"
+                  },
+                  {
+                      "path":  "visuals/model_evaluation/model_evaluation_coverage_diagnostics.png",
+                      "bytes":  292871,
+                      "sha256":  "54a2e7daa7e72ea8ecab39d040721a6f08dd89ebb7334953f7f4feb0f0f1e392"
+                  },
+                  {
+                      "path":  "visuals/model_evaluation/model_evaluation_feature_contract.png",
+                      "bytes":  231460,
+                      "sha256":  "35efed7d268e1a5d16f3a0d6b2a3a79da346941e98966b264bcc3b2a82fe51d6"
+                  },
+                  {
+                      "path":  "visuals/model_evaluation/model_evaluation_performance_ladder.png",
+                      "bytes":  141637,
+                      "sha256":  "4d6c5823a13d056723cfa16dfb6e701e7d88e35ccb55f800d7bed22f31c1fa92"
+                  },
+                  {
+                      "path":  "visuals/model_evaluation/model_evaluation_segment_dashboard.png",
+                      "bytes":  355062,
+                      "sha256":  "be1929caa1a414e09de57abd5a1994a30f33bb1f747505dc04114d723faf9782"
+                  },
+                  {
+                      "path":  "visuals/model_performance_dashboard.png",
+                      "bytes":  786134,
+                      "sha256":  "7b6523ecf169c0b1aabf94342a79d74a874858bdd1dfc39a564c8e19a96b7e8b"
+                  },
+                  {
+                      "path":  "visuals/model_workflow_infographic.png",
+                      "bytes":  1235430,
+                      "sha256":  "55fcc00e28065cb6a9110c04e2e24d304ec2338669261788199a4f3325c6670a"
+                  },
+                  {
+                      "path":  "visuals/phase2/comparable_coverage.png",
+                      "bytes":  140919,
+                      "sha256":  "c34b85d3025ecc5a889d0ef8488fe06f68ed8b21fc09f6002bc9f5662e32fadd"
+                  },
+                  {
+                      "path":  "visuals/phase2/comparable_weight_selection.png",
+                      "bytes":  214436,
+                      "sha256":  "4f3aa048dafe08b8a75f3c05978c36de07e3322bb9d2c1872532905b1ed394f8"
+                  },
+                  {
+                      "path":  "visuals/phase2/correction_diagnostics.png",
+                      "bytes":  499851,
+                      "sha256":  "3ef485bf7ef80652ab81083b1a71f2e0b228bbfad1342115183aab6a5ed7cd86"
+                  },
+                  {
+                      "path":  "visuals/phase2/phase2_accuracy.png",
+                      "bytes":  185397,
+                      "sha256":  "67b7b524c5d0a01c61073f02c5ce4e6e31e3a85dd5239c7823ffe64470cc97c4"
+                  },
+                  {
+                      "path":  "visuals/phase2/phase2_feature_importance.png",
+                      "bytes":  184540,
+                      "sha256":  "08922e32fbb78b43083918bef9b2114c5672068e359b4452d1fb9704becb4ea3"
+                  },
+                  {
+                      "path":  "visuals/phase3/phase3_data_pipeline.png",
+                      "bytes":  252583,
+                      "sha256":  "14ee077f5f498e19401ace08c7465b4bbb67790f4279513bc8bcb374f9cf060f"
+                  },
+                  {
+                      "path":  "visuals/phase3/phase3_enrichment_profile.png",
+                      "bytes":  262951,
+                      "sha256":  "75d22f1eea0954b142fd57b7a9687b975a7fdac553777d90bd01526993105733"
+                  },
+                  {
+                      "path":  "visuals/phase3/phase3_feature_importance.png",
+                      "bytes":  278733,
+                      "sha256":  "08712e89595583e1915ad49ce6ff5ec7130b8593cf8be165877e7e68f4919127"
+                  },
+                  {
+                      "path":  "visuals/phase3/phase3_prediction_diagnostics.png",
+                      "bytes":  549791,
+                      "sha256":  "dd231d244c350d34cde14281ba76bedacd0bce39904bebe1bc6af27f10951550"
+                  },
+                  {
+                      "path":  "visuals/phase3/phase3_results_dashboard.png",
+                      "bytes":  282701,
+                      "sha256":  "68185315ca14c803a2fc8979ba6ece3d72a1ab38647b0f09928da1f1e2e70ba3"
+                  },
+                  {
+                      "path":  "visuals/phase3/phase3_spatial_performance.png",
+                      "bytes":  1025843,
+                      "sha256":  "dd9926ff8fc4a8142a68ea2225c558f3b6669b361e7017379736d234a47b4ce0"
+                  },
+                  {
+                      "path":  "visuals/phase4/phase4_comparable_coverage.png",
+                      "bytes":  276415,
+                      "sha256":  "8d48b6de93cfc22a9f9dc8314ac44955581710f403835518b0c621f15fb9ca9f"
+                  },
+                  {
+                      "path":  "visuals/phase4/phase4_department_clusters.png",
+                      "bytes":  165573,
+                      "sha256":  "a2f3f88dff8b5a5a496ac83272743b77daa0f844abb26882bcb9dfa74e387b4c"
+                  },
+                  {
+                      "path":  "visuals/phase4/phase4_feature_importance.png",
+                      "bytes":  229555,
+                      "sha256":  "b587d5482d3e8cfa664332d24793840a841de08e1b48662d49b4a49a829f9729"
+                  },
+                  {
+                      "path":  "visuals/phase4/phase4_national_coverage.png",
+                      "bytes":  528275,
+                      "sha256":  "ef835042e705b2fd8c4f6f2d9960204590fed253acd921667d5a39fc442a247c"
+                  },
+                  {
+                      "path":  "visuals/phase4/phase4_national_pipeline.png",
+                      "bytes":  263262,
+                      "sha256":  "cc215f2bb2d561a3a1df22bc77de28df8354adcce77a3baf19404dcb481b7ede"
+                  },
+                  {
+                      "path":  "visuals/phase4/phase4_performance_dashboard.png",
+                      "bytes":  231699,
+                      "sha256":  "8aad70be5b55fef20e0f448cf989e6a404ed8bed4f25df0300637b796c098048"
+                  },
+                  {
+                      "path":  "visuals/phase4/phase4_prediction_diagnostics.png",
+                      "bytes":  593832,
+                      "sha256":  "8cbefb53be9e0165d8210815a30aea1e85d025e9f73493d9b80f25dc0c3ae37f"
+                  },
+                  {
+                      "path":  "visuals/phase4/phase4_preflight_data_audit.png",
+                      "bytes":  220585,
+                      "sha256":  "48f696be1ee0b94208383a09d90e425c626ac924d7850cb2fc9452f70c1a400a"
+                  },
+                  {
+                      "path":  "visuals/phase4/phase4_regional_performance.png",
+                      "bytes":  239896,
+                      "sha256":  "9fdd0ae85a9eb8c84517d4acfd2a49638cf19d4e3ba3c6fa0b0133287e0ec25b"
+                  },
+                  {
+                      "path":  "visuals/prediction_error_map.png",
+                      "bytes":  1231750,
+                      "sha256":  "51f15dda7d9012b06195a488debfadea0abf46a5164d929db50a5d91d7e7d237"
+                  },
+                  {
+                      "path":  "visuals/property_probability_distribution.png",
+                      "bytes":  108732,
+                      "sha256":  "e0708779d79038b3b963f5e91a618459ae71d086177903db9057b92cfb880a4d"
+                  },
+                  {
+                      "path":  "visuals/segment_error_heatmap.png",
+                      "bytes":  331134,
+                      "sha256":  "de075f4880cbcdb187ecc7eefc179ac612f9497146f1528c7cff405cce5d4253"
+                  },
+                  {
+                      "path":  "visuals/test_results_dashboard.png",
+                      "bytes":  631202,
+                      "sha256":  "86f4566702c28c5458113cce100a82400e0ceb81ffec739488de38eb86aa9679"
+                  },
+                  {
+                      "path":  "visuals/uncertainty_calibration.png",
+                      "bytes":  124562,
+                      "sha256":  "97845fc3c6117f12b55001ffdc9eea1315dae267da3027521c717483b8df0d93"
+                  },
+                  {
+                      "path":  "visuals/uncertainty_coverage_by_segment.png",
+                      "bytes":  234760,
+                      "sha256":  "051153d2e97078379687ddbe14be39b211e13a29b2c0fca384c943cd7590d292"
+                  }
+              ]
+}

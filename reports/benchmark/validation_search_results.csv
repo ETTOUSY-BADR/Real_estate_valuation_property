@@ -1,0 +1,17 @@
+model_key,model,candidate,configuration,fit_seconds,prediction_seconds,mae_eur,rmse_eur,r2,mape_percent,median_absolute_percentage_error,within_10_percent,within_20_percent
+ridge,Ridge regression,1,"{""alpha"": 0.1}",0.353,0.051,170079.01,628837.89,-0.4234,29.86,18.64,0.2814,0.5292
+ridge,Ridge regression,2,"{""alpha"": 1.0}",0.369,0.029,170078.41,628814.15,-0.4233,29.86,18.64,0.2814,0.5291
+ridge,Ridge regression,3,"{""alpha"": 10.0}",0.302,0.035,170072.41,628577.83,-0.4223,29.86,18.64,0.2814,0.529
+ridge,Ridge regression,4,"{""alpha"": 100.0}",0.397,0.032,170015.8,626302.54,-0.412,29.88,18.66,0.2815,0.5279
+random_forest,Random Forest,1,"{""max_features"": 0.7, ""min_samples_leaf"": 2, ""n_estimators"": 240}",42.796,0.755,99286.3,200381.34,0.8555,19.99,13.03,0.3951,0.6891
+random_forest,Random Forest,2,"{""max_features"": 1.0, ""min_samples_leaf"": 2, ""n_estimators"": 240}",60.027,0.703,100853.08,202085.24,0.853,20.15,13.33,0.3892,0.6788
+random_forest,Random Forest,3,"{""max_features"": 0.7, ""min_samples_leaf"": 5, ""n_estimators"": 240}",21.366,0.18,98207.4,199465.64,0.8568,20.05,12.73,0.4067,0.6928
+hist_gradient_boosting,Histogram Gradient Boosting,1,"{""l2_regularization"": 1.0, ""max_leaf_nodes"": 15, ""min_samples_leaf"": 25}",2.783,0.144,96177.63,196147.52,0.8615,19.58,12.42,0.4169,0.7047
+hist_gradient_boosting,Histogram Gradient Boosting,2,"{""l2_regularization"": 1.0, ""max_leaf_nodes"": 31, ""min_samples_leaf"": 25}",2.438,0.134,96148.15,195570.64,0.8623,19.61,12.48,0.4146,0.7054
+hist_gradient_boosting,Histogram Gradient Boosting,3,"{""l2_regularization"": 2.0, ""max_leaf_nodes"": 63, ""min_samples_leaf"": 40}",2.83,0.123,96043.9,194787.75,0.8634,19.62,12.49,0.413,0.7019
+xgboost,XGBoost,1,"{""max_depth"": 4, ""min_child_weight"": 5.0}",2.632,0.06,96308.79,197979.29,0.8589,19.46,12.43,0.4172,0.7059
+xgboost,XGBoost,2,"{""max_depth"": 6, ""min_child_weight"": 5.0}",2.84,0.072,95947.69,196541.92,0.8609,19.49,12.36,0.4173,0.7073
+xgboost,XGBoost,3,"{""max_depth"": 8, ""min_child_weight"": 10.0}",3.556,0.074,97112.75,197338.24,0.8598,19.79,12.55,0.4115,0.6969
+lightgbm,LightGBM,1,"{""min_child_samples"": 25, ""num_leaves"": 15}",1.558,0.118,96107.87,196712.72,0.8607,19.48,12.47,0.4158,0.7093
+lightgbm,LightGBM,2,"{""min_child_samples"": 25, ""num_leaves"": 31}",1.747,0.13,95770.21,196896.43,0.8604,19.42,12.36,0.4178,0.7087
+lightgbm,LightGBM,3,"{""min_child_samples"": 40, ""num_leaves"": 63}",2.57,0.17,96078.91,196685.59,0.8607,19.43,12.39,0.4167,0.7077

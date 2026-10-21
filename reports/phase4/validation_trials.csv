@@ -1,0 +1,5 @@
+candidate,configuration,market_cluster_feature,market_clusters,fit_predict_seconds,clipped_predictions,mae_eur,rmse_eur,r2,mape_percent,median_absolute_percentage_error,within_10_percent,within_20_percent
+1,"{""depth"": 8, ""l2_leaf_reg"": 8.0, ""loss_function"": ""MAE""}",False,0,1006.981,0,42146.82,94159.81,0.839,27.47,13.75,0.3829,0.6555
+2,"{""depth"": 9, ""l2_leaf_reg"": 10.0, ""loss_function"": ""Huber:delta=1.0""}",False,0,978.882,201487,6031219.88,7652616.4,-1062.6883,4804.02,3289.83,0.0795,0.1488
+3,"{""depth"": 8, ""l2_leaf_reg"": 8.0, ""loss_function"": ""MAE""}",True,2,2531.121,0,42161.15,94192.45,0.8389,27.42,13.74,0.3824,0.6557
+4,"{""depth"": 9, ""l2_leaf_reg"": 10.0, ""loss_function"": ""Huber:delta=1.0""}",True,2,1271.465,111119,1544040.31,3740586.11,-253.1405,1299.64,56.52,0.117,0.2283

@@ -10,3 +10,13 @@
 *.pdf binary
 *.png binary
 *.zip binary
+
+# Large fitted models and prepared tables are stored through Git LFS.
+*.joblib filter=lfs diff=lfs merge=lfs -text
+*.parquet filter=lfs diff=lfs merge=lfs -text
+# Preserve exact report bytes so the published SHA-256 inventory is portable.
+reports/**/*.csv -text
+reports/**/*.json -text
+reports/**/*.csv whitespace=cr-at-eol
+reports/**/*.json whitespace=cr-at-eol
+data/raw/dvf_france/manifest.json -text whitespace=cr-at-eol

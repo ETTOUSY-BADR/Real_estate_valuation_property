@@ -1,0 +1,3 @@
+method,mae_eur,rmse_eur,r2,mape_percent,median_absolute_percentage_error,within_10_percent,within_20_percent,mae_ci95_lower_eur,mae_ci95_upper_eur,mae_reduction_vs_baseline_eur,reduction_ci95_lower_eur,reduction_ci95_upper_eur
+Phase 4 CatBoost,41936.46,92374.61,0.849,24.68,13.5,0.3852,0.6697,41581.49,42205.66,10957.2,10763.35,11113.61
+Hierarchical geographic median baseline,52893.66,108830.28,0.7905,31.29,18.37,0.2909,0.5365,52496.31,53208.14,0.0,0.0,0.0

@@ -1,0 +1,369 @@
+{
+  "schema_version": 2,
+  "generated_at_utc": "2026-08-18T23:26:51.299196+00:00",
+  "gold_table": "C:\\Users\\badre\\OneDrive\\Documents\\real_estate_datasets\\real_estate_valuation_property\\data\\gold\\phase2_sale_features.parquet",
+  "output_sha256": "c18bc693950c36d22fef2125237a8e2426f1cac5aa3eaeaa3bc1bc5bee246c2a",
+  "row_count": 143009,
+  "date_min": "2021-01-04",
+  "date_max": "2025-12-31",
+  "crs_storage": "EPSG:4326",
+  "crs_metric_features": "EPSG:2154",
+  "h3_resolutions": [
+    8,
+    9,
+    10
+  ],
+  "source_files": [
+    {
+      "path": "C:\\Users\\badre\\OneDrive\\Documents\\real_estate_datasets\\real_estate_valuation_property\\data\\raw\\dvf\\75_2021.csv",
+      "bytes": 15521009,
+      "sha256": "abbf26510502ab84389d451b22170ad084065dd312ee28669e66daa037e351ce"
+    },
+    {
+      "path": "C:\\Users\\badre\\OneDrive\\Documents\\real_estate_datasets\\real_estate_valuation_property\\data\\raw\\dvf\\75_2022.csv",
+      "bytes": 18711444,
+      "sha256": "88eaba683efcab5db2b2c6a6591f9205fe5bdf27fedfa2bf0562b270e4be2603"
+    },
+    {
+      "path": "C:\\Users\\badre\\OneDrive\\Documents\\real_estate_datasets\\real_estate_valuation_property\\data\\raw\\dvf\\75_2023.csv",
+      "bytes": 15379490,
+      "sha256": "94c4f1db799ef180f97dad171a33891116390a3b63b2aaf941f92fcd73719aa7"
+    },
+    {
+      "path": "C:\\Users\\badre\\OneDrive\\Documents\\real_estate_datasets\\real_estate_valuation_property\\data\\raw\\dvf\\75_2024.csv",
+      "bytes": 14236142,
+      "sha256": "da9e31ecaf5617e97d26b2fdc9de7437c836e07121c214ea076f3c036ecc5420"
+    },
+    {
+      "path": "C:\\Users\\badre\\OneDrive\\Documents\\real_estate_datasets\\real_estate_valuation_property\\data\\raw\\dvf\\75.csv",
+      "bytes": 16053657,
+      "sha256": "fbd36f2a0a16d5875c69fddbbc809a052ea03704d7af02615e9125a497ff1985"
+    }
+  ],
+  "source_cleaning_counts": {
+    "raw_rows": 420058,
+    "raw_mutations": 207365,
+    "single_apartment_sale_rows": 149673,
+    "clean_model_rows": 143009,
+    "removed_during_quality_filters": 6664,
+    "per_file": {
+      "75_2021.csv": {
+        "raw_rows": 81517,
+        "raw_mutations": 43743,
+        "single_apartment_sale_rows": 31835,
+        "clean_model_rows": 30397,
+        "removed_during_quality_filters": 1438
+      },
+      "75_2022.csv": {
+        "raw_rows": 98308,
+        "raw_mutations": 47240,
+        "single_apartment_sale_rows": 34566,
+        "clean_model_rows": 33080,
+        "removed_during_quality_filters": 1486
+      },
+      "75_2023.csv": {
+        "raw_rows": 80993,
+        "raw_mutations": 39417,
+        "single_apartment_sale_rows": 28174,
+        "clean_model_rows": 26798,
+        "removed_during_quality_filters": 1376
+      },
+      "75_2024.csv": {
+        "raw_rows": 74800,
+        "raw_mutations": 36154,
+        "single_apartment_sale_rows": 25595,
+        "clean_model_rows": 24404,
+        "removed_during_quality_filters": 1191
+      },
+      "75.csv": {
+        "raw_rows": 84440,
+        "raw_mutations": 40811,
+        "single_apartment_sale_rows": 29503,
+        "clean_model_rows": 28330,
+        "removed_during_quality_filters": 1173
+      }
+    }
+  },
+  "comparable_feature_contract": {
+    "availability_lag_days": 90,
+    "maximum_radius_meters": 1000,
+    "maximum_history_days": 730,
+    "minimum_observed_comparable_age_days": 90,
+    "coverage_by_year": {
+      "2021": {
+        "rows": 30397,
+        "weighted_comparable_coverage": 0.7764,
+        "similar_comparable_coverage": 0.7728,
+        "median_count_365d_500m": 81.0,
+        "median_count_365d_1000m": 286.0
+      },
+      "2022": {
+        "rows": 33080,
+        "weighted_comparable_coverage": 1.0,
+        "similar_comparable_coverage": 0.9996,
+        "median_count_365d_500m": 299.0,
+        "median_count_365d_1000m": 1007.0
+      },
+      "2023": {
+        "rows": 26798,
+        "weighted_comparable_coverage": 1.0,
+        "similar_comparable_coverage": 0.9999,
+        "median_count_365d_500m": 296.0,
+        "median_count_365d_1000m": 1015.0
+      },
+      "2024": {
+        "rows": 24404,
+        "weighted_comparable_coverage": 1.0,
+        "similar_comparable_coverage": 0.9997,
+        "median_count_365d_500m": 232.0,
+        "median_count_365d_1000m": 801.0
+      },
+      "2025": {
+        "rows": 28330,
+        "weighted_comparable_coverage": 1.0,
+        "similar_comparable_coverage": 0.9996,
+        "median_count_365d_500m": 243.0,
+        "median_count_365d_1000m": 836.0
+      }
+    },
+    "count_feature_ranges": {
+      "local_365d_250m_count": {
+        "minimum": 0,
+        "maximum": 293
+      },
+      "local_180d_500m_count": {
+        "minimum": 0,
+        "maximum": 313
+      },
+      "local_365d_500m_count": {
+        "minimum": 0,
+        "maximum": 860
+      },
+      "local_730d_500m_count": {
+        "minimum": 0,
+        "maximum": 1862
+      },
+      "local_180d_1000m_count": {
+        "minimum": 0,
+        "maximum": 928
+      },
+      "local_365d_1000m_count": {
+        "minimum": 0,
+        "maximum": 2499
+      },
+      "local_730d_1000m_count": {
+        "minimum": 0,
+        "maximum": 5487
+      },
+      "similar_comparable_count": {
+        "minimum": 0,
+        "maximum": 2499
+      }
+    }
+  },
+  "model_feature_contract": {
+    "target": "valeur_fonciere",
+    "phase2_feature_count": 44,
+    "phase3_feature_count": 100,
+    "phase2_groups": {
+      "property": [
+        "surface_reelle_bati",
+        "nombre_pieces_principales",
+        "adresse_numero",
+        "nombre_lots",
+        "log_surface",
+        "rooms_per_10m2",
+        "surface_terrain"
+      ],
+      "time": [
+        "month",
+        "day_of_year",
+        "year",
+        "months_since_2021"
+      ],
+      "coordinates": [
+        "latitude",
+        "longitude"
+      ],
+      "spatial": [
+        "x_l93",
+        "y_l93",
+        "distance_paris_center_m",
+        "bearing_sin",
+        "bearing_cos",
+        "h3_r8",
+        "h3_r9"
+      ],
+      "historical_comparables": [
+        "local_365d_250m_count",
+        "local_365d_250m_median_ppm2",
+        "local_180d_500m_count",
+        "local_180d_500m_median_ppm2",
+        "local_365d_500m_count",
+        "local_365d_500m_median_ppm2",
+        "local_730d_500m_count",
+        "local_730d_500m_median_ppm2",
+        "local_180d_1000m_count",
+        "local_180d_1000m_median_ppm2",
+        "local_365d_1000m_count",
+        "local_365d_1000m_median_ppm2",
+        "local_730d_1000m_count",
+        "local_730d_1000m_median_ppm2",
+        "local_365d_500m_mad_ppm2",
+        "weighted_comp_ppm2",
+        "similar_weighted_comp_ppm2",
+        "similar_comparable_count",
+        "effective_comparable_count",
+        "nearest_prior_sale_m",
+        "median_comparable_age_days",
+        "local_momentum_180v365_500m",
+        "local_momentum_180v365_1000m"
+      ],
+      "categorical": [
+        "code_postal"
+      ]
+    },
+    "phase3_groups": {
+      "building": [
+        "ban_match_distance_m",
+        "ban_match_confidence",
+        "bdnb_match_confidence",
+        "bdnb_address_candidate_count",
+        "bdnb_parcel_candidate_count",
+        "building_level_count",
+        "building_year",
+        "building_dwelling_count",
+        "building_height_m",
+        "building_footprint_m2",
+        "building_parking_lot_count",
+        "building_total_lot_count",
+        "building_dwelling_count_rnc",
+        "building_age_at_sale",
+        "building_year_missing",
+        "usage_niveau_1_txt",
+        "mat_mur_txt",
+        "mat_toit_txt",
+        "building_state",
+        "building_period_rnc"
+      ],
+      "dpe_point_in_time": [
+        "dpe_available_at_sale",
+        "dpe_age_days",
+        "dpe_surface_difference_ratio",
+        "dpe_match_confidence",
+        "annee_construction_dpe",
+        "nombre_niveau_logement",
+        "nombre_niveau_immeuble",
+        "surface_habitable_immeuble",
+        "surface_habitable_logement",
+        "conso_5_usages_ep_m2",
+        "emission_ges_5_usages_m2",
+        "classe_bilan_dpe",
+        "classe_emission_ges",
+        "type_installation_chauffage",
+        "type_energie_chauffage"
+      ],
+      "neighborhood_context": [
+        "distance_metro_m",
+        "distance_rer_m",
+        "distance_train_m",
+        "distance_tram_m",
+        "rail_station_mode_count_1000m",
+        "rail_line_count_1000m",
+        "distance_school_m",
+        "school_count_1000m",
+        "distance_green_space_centroid_m",
+        "green_space_count_500m",
+        "green_area_500m2",
+        "distance_shop_service_m",
+        "shop_service_count_500m",
+        "shop_service_count_1000m",
+        "noise_road_lden_db",
+        "noise_rail_ratp_lden_db",
+        "noise_rail_sncf_lden_db",
+        "noise_transport_lden_max_db"
+      ],
+      "external_identity": [
+        "ban_address_id",
+        "bdnb_building_id",
+        "bdnb_match_method"
+      ]
+    },
+    "audit_columns": [
+      "id_mutation",
+      "date_mutation",
+      "id_parcelle",
+      "street_id",
+      "address_id",
+      "parcel_id",
+      "h3_r10",
+      "source_file"
+    ],
+    "excluded_target_derived_columns": [
+      "price_per_m2"
+    ]
+  },
+  "feature_columns": [
+    "id_mutation",
+    "date_mutation",
+    "nature_mutation",
+    "valeur_fonciere",
+    "adresse_numero",
+    "adresse_suffixe",
+    "adresse_nom_voie",
+    "adresse_code_voie",
+    "code_postal",
+    "code_commune",
+    "id_parcelle",
+    "nombre_lots",
+    "code_type_local",
+    "surface_reelle_bati",
+    "nombre_pieces_principales",
+    "surface_terrain",
+    "longitude",
+    "latitude",
+    "price_per_m2",
+    "month",
+    "day_of_year",
+    "year",
+    "months_since_2021",
+    "source_file",
+    "x_l93",
+    "y_l93",
+    "distance_paris_center_m",
+    "bearing_sin",
+    "bearing_cos",
+    "log_surface",
+    "rooms_per_10m2",
+    "street_id",
+    "address_id",
+    "parcel_id",
+    "h3_r8",
+    "h3_r9",
+    "h3_r10",
+    "local_365d_250m_count",
+    "local_365d_250m_median_ppm2",
+    "local_180d_500m_count",
+    "local_180d_500m_median_ppm2",
+    "local_365d_500m_count",
+    "local_365d_500m_median_ppm2",
+    "local_730d_500m_count",
+    "local_730d_500m_median_ppm2",
+    "local_180d_1000m_count",
+    "local_180d_1000m_median_ppm2",
+    "local_365d_1000m_count",
+    "local_365d_1000m_median_ppm2",
+    "local_730d_1000m_count",
+    "local_730d_1000m_median_ppm2",
+    "similar_comparable_count",
+    "local_365d_500m_mad_ppm2",
+    "weighted_comp_ppm2",
+    "similar_weighted_comp_ppm2",
+    "effective_comparable_count",
+    "nearest_prior_sale_m",
+    "median_comparable_age_days",
+    "local_momentum_180v365_500m",
+    "local_momentum_180v365_1000m"
+  ],
+  "runtime_seconds": 222.552
+}
